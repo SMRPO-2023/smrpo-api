@@ -1,9 +1,14 @@
-# Api
+# SMRPO Project Backend
 
-Starter template for 😻 [NestJS](https://nestjs.com/) and [Prisma](https://www.prisma.io/).
+--- Draft ---
+
+> One API to rule them all  
+
+SMRPO Project Backend is an API, which communicates with the [Web](https://github.com/SMRPO-2023/project-app) application to bring you seamless experience.
 
 ## Features
 
+- [NestJS](https://nestjs.com/)
 - GraphQL w/ [playground](https://github.com/prisma/graphql-playground)
 - Code-First w/ [decorators](https://docs.nestjs.com/graphql/quick-start#code-first)
 - [Prisma](https://www.prisma.io/) for database modelling, migration and type-safe access (Postgres, MySQL & MongoDB)
@@ -12,7 +17,7 @@ Starter template for 😻 [NestJS](https://nestjs.com/) and [Prisma](https://www
 
 ## Overview
 
-- [Api](#api)
+- [SMRPO Project Api](#smrpo-project-api)
   - [Features](#features)
   - [Overview](#overview)
   - [Prisma Setup](#prisma-setup)
@@ -163,15 +168,15 @@ Now to build a Docker image of your own Nest server simply run:
 
 ```bash
 # give your docker image a name
-docker build -t <your username>/nest-prisma-server .
+docker build -t <your username>/api-server .
 # for example
-docker build -t nest-prisma-server .
+docker build -t api-server .
 ```
 
 After Docker build your docker image you are ready to start up a docker container running the nest server:
 
 ```bash
-docker run -d -t -p 3000:3000 --env-file .env nest-prisma-server
+docker run -d -t -p 3000:3000 --env-file .env api-server
 ```
 
 Now open up [localhost:3000](http://localhost:3000) to verify that your nest server is running.

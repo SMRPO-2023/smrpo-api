@@ -1,11 +1,13 @@
 version: '3.8'
 services:
   postgres:
-    image: postgres:13
+    image: postgres:15.1-alpine
     container_name: postgres
-    restart: always
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-U", "${POSTGRES_USER}" ]
     ports:
-      - '5432:5432'
+      - 5432:5432
     env_file:
       - .env
     volumes:
@@ -13,4 +15,4 @@ services:
 
 volumes:
   postgres:
-    name: nest-db
+    name: db

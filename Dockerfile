@@ -1,4 +1,4 @@
-FROM node:16 AS builder
+FROM node:18-alpine AS development
 
 # Create app directory
 WORKDIR /app
@@ -8,19 +8,21 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install app dependencies
-RUN npm install
+RUN npm ci
 
-COPY . .
+COPY --chown=node:node . .
 
 RUN npm run build
 
-FROM node:16
+FROM node:18-alpine AS production
 
 WORKDIR /app
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
+
+USER node
 
 EXPOSE 3000
 CMD [ "npm", "run", "start:prod" ]

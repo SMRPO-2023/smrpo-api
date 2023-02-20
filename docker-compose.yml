@@ -1,23 +1,33 @@
 version: '3.8'
+name: api
 services:
-  nest-api:
-    container_name: nest-api
+  api:
+    container_name: api
     build:
       context: .
       dockerfile: Dockerfile
+      target: development
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run start:dev
     ports:
-      - '3000:3000'
+      - ${PORT:-3000}:${PORT:-3000}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://api:${HTTP_PORT:-3000}" ]
     depends_on:
       - postgres
     env_file:
       - .env
 
   postgres:
-    image: postgres:13
+    image: postgres:15.1-alpine
     container_name: postgres
-    restart: always
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-U", "${POSTGRES_USER}" ]
     ports:
-      - '5432:5432'
+      - 5432:5432
     env_file:
       - .env
     volumes:
@@ -25,4 +35,4 @@ services:
 
 volumes:
   postgres:
-    name: nest-db
+    name: db
