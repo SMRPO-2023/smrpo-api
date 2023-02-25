@@ -9,9 +9,9 @@ const config: Config = {
   },
   swagger: {
     enabled: true,
-    title: 'Nestjs FTW',
-    description: 'The nestjs API description',
-    version: '1.5',
+    title: 'SMRPO Api',
+    description: 'Backend for the scrum project management system.',
+    version: '0.0.1',
     path: 'api',
   },
   security: {
