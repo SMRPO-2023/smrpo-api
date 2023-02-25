@@ -1,7 +1,7 @@
 {
   "name": "api",
   "version": "0.0.1",
-  "description": "Backend For The SMRPO Jira clone Project.",
+  "description": "Backend for the scrum project management system.",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
