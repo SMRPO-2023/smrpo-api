@@ -1,30 +1,26 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { PrismaModule } from 'nestjs-prisma';
 import { AppController } from './app.controller';
-import { ContextMiddleware } from './middlewares/context.middleware';
-import { MongooseModule } from '@nestjs/mongoose';
-import { env } from './config/env';
-import { AuthModule } from './modules/auth/auth.module';
-import { UserModule } from './modules/user/user.module';
-import { RequestLog, RequestLogSchema } from './modules/request-log/request-log.schema';
-import { RequestLogMiddleware } from './middlewares/request-log.middleware';
-import { JwtModule } from '@nestjs/jwt';
+import { AppService } from './app.service';
+import { AuthModule } from 'src/auth/auth.module';
+import { UsersModule } from 'src/users/users.module';
+import config from 'src/common/configs/config';
+import { loggingMiddleware } from 'src/common/middleware/logging.middleware';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(env.MONGO_URI),
-    MongooseModule.forFeature([{ name: RequestLog.name, schema: RequestLogSchema }]),
-    UserModule,
-    AuthModule,
-    JwtModule.register({
-      secret: env.JWT_SECRET,
-      signOptions: { expiresIn: '48h' },
+    ConfigModule.forRoot({ isGlobal: true, load: [config] }),
+    PrismaModule.forRoot({
+      isGlobal: true,
+      prismaServiceOptions: {
+        middlewares: [loggingMiddleware(new Logger('PrismaMiddleware'))], // configure your prisma middleware
+      },
     }),
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
+  providers: [AppService],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ContextMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL });
-    consumer.apply(RequestLogMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL });
-  }
-}
+export class AppModule {}

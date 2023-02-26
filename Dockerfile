@@ -1,30 +1,28 @@
-# Base image
-FROM node:16-alpine as builder
+FROM node:18-alpine AS development
 
+# Create app directory
 WORKDIR /app
+
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Install app dependencies
+RUN npm ci
 
 COPY --chown=node:node . .
 
-RUN npm ci
-
 RUN npm run build
 
-RUN rm -rf node_modules && \
-  NODE_ENV=production npm ci
-
-FROM node:16-alpine
+FROM node:18-alpine AS production
 
 WORKDIR /app
 
-COPY --from=builder --chown=node:node /app  .
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
 
 USER node
 
-ARG NODE_ENV=production
-ARG HOST=0.0.0.0
-#ARG PORT=3100
-#ARG API_URL=http://localhost:4500
-
-EXPOSE 4500
-
-CMD ["npm", "run", "start:prod"]
+EXPOSE 3000
+CMD [ "npm", "run", "start:prod" ]
