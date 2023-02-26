@@ -4,8 +4,8 @@ import { UserEntity } from 'src/common/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
 import { UsersService } from './users.service';
 import { User } from './models/user.model';
-import { ChangePasswordInput } from './dto/change-password.input';
-import { UpdateUserInput } from './dto/update-user.input';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -24,7 +24,7 @@ export class UsersController {
   @Put()
   async updateUser(
     @UserEntity() user: User,
-    @Body('data') newUserData: UpdateUserInput
+    @Body('data') newUserData: UpdateUserDto
   ) {
     return this.usersService.updateUser(user.id, newUserData);
   }
@@ -33,7 +33,7 @@ export class UsersController {
   @Post('change-password')
   async changePassword(
     @UserEntity() user: User,
-    @Body('data') changePassword: ChangePasswordInput
+    @Body('data') changePassword: ChangePasswordDto
   ) {
     return this.usersService.changePassword(
       user.id,

@@ -1,4 +1,4 @@
-export class UpdateUserInput {
+export class UpdateUserDto {
   firstname?: string;
   lastname?: string;
 }
