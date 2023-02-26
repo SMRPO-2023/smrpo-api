@@ -10,9 +10,11 @@ export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
   @Post('signup')
-  async signup(@Body('data') data: SignupInput) {
-    data.email = data.email.toLowerCase();
-    const { accessToken, refreshToken } = await this.auth.createUser(data);
+  async signup(@Body() signupInput: SignupInput) {
+    signupInput.email = signupInput.email.toLowerCase();
+    const { accessToken, refreshToken } = await this.auth.createUser(
+      signupInput
+    );
     return {
       accessToken,
       refreshToken,
@@ -20,7 +22,7 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Body('data') { email, password }: LoginInput) {
+  async login(@Body() { email, password }: LoginInput) {
     const { accessToken, refreshToken } = await this.auth.login(
       email.toLowerCase(),
       password
