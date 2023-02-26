@@ -1,8 +1,8 @@
 version: '3.8'
-name: api
+name: smrpo
 services:
-  api:
-    container_name: api
+  smrpo-api:
+    container_name: smrpo-api
     build:
       context: .
       dockerfile: Dockerfile
@@ -16,13 +16,13 @@ services:
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://api:${HTTP_PORT:-3000}" ]
     depends_on:
-      - postgres
+      - smrpo-db
     env_file:
       - .env
 
-  postgres:
+  smrpo-db:
     image: postgres:15.1-alpine
-    container_name: postgres
+    container_name: smrpo-db
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-U", "${POSTGRES_USER}" ]
@@ -35,4 +35,4 @@ services:
 
 volumes:
   postgres:
-    name: db
+    name: smrpo-db

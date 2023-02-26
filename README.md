@@ -140,10 +140,10 @@ When you run your NestJS application in a Docker container update your [.env](.e
 ```diff
 - DB_HOST=localhost
 # replace with name of the database container
-+ DB_HOST=postgres
++ DB_HOST=smrpo-db
 
 # Prisma database connection
-+ DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST}:${DB_PORT}/${POSTGRES_DB}?schema=${DB_SCHEMA}&sslmode=prefer
++ DATABASE_URL=smrpo-db://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST}:${DB_PORT}/${POSTGRES_DB}?schema=${DB_SCHEMA}&sslmode=prefer
 ```
 
 If `DATABASE_URL` is missing in the root `.env` file, which is loaded into the Docker container, the NestJS application will exit with the following error:

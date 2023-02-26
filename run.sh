@@ -1,2 +1,2 @@
-docker build -t api-server .
-docker run -d -t -p 3000:3000 api-server
+docker build -t smrpo-api .
+docker run -d -t -p 3000:3000 smrpo-api
