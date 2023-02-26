@@ -3,7 +3,7 @@ import { Auth } from './models/auth.model';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Param } from '@nestjs/common';
 
 @Controller('auth')
 export class AuthController {
@@ -39,8 +39,8 @@ export class AuthController {
     return this.auth.refreshToken(token);
   }
 
-  @Get('user')
-  async user(@Body() auth: Auth) {
-    return await this.auth.getUserFromToken(auth.accessToken);
+  @Get('user/:token')
+  async user(@Param('token') token: string) {
+    return await this.auth.getUserFromToken(token);
   }
 }
