@@ -13,25 +13,7 @@ SMRPO Project Backend is an API, which communicates with the [Web](https://githu
 - 🔐 JWT authentication w/ [passport-jwt](https://github.com/mikenicholson/passport-jwt)
 - REST API docs w/ [Swagger](https://swagger.io/)
 
-## Overview
-
-- [SMRPO Project Api](#smrpo-project-api)
-  - [Features](#features)
-  - [Overview](#overview)
-  - [Prisma Setup](#prisma-setup)
-    - [1. Install Dependencies](#1-install-dependencies)
-    - [2. PostgreSQL with Docker](#2-PostgreSQL-with-docker)
-    - [3. Prisma: Prisma Migrate](#3-prisma-prisma-migrate)
-    - [4. Prisma: Prisma Client JS](#4-prisma-client-js)
-    - [5. Seed the database data with this script](#5-seed-the-database-data-with-this-script)
-    - [6. Start NestJS Server](#6-start-nestjs-server)
-  - [Rest Api](#rest-api)
-  - [Docker](#docker)
-  - [Schema Development](#schema-development)
-  - [NestJS - Api Schema](#nestjs---api-schema)
-    - [Resolver](#resolver)
-
-## Prisma Setup
+## Setup
 
 ### 1. Install Dependencies
 
@@ -91,7 +73,15 @@ npx prisma migrate deploy
 npm run migrate:deploy
 ```
 
-### 4. Prisma: Prisma Client JS
+### 4. Seed the database data with this script
+
+Execute the script with this command:
+
+```bash
+npm run seed
+```
+
+### 5. Prisma: Prisma Client JS (Optional)
 
 [Prisma Client JS](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/api) is a type-safe database client auto-generated based on the data model.
 
@@ -105,15 +95,7 @@ npx prisma generate
 npm run prisma:generate
 ```
 
-### 5. Seed the database data with this script
-
-Execute the script with this command:
-
-```bash
-npm run seed
-```
-
-### 6. Start NestJS Server
+## Run Nest Server
 
 Run Nest Server in Development mode:
 
@@ -129,12 +111,6 @@ Run Nest Server in Production mode:
 ```bash
 npm run start:prod
 ```
-
-**[⬆ back to top](#overview)**
-
-## Rest Api
-
-[RESTful API](http://localhost:3000/api) documentation available with Swagger.
 
 ## Docker
 
@@ -209,25 +185,6 @@ npm run prisma:generate
 npm run prisma:generate:watch
 ```
 
-**[⬆ back to top](#overview)**
+## Rest Api
 
-## NestJS - Api Schema
-
-The [schema.graphql](./src/schema.graphql) is generated with [code first approach](https://docs.nestjs.com/graphql/quick-start#code-first) from the models, resolvers and input classes.
-
-You can use [class-validator](https://docs.nestjs.com/techniques/validation) to validate your inputs and arguments.
-
-### Resolver
-
-To implement the new query, a new resolver function needs to be added to `users.resolver.ts`.
-
-```ts
-@Query(returns => User)
-async getUser(@Args() args): Promise<User> {
-  return await this.prisma.client.user(args);
-}
-```
-
-Restart the NestJS server and this time the Query to fetch a `user` should work.
-
-**[⬆ back to top](#overview)**
+[RESTful API](http://localhost:3000/api) documentation available with Swagger.
