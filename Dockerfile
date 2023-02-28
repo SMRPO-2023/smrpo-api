@@ -17,6 +17,7 @@ WORKDIR /app
 # A wildcard is used to ensure copying both package.json AND package-lock.json (when available).
 # Copying this first prevents re-running npm install on every code change.
 COPY --chown=node:node package*.json ./
+COPY --chown=node:node tsconfig*.json ./
 
 # Install app dependencies
 RUN npm ci
@@ -40,8 +41,10 @@ FROM node:18-alpine As build
 WORKDIR /app
 
 COPY --chown=node:node package*.json ./
+COPY --chown=node:node tsconfig*.json ./
 
-# In order to run `npm run build` we need access to the Nest CLI which is a dev dependency. In the previous development stage we ran `npm ci` which installed all dependencies, so we can copy over the node_modules directory from the development image
+# In order to run `npm run build` we need access to the Nest CLI which is a dev dependency.
+# In the previous development stage we ran `npm ci` which installed all dependencies, so we can copy over the node_modules directory from the development image
 COPY --chown=node:node --from=development /app/node_modules ./node_modules
 COPY --chown=node:node . .
 
@@ -65,10 +68,8 @@ USER node
 # Base image for production
 FROM node:18-alpine AS production
 
-
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
-
+COPY --chown=node:node  --from=build /app/node_modules ./node_modules
+COPY --chown=node:node  --from=build /app/dist ./dist
 
 EXPOSE 3000
 

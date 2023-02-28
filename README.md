@@ -29,14 +29,14 @@ Install the dependencies for the Nest application:
 npm install
 ```
 
-### 2. PostgreSQL with Docker
+### 2. Create database
 
 Setup a development PostgreSQL with Docker. Copy [.env.example](./.env.example) and rename to `.env` - `cp .env.example .env` - which sets the required environments for PostgreSQL such as `POSTGRES_USER`, `POSTGRES_PASSWORD` and `POSTGRES_DB`. Update the variables as you wish and select a strong password.
 
 Start the PostgreSQL database
 
 ```bash
-docker-compose -f docker-compose.db.yml up -d
+docker-compose up -d smrpo-db
 # or
 npm run docker:db
 ```
@@ -73,12 +73,22 @@ npx prisma migrate deploy
 npm run migrate:deploy
 ```
 
+Migrations can be also done using a Docker container.
+
+```bash
+docker-compose up -d prisma-migrate
+# or
+npm run docker:migrate
+```
+
 ### 4. Seed the database data with this script
 
 Execute the script with this command:
 
 ```bash
 npm run seed
+# or
+npm run docker:seed
 ```
 
 ### 5. Prisma: Prisma Client JS (Optional)
@@ -97,6 +107,8 @@ npm run prisma:generate
 
 ## Run Nest Server
 
+### Directly
+
 Run Nest Server in Development mode:
 
 ```bash
@@ -112,28 +124,13 @@ Run Nest Server in Production mode:
 npm run start:prod
 ```
 
-## Docker
+Now open up [localhost:3000](http://localhost:3000) to verify that your nest server is running.
+
+### Using Docker
 
 Nest server is a Node.js application and it is easily [dockerized](https://nodejs.org/de/docs/guides/nodejs-docker-webapp/).
 
 See the [Dockerfile](./Dockerfile) on how to build a Docker image of your Nest server.
-
-Now to build a Docker image of your own Nest server simply run:
-
-```bash
-# give your docker image a name
-docker build -t <your username>/api-server .
-# for example
-docker build -t api-server .
-```
-
-After Docker build your docker image you are ready to start up a docker container running the nest server:
-
-```bash
-docker run -d -t -p 3000:3000 --env-file .env api-server
-```
-
-Now open up [localhost:3000](http://localhost:3000) to verify that your nest server is running.
 
 When you run your NestJS application in a Docker container update your [.env](.env) file
 
@@ -156,18 +153,30 @@ If `DATABASE_URL` is missing in the root `.env` file, which is loaded into the D
  3 |   url      = env("DATABASE_URL")
 ```
 
-### Docker Compose
+Build Docker image:
+
+```bash
+docker build -t smrpo-api .
+```
+
+After Docker build your docker image you are ready to start up a docker container:
+
+```bash
+docker run -d -t -p 3000:3000 --env-file .env smrpo-api
+```
+
+### Using Docker Compose
 
 You can also setup a the database and Nest application with the docker-compose
 
 ```bash
 # building new NestJS docker image
-docker-compose build
+docker-compose build smrpo-api smrpo-db
 # or
 npm run docker:build
 
 # start docker-compose
-docker-compose up -d
+docker-compose up -d smrpo-api smrpo-db
 # or
 npm run docker
 ```
@@ -183,6 +192,14 @@ npx prisma generate --watch
 # or
 npm run prisma:generate
 npm run prisma:generate:watch
+```
+
+You can also use the Docker migration container.
+
+```bash
+docker-compose up -d prisma-migrate
+# or
+npm run docker:migrate
 ```
 
 ## Rest Api

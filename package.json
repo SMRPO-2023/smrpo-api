@@ -46,11 +46,11 @@
     "start:db": "npm run migrate:up && npm run prisma:generate && npm run seed",
     "seed": "prisma db seed",
     "postinstall": "npm run prisma:generate",
-    "docker:migrate": "docker-compose -f docker-compose.migrate.yml up -d",
-    "docker:db": "docker-compose -f docker-compose.db.yml up -d",
-    "docker:seed": "docker exec -it api npm run seed",
-    "docker": "docker-compose up -d",
-    "docker:build": "docker-compose build"
+    "docker:migrate": "docker-compose up -d prisma-migrate",
+    "docker:db": "docker-compose up -d smrpo-db",
+    "docker:seed": "docker exec -it smrpo-api npm run seed",
+    "docker": "docker-compose up -d smrpo-api  smrpo-db",
+    "docker:build": "docker-compose build smrpo-api  smrpo-db"
   },
   "dependencies": {
     "@devoxa/prisma-relay-cursor-connection": "2.2.2",
