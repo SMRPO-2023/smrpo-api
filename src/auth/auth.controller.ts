@@ -12,26 +12,18 @@ export class AuthController {
   @Post('signup')
   async signup(@Body() signupInput: SignupDto) {
     signupInput.email = signupInput.email.toLowerCase();
-    const { accessToken, refreshToken } = await this.auth.createUser(
+
+    return await this.auth.createUser(
       signupInput
     );
-    return {
-      accessToken,
-      refreshToken,
-    };
   }
 
   @Post('login')
   async login(@Body() { email, password }: LoginDto) {
-    const { accessToken, refreshToken } = await this.auth.login(
+    return await this.auth.login(
       email.toLowerCase(),
       password
     );
-
-    return {
-      accessToken,
-      refreshToken,
-    };
   }
 
   @Post('refresh')
