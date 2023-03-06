@@ -1,19 +1,40 @@
 import { PrismaService } from 'nestjs-prisma';
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, ConflictException } from '@nestjs/common';
 import { PasswordService } from 'src/auth/password.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { Prisma, User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
   constructor(
     private prisma: PrismaService,
-    private passwordService: PasswordService
+    private passwordService: PasswordService,
+
   ) {}
 
-  updateUser(userId: string, newUserData: UpdateUserDto) {
+  async createUser(payload: CreateUserDto): Promise<User | never> {
+    const hashedPassword = await this.passwordService.hashPassword(payload.password);
+
+    try {
+      return await this.prisma.user.create({
+        data: {
+          ...payload,
+          password: hashedPassword
+        }
+      });
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+        throw new ConflictException(`Email ${payload.email} already used.`);
+      }
+      throw new Error(e);
+    }
+  }
+
+  updateUser(userId: string, data: UpdateUserDto) {
     return this.prisma.user.update({
-      data: newUserData,
+      data,
       where: {
         id: userId,
       },

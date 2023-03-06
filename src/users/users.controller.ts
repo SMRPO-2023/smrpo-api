@@ -1,13 +1,11 @@
 import { PrismaService } from 'nestjs-prisma';
-import { Body, Controller, Get, Post, Put, SetMetadata, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, UseGuards } from '@nestjs/common';
 import { UserEntity } from 'src/common/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
 import { UsersService } from './users.service';
 import { User } from './models/user.model';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { RolesGuard } from 'src/auth/roles-guard.service';
-import { Roles } from 'src/common/decorators/roles.decorator';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -22,14 +20,6 @@ export class UsersController {
     return user;
   }
 
-  @Get()
-  @UseGuards(RolesGuard)
-  @Roles('ADMIN')
-  async getAllUsers(): Promise<Array<User>> {
-    return this.prisma.user.findMany();
-  }
-
-  @UseGuards(JwtAuthGuard)
   @Put()
   async updateUser(
     @UserEntity() user: User,
@@ -38,7 +28,6 @@ export class UsersController {
     return this.usersService.updateUser(user.id, newUserData);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('change-password')
   async changePassword(
     @UserEntity() user: User,
