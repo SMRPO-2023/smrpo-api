@@ -16,11 +16,13 @@ model User {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
   email     String   @unique
-  password  String
+  password  String  // hashed password
   firstname String?
   lastname  String?
   posts     Post[]
+  membership ProjectMember[]
   role      Role
 }
 
@@ -28,6 +30,7 @@ model Post {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
   published Boolean
   title     String
   content   String?
@@ -38,4 +41,32 @@ model Post {
 enum Role {
   ADMIN
   USER
+}
+
+enum ProjectRole {
+    PRODUCT_LEADER
+    METHODOLOGY_MASTER
+    MEMBER
+}
+
+model ProjectMember {
+  @@id([userId, projectId])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String
+  project_role ProjectRole
+}
+
+model Project {
+  id            String    @id @default(cuid())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  title         String?
+  documentation String?
+  members       ProjectMember[]
 }
