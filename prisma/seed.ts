@@ -15,6 +15,7 @@ async function main() {
       // cspell:disable-next-line -- disables checking till the end of the next line.
       password: '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6xNekdHgTGmrpHEfIoxm', // secret42
       role: 'USER',
+      username: 'simpsonl',
     },
   });
   const user2 = await prisma.user.create({
@@ -25,6 +26,7 @@ async function main() {
       role: 'ADMIN',
       // cspell:disable-next-line -- disables checking till the end of the next line.
       password: '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6xNekdHgTGmrpHEfIoxm', // secret42
+      username: 'simpsonb',
     },
   });
 

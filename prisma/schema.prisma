@@ -13,19 +13,159 @@ generator dbml {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  email     String   @unique
-  password  String
-  firstname String?
-  lastname  String?
-  /// user role
-  role      Role     @default(USER)
+  id           Int             @id @default(autoincrement())
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  username     String          @unique
+  email        String          @unique
+  password     String
+  firstname    String?
+  lastname     String?
+  role         Role            @default(USER)
+  storyComment StoryComment[]
+  projects     ProjectMember[]
+  tasks        Task[]
+  timeLogs     TimeLog[]
+  posts        Post[]
 }
 
-/// user role
+/// user type
 enum Role {
   ADMIN /// allowed to do everything
   USER
+}
+
+model Sprint {
+  id          Int        @id @default(autoincrement())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  start       DateTime
+  end         DateTime
+  velocity    Int
+  Project     Project?   @relation(fields: [projectId], references: [id])
+  projectId   Int?
+  UserStory   UserStory? @relation(fields: [userStoryId], references: [id])
+  userStoryId Int?
+}
+
+model StoryComment {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userStoryId Int
+  message     String
+  User        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  UserStory   UserStory @relation(fields: [userStoryId], references: [id])
+}
+
+model ProjectMember {
+  id          Int               @id @default(autoincrement())
+  createdAt   DateTime          @default(now())
+  projectId   Int
+  projectRole ProjectMemberRole @default(DEVELOPER)
+  Project     Project           @relation(fields: [projectId], references: [id])
+  User        User?             @relation(fields: [userId], references: [id])
+  userId      Int?
+}
+
+/// Project member role
+enum ProjectMemberRole {
+  PROJECT_OWNER
+  SCRUM_MASTER
+  DEVELOPER
+}
+
+model Project {
+  id            Int             @id @default(autoincrement())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  title         String
+  documentation String?
+  sprints       Sprint[]
+  members       ProjectMember[]
+  posts         Post[]
+  UserStory     UserStory[]
+}
+
+model Task {
+  id          Int        @id @default(autoincrement())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  title       String
+  description String?
+  hours       Int
+  accepted    Boolean
+  status      TaskStatus @default(UNASSIGNED)
+  assignedTo  User?      @relation(fields: [userId], references: [id])
+  userId      Int?
+  timeLogs    TimeLog[]
+  userStory   UserStory? @relation(fields: [userStoryId], references: [id])
+  userStoryId Int?
+}
+
+enum TaskStatus {
+  UNASSIGNED
+  ASSIGNED
+  FINISHED
+  ACTIVE
+}
+
+model UserStory {
+  id                   Int                @id @default(autoincrement())
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  project              Project?           @relation(fields: [projectId], references: [id])
+  sprints              Sprint[]
+  title                String
+  description          String
+  importance           StoryImportance    @default(LOW)
+  points               Int
+  realised             Boolean
+  projectId            Int?
+  sprintId             Int?
+  acceptanceCriteria   AcceptanceCriteria @relation(fields: [acceptanceCriteriaId], references: [id])
+  acceptanceCriteriaId Int
+  comments             StoryComment[]
+  Task                 Task[]
+}
+
+enum StoryImportance {
+  BLOCKER
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model TimeLog {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  day       DateTime
+  hours     Int
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  Task      Task?    @relation(fields: [taskId], references: [id])
+  taskId    Int?
+}
+
+model AcceptanceCriteria {
+  id          Int         @id @default(autoincrement())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  userStoryId Int
+  title       String
+  completed   Boolean
+  UserStory   UserStory[]
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  message   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  Project   Project? @relation(fields: [projectId], references: [id])
+  projectId Int?
 }
