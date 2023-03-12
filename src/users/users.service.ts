@@ -48,7 +48,7 @@ export class UsersService {
     }
   }
 
-  updateUser(userId: string, data: UpdateUserDto) {
+  updateUser(userId: number, data: UpdateUserDto) {
     this.logger.debug(`Updating user ${userId}.`);
     return this.prisma.user.update({
       data,
@@ -59,7 +59,7 @@ export class UsersService {
   }
 
   async changePassword(
-    userId: string,
+    userId: number,
     userPassword: string,
     changePassword: ChangePasswordDto
   ) {

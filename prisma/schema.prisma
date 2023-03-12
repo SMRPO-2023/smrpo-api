@@ -20,22 +20,12 @@ model User {
   password  String
   firstname String?
   lastname  String?
-  posts     Post[]
-  role      Role
+  /// user role
+  role      Role     @default(USER)
 }
 
-model Post {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  published Boolean
-  title     String
-  content   String?
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  String?
-}
-
+/// user role
 enum Role {
-  ADMIN
+  ADMIN /// allowed to do everything
   USER
 }

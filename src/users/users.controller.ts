@@ -39,9 +39,4 @@ export class UsersController {
       changePassword
     );
   }
-
-  @Get('posts')
-  posts(@Body() author: User) {
-    return this.prisma.user.findUnique({ where: { id: author.id } }).posts();
-  }
 }
