@@ -1,13 +1,23 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, UseGuards } from "@nestjs/common";
-import { Role, User } from "@prisma/client";
-import { PrismaService } from "nestjs-prisma";
-import { JwtAuthGuard } from "src/auth/jwt-auth-guard.service";
-import { PasswordService } from "src/auth/password.service";
-import { RolesGuard } from "src/auth/roles-guard.service";
-import { Roles } from "src/common/decorators/roles.decorator";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
-import { UsersService } from "./users.service";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
+import { Role, User } from '@prisma/client';
+import { PrismaService } from 'nestjs-prisma';
+import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
+import { PasswordService } from 'src/auth/password.service';
+import { RolesGuard } from 'src/auth/roles-guard.service';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UsersService } from './users.service';
 
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -16,7 +26,7 @@ export class UsersAdminController {
   constructor(
     private usersService: UsersService,
     private prisma: PrismaService,
-    private passwordService: PasswordService,
+    private passwordService: PasswordService
   ) {}
 
   @Get()
@@ -25,15 +35,18 @@ export class UsersAdminController {
   }
 
   @Get(':id')
-  async getUser(@Param('id') id: string): Promise<User> {
+  async getUser(@Param('id') id: number): Promise<User> {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
   @Put(':id/role')
-  async updateUserRole(@Param('id') id: string, @Body('role') role: Role): Promise<User> {
+  async updateUserRole(
+    @Param('id') id: number,
+    @Body('role') role: Role
+  ): Promise<User> {
     return await this.prisma.user.update({
-        data: {role}, 
-        where: {id}
+      data: { role },
+      where: { id },
     });
   }
 
@@ -43,21 +56,24 @@ export class UsersAdminController {
   }
 
   @Put(':id')
-  async updateUser(@Param('id') id: string, @Body() dto: UpdateUserDto): Promise<User> {
+  async updateUser(
+    @Param('id') id: number,
+    @Body() dto: UpdateUserDto
+  ): Promise<User> {
     if (!dto.password) {
-      delete dto.password
+      delete dto.password;
     } else {
       dto.password = await this.passwordService.hashPassword(dto.password);
-    } 
+    }
     return await this.prisma.user.update({
-        data: {...dto}, 
-        where: {id}
+      data: { ...dto },
+      where: { id },
     });
   }
 
   @Delete(':id')
   @HttpCode(204)
-  async deleteUser(@Param('id') id: string): Promise<User> {
+  async deleteUser(@Param('id') id: number): Promise<User> {
     return this.prisma.user.delete({ where: { id } });
   }
 }

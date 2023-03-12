@@ -13,17 +13,12 @@ export class AuthController {
   async signup(@Body() signupInput: SignupDto) {
     signupInput.email = signupInput.email.toLowerCase();
 
-    return await this.auth.createUser(
-      signupInput
-    );
+    return await this.auth.createUser(signupInput);
   }
 
   @Post('login')
   async login(@Body() { email, password }: LoginDto) {
-    return await this.auth.login(
-      email.toLowerCase(),
-      password
-    );
+    return await this.auth.login(email.toLowerCase(), password);
   }
 
   @Post('refresh')

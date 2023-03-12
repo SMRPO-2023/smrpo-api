@@ -5,6 +5,7 @@ import {
   NotFoundException,
   BadRequestException,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -16,34 +17,44 @@ import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly passwordService: PasswordService,
     private readonly configService: ConfigService,
-    private readonly usersService: UsersService,
+    private readonly usersService: UsersService
   ) {}
 
   async createUser(payload: SignupDto): Promise<Token> {
+    this.logger.debug(`Creating user ${payload.email}.`);
     try {
       const user = await this.usersService.createUser({
         ...payload,
         role: 'USER',
       });
+      this.logger.log(`User ${payload.email} created successfully.`);
 
       return this.generateTokens({
         userId: user.id,
       });
     } catch (error) {
+      this.logger.error(
+        `Failed to creating user ${payload.email} with an error ${error}.`
+      );
       throw new Error(error);
     }
   }
 
   async login(email: string, password: string): Promise<Token> {
+    this.logger.debug(`User ${email} login.`);
     const user = await this.prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      throw new NotFoundException(`No user found for email: ${email}`);
+      const message = `No user found for email: ${email}.`;
+      this.logger.debug(message);
+      throw new NotFoundException(message);
     }
 
     const passwordValid = await this.passwordService.validatePassword(
@@ -52,24 +63,31 @@ export class AuthService {
     );
 
     if (!passwordValid) {
-      throw new BadRequestException('Invalid password');
+      const message = `Invalid password for user ${email}.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
     }
+
+    this.logger.log(`User ${email} login successful.`);
 
     return this.generateTokens({
       userId: user.id,
     });
   }
 
-  validateUser(userId: string): Promise<User> {
+  validateUser(userId: number): Promise<User> {
+    this.logger.debug(`Validating user ${userId}.`);
     return this.prisma.user.findUnique({ where: { id: userId } });
   }
 
   getUserFromToken(token: string): Promise<User> {
+    this.logger.debug(`Getting user from token ${token}.`);
     const id = this.jwtService.decode(token)['userId'];
     return this.prisma.user.findUnique({ where: { id } });
   }
 
-  generateTokens(payload: { userId: string }): Token {
+  generateTokens(payload: { userId: number }): Token {
+    this.logger.log(`Generating tokens for user ${payload.userId}.`);
     return {
       userId: payload.userId,
       accessToken: this.generateAccessToken(payload),
@@ -77,11 +95,13 @@ export class AuthService {
     };
   }
 
-  private generateAccessToken(payload: { userId: string }): string {
+  private generateAccessToken(payload: { userId: number }): string {
+    this.logger.debug(`Generating access token for user ${payload.userId}.`);
     return this.jwtService.sign(payload);
   }
 
-  private generateRefreshToken(payload: { userId: string }): string {
+  private generateRefreshToken(payload: { userId: number }): string {
+    this.logger.debug(`Generating refresh token for user ${payload.userId}.`);
     const securityConfig = this.configService.get<SecurityConfig>('security');
     return this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_REFRESH_SECRET'),
@@ -90,6 +110,7 @@ export class AuthService {
   }
 
   refreshToken(token: string) {
+    this.logger.debug(`Generating access token from a refresh token ${token}.`);
     try {
       const { userId } = this.jwtService.verify(token, {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
@@ -99,6 +120,9 @@ export class AuthService {
         userId,
       });
     } catch (e) {
+      this.logger.error(
+        `Failed to generate access token from a refresh token with an error ${e}.`
+      );
       throw new UnauthorizedException();
     }
   }

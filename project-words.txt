@@ -1,0 +1,8 @@
+datasource
+dockerized
+firstname
+lastname
+simpsonb
+simpsonl
+SMRPO
+sslmode
