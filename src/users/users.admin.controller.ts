@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   UseGuards,
@@ -37,13 +38,13 @@ export class UsersAdminController {
   }
 
   @Get(':id')
-  async getUser(@Param('id') id: number): Promise<User> {
+  async getUser(@Param('id', ParseIntPipe) id: number): Promise<User> {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
   @Put(':id/role')
   async updateUserRole(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body('role') role: Role
   ): Promise<User> {
     return await this.prisma.user.update({
@@ -59,7 +60,7 @@ export class UsersAdminController {
 
   @Put(':id')
   async updateUser(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateUserDto
   ): Promise<User> {
     if (!dto.password) {
@@ -75,7 +76,7 @@ export class UsersAdminController {
 
   @Delete(':id')
   @HttpCode(204)
-  async deleteUser(@Param('id') id: number): Promise<User> {
+  async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<User> {
     return this.prisma.user.delete({ where: { id } });
   }
 }

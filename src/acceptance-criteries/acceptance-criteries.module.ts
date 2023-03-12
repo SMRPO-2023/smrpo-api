@@ -4,6 +4,6 @@ import { AcceptanceCriteriesController } from './acceptance-criteries.controller
 
 @Module({
   controllers: [AcceptanceCriteriesController],
-  providers: [AcceptanceCriteriesService]
+  providers: [AcceptanceCriteriesService],
 })
 export class AcceptanceCriteriesModule {}

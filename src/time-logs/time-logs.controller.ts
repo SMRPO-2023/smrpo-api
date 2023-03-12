@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { TimeLogsService } from './time-logs.service';
 import { CreateTimeLogDto } from './dto/create-time-log.dto';
 import { UpdateTimeLogDto } from './dto/update-time-log.dto';
@@ -18,17 +27,20 @@ export class TimeLogsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.timeLogsService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTimeLogDto: UpdateTimeLogDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateTimeLogDto: UpdateTimeLogDto
+  ) {
     return this.timeLogsService.update(+id, updateTimeLogDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.timeLogsService.remove(+id);
   }
 }

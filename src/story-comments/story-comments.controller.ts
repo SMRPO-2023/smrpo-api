@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { StoryCommentsService } from './story-comments.service';
 import { CreateStoryCommentDto } from './dto/create-story-comment.dto';
 import { UpdateStoryCommentDto } from './dto/update-story-comment.dto';
@@ -18,17 +27,20 @@ export class StoryCommentsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.storyCommentsService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStoryCommentDto: UpdateStoryCommentDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateStoryCommentDto: UpdateStoryCommentDto
+  ) {
     return this.storyCommentsService.update(+id, updateStoryCommentDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.storyCommentsService.remove(+id);
   }
 }
