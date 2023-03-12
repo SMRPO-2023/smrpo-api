@@ -12,6 +12,7 @@ async function main() {
       email: 'lisa@simpson.com',
       firstname: 'Lisa',
       lastname: 'Simpson',
+      // cspell:disable-next-line -- disables checking till the end of the next line.
       password: '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6xNekdHgTGmrpHEfIoxm', // secret42
       role: 'USER',
     },
@@ -22,6 +23,7 @@ async function main() {
       firstname: 'Bart',
       lastname: 'Simpson',
       role: 'ADMIN',
+      // cspell:disable-next-line -- disables checking till the end of the next line.
       password: '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6xNekdHgTGmrpHEfIoxm', // secret42
     },
   });
