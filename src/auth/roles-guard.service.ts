@@ -7,8 +7,13 @@ import { Role } from '@prisma/client';
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    const roles: Role[] = this.reflector.get<Role[]>('roles', context.getHandler());
+  canActivate(
+    context: ExecutionContext
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    const roles: Role[] = this.reflector.get<Role[]>(
+      'roles',
+      context.getHandler()
+    );
     if (!roles) {
       return true;
     }

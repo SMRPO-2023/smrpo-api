@@ -1,5 +1,4 @@
 import { AuthService } from './auth.service';
-import { Auth } from './models/auth.model';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';

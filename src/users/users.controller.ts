@@ -6,9 +6,11 @@ import { UsersService } from './users.service';
 import { User } from './models/user.model';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class UsersController {
   constructor(
     private usersService: UsersService,

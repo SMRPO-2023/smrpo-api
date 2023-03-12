@@ -2,6 +2,7 @@ datasource
 dockerized
 firstname
 lastname
+nestjs
 simpsonb
 simpsonl
 SMRPO
