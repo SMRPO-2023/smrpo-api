@@ -76,7 +76,7 @@ export class UsersService {
     );
 
     if (!passwordValid) {
-      const message = `User ${userId}'s password is invalid.`;
+      const message = `Old password is invalid.`;
       this.logger.warn(message);
       throw new BadRequestException(message);
     }
