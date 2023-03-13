@@ -41,7 +41,7 @@ export class ProjectController {
 
   @UseGuards(JwtAuthGuard)
   @Roles('ADMIN')
-  @Put('id')
+  @Put(':id')
   updateProject(
     @Body() data: ProjectDto,
     @Param('id', ParseIntPipe) project_id: number
