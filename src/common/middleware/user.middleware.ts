@@ -1,6 +1,12 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../../users/users.service';
+import { User } from '@prisma/client';
+
+export interface IRequest extends Request {
+  user: User;
+  query: { [key: string]: undefined | string };
+}
 
 /**
  * Returns a middleware which creates a context.

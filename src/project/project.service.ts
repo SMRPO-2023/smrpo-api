@@ -1,4 +1,4 @@
-import {BadRequestException, Injectable} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { Prisma } from '@prisma/client';
 
@@ -7,11 +7,11 @@ export class ProjectService {
   constructor(private prisma: PrismaService) {}
 
   async getProjects() {
-    return this.prisma.project.findMany({ select: { deletedAt: null } });
+    return this.prisma.project.findMany({ where: { deletedAt: null } });
   }
 
   async getProject(where: Prisma.ProjectWhereUniqueInput) {
-    return this.prisma.project.findFirst({
+    return this.prisma.project.findFirstOrThrow({
       where: {
         ...where,
         deletedAt: null,
@@ -41,7 +41,12 @@ export class ProjectService {
   }
 
   async markDeleted(where: Prisma.ProjectWhereUniqueInput) {
-    const project = await this.prisma.project.findUnique({ where });
+    const project = await this.prisma.project.findFirstOrThrow({
+      where: {
+        ...where,
+        deletedAt: null,
+      },
+    });
     project.deletedAt = new Date();
     return this.prisma.project.update({
       data: project,
