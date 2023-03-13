@@ -20,8 +20,11 @@ export class UsersService {
   ) {}
 
   async getUser(where: Prisma.UserWhereUniqueInput): Promise<User | null> {
-    return this.prisma.user.findUnique({
-      where,
+    return this.prisma.user.findFirstOrThrow({
+      where: {
+        ...where,
+        deletedAt: null,
+      }
     });
   }
 
@@ -109,5 +112,19 @@ export class UsersService {
       this.logger.warn(`Changing user password failed with an error ${e}.`);
       throw new Error(e);
     }
+  }
+
+  async markDeleted(where: Prisma.UserWhereUniqueInput) {
+    const user = await this.prisma.user.findFirstOrThrow({
+      where: {
+        ...where,
+        deletedAt: null,
+      },
+    });
+    user.deletedAt = new Date();
+    return this.prisma.user.update({
+      data: user,
+      where,
+    });
   }
 }

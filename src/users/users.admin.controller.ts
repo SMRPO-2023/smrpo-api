@@ -34,13 +34,13 @@ export class UsersAdminController {
   @Roles('ADMIN')
   @Get()
   async getAllUsers(): Promise<Array<User>> {
-    return this.prisma.user.findMany();
+    return this.prisma.user.findMany({ where: { deletedAt: null } });
   }
 
   @Roles('ADMIN')
   @Get(':id')
   async getUser(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    return this.prisma.user.findUnique({ where: { id } });
+    return this.usersService.getUser({ id });
   }
 
   @Roles('ADMIN')
@@ -82,6 +82,6 @@ export class UsersAdminController {
   @Delete(':id')
   @HttpCode(204)
   async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    return this.prisma.user.delete({ where: { id } });
+    return this.usersService.markDeleted({ id });
   }
 }
