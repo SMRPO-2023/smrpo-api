@@ -123,6 +123,7 @@ Table Post {
 }
 
 Table ProjectMember {
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   deletedAt DateTime
@@ -131,10 +132,6 @@ Table ProjectMember {
   project Project [not null]
   projectId Int [not null]
   project_role ProjectMemberRole [not null]
-
-  indexes {
-    (userId, projectId) [pk]
-  }
 }
 
 Table Project {

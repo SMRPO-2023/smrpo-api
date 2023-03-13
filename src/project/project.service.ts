@@ -6,11 +6,11 @@ import { Prisma } from '@prisma/client';
 export class ProjectService {
   constructor(private prisma: PrismaService) {}
 
-  async getProjects() {
+  async findAll() {
     return this.prisma.project.findMany({ where: { deletedAt: null } });
   }
 
-  async getProject(where: Prisma.ProjectWhereUniqueInput) {
+  async findOne(where: Prisma.ProjectWhereUniqueInput) {
     return this.prisma.project.findFirstOrThrow({
       where: {
         ...where,
@@ -19,18 +19,18 @@ export class ProjectService {
     });
   }
 
-  async createProject(data: Prisma.ProjectCreateInput) {
+  async create(data: Prisma.ProjectCreateInput) {
     return this.prisma.project.create({
       data,
     });
   }
 
-  async updateProject(params: {
+  async update(params: {
     where: Prisma.ProjectWhereUniqueInput;
     data: Prisma.ProjectUpdateInput;
   }) {
     const { where, data } = params;
-    const project = await this.getProject(where);
+    const project = await this.findOne(where);
     if (!project) {
       throw new BadRequestException('Object is deleted');
     }

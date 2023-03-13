@@ -23,20 +23,20 @@ export class ProjectController {
   @Get()
   getProjects(@Req() req: IRequest) {
     console.log(req?.user);
-    return this.projectService.getProjects();
+    return this.projectService.findAll();
   }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   getProject(@Param('id', ParseIntPipe) project_id: number) {
-    return this.projectService.getProject({ id: project_id });
+    return this.projectService.findOne({ id: project_id });
   }
 
   @UseGuards(JwtAuthGuard)
   @Roles('ADMIN')
   @Post()
   createProject(@Body() data: ProjectDto) {
-    return this.projectService.createProject(data);
+    return this.projectService.create(data);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -46,7 +46,7 @@ export class ProjectController {
     @Body() data: ProjectDto,
     @Param('id', ParseIntPipe) project_id: number
   ) {
-    return this.projectService.updateProject({
+    return this.projectService.update({
       data,
       where: { id: project_id },
     });

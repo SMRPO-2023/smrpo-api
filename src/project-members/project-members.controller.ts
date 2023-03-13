@@ -3,44 +3,46 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   ParseIntPipe,
+  Put,
+  Query,
 } from '@nestjs/common';
 import { ProjectMembersService } from './project-members.service';
 import { CreateProjectMemberDto } from './dto/create-project-member.dto';
 import { UpdateProjectMemberDto } from './dto/update-project-member.dto';
+import { CreateProjectMembersDto } from './dto/create-project-members.dto';
 
 @Controller('project-members')
 export class ProjectMembersController {
   constructor(private readonly projectMembersService: ProjectMembersService) {}
 
-  @Post()
-  create(@Body() createProjectMemberDto: CreateProjectMemberDto) {
-    return this.projectMembersService.create(createProjectMemberDto);
-  }
-
   @Get()
-  findAll() {
-    return this.projectMembersService.findAll();
+  async findAll(@Query('pid', ParseIntPipe) pid: number) {
+    return this.projectMembersService.findAll(pid);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.projectMembersService.findOne(+id);
+  @Post()
+  async create(@Body() data: CreateProjectMemberDto) {
+    return this.projectMembersService.create(data);
   }
 
-  @Patch(':id')
-  update(
+  @Post('multi')
+  async createMulti(@Body() data: CreateProjectMembersDto) {
+    return this.projectMembersService.createMulti(data);
+  }
+
+  @Put(':id')
+  async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateProjectMemberDto: UpdateProjectMemberDto
+    @Body() data: UpdateProjectMemberDto
   ) {
-    return this.projectMembersService.update(+id, updateProjectMemberDto);
+    return this.projectMembersService.update({ id }, data);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.projectMembersService.remove(+id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return this.projectMembersService.remove({ id });
   }
 }
