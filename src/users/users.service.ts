@@ -3,6 +3,7 @@ import {
   Injectable,
   BadRequestException,
   ConflictException,
+  Logger,
 } from '@nestjs/common';
 import { PasswordService } from 'src/auth/password.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -12,6 +13,7 @@ import { Prisma, User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
   constructor(
     private prisma: PrismaService,
     private passwordService: PasswordService
@@ -24,6 +26,7 @@ export class UsersService {
   }
 
   async createUser(payload: CreateUserDto): Promise<User | never> {
+    this.logger.debug(`Creating user ${payload.email}.`);
     const hashedPassword = await this.passwordService.hashPassword(
       payload.password
     );
@@ -40,13 +43,19 @@ export class UsersService {
         e instanceof Prisma.PrismaClientKnownRequestError &&
         e.code === 'P2002'
       ) {
-        throw new ConflictException(`Email ${payload.email} already used.`);
+        const message = `Email ${payload.email} already used.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
       }
+      this.logger.warn(
+        `Creating user ${payload.email} failed with an error ${e}`
+      );
       throw new Error(e);
     }
   }
 
-  updateUser(userId: string, data: UpdateUserDto) {
+  updateUser(userId: number, data: UpdateUserDto) {
+    this.logger.debug(`Updating user ${userId}.`);
     return this.prisma.user.update({
       data,
       where: {
@@ -56,22 +65,27 @@ export class UsersService {
   }
 
   async changePassword(
-    userId: string,
+    userId: number,
     userPassword: string,
     changePassword: ChangePasswordDto
   ) {
+    this.logger.debug(`Changing user ${userId} password.`);
     const passwordValid = await this.passwordService.validatePassword(
       changePassword.oldPassword,
       userPassword
     );
 
     if (!passwordValid) {
-      throw new BadRequestException('Invalid password');
+      const message = `User ${userId}'s password is invalid.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
     }
 
     const hashedPassword = await this.passwordService.hashPassword(
       changePassword.newPassword
     );
+
+    this.logger.debug(`User ${userId} password is valid.`);
 
     return this.prisma.user.update({
       data: {

@@ -13,60 +13,176 @@ generator dbml {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int             @id @default(autoincrement())
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  deletedAt    DateTime?
+  username     String          @unique
+  email        String          @unique
+  password     String
+  firstname    String?
+  lastname     String?
+  role         Role            @default(USER)
+  storyComment StoryComment[]
+  projects     ProjectMember[]
+  tasks        Task[]
+  timeLogs     TimeLog[]
+  posts        Post[]
+}
+
+/// user type
+enum Role {
+  ADMIN /// allowed to do everything
+  USER
+}
+
+model Sprint {
+  id          Int        @id @default(autoincrement())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+  start       DateTime
+  end         DateTime
+  velocity    Int
+  Project     Project?   @relation(fields: [projectId], references: [id])
+  projectId   Int?
+  UserStory   UserStory? @relation(fields: [userStoryId], references: [id])
+  userStoryId Int?
+}
+
+model StoryComment {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  userStoryId Int
+  message     String
+  User        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  UserStory   UserStory @relation(fields: [userStoryId], references: [id])
+}
+
+model Task {
+  id          Int        @id @default(autoincrement())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+  title       String
+  description String?
+  hours       Int
+  accepted    Boolean
+  status      TaskStatus @default(UNASSIGNED)
+  assignedTo  User?      @relation(fields: [userId], references: [id])
+  userId      Int?
+  timeLogs    TimeLog[]
+  userStory   UserStory? @relation(fields: [userStoryId], references: [id])
+  userStoryId Int?
+}
+
+enum TaskStatus {
+  UNASSIGNED
+  ASSIGNED
+  FINISHED
+  ACTIVE
+}
+
+model UserStory {
+  id                   Int                @id @default(autoincrement())
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  deletedAt            DateTime?
+  project              Project?           @relation(fields: [projectId], references: [id])
+  sprints              Sprint[]
+  title                String
+  description          String
+  importance           StoryImportance    @default(LOW)
+  points               Int
+  realised             Boolean
+  projectId            Int?
+  sprintId             Int?
+  acceptanceCriteria   AcceptanceCriteria @relation(fields: [acceptanceCriteriaId], references: [id])
+  acceptanceCriteriaId Int
+  comments             StoryComment[]
+  Task                 Task[]
+}
+
+enum StoryImportance {
+  BLOCKER
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model TimeLog {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-  email     String   @unique
-  password  String  // hashed password
-  firstname String?
-  lastname  String?
-  posts     Post[]
-  membership ProjectMember[]
-  role      Role
+  day       DateTime
+  hours     Int
+  User      User?     @relation(fields: [userId], references: [id])
+  userId    Int?
+  Task      Task?     @relation(fields: [taskId], references: [id])
+  taskId    Int?
+}
+
+model AcceptanceCriteria {
+  id          Int         @id @default(autoincrement())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+  userStoryId Int
+  title       String
+  completed   Boolean
+  UserStory   UserStory[]
 }
 
 model Post {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int       @id @default(autoincrement())
+  message   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
   published Boolean
   title     String
   content   String?
-  author    User?    @relation(fields: [authorId], references: [id])
+  author    User?     @relation(fields: [authorId], references: [id])
   authorId  String?
+  User      User?     @relation(fields: [userId], references: [id])
+  userId    Int?
+  Project   Project?  @relation(fields: [projectId], references: [id])
+  projectId Int?
 }
 
-enum Role {
-  ADMIN
-  USER
-}
-
-enum ProjectRole {
-    PRODUCT_LEADER
-    METHODOLOGY_MASTER
-    MEMBER
+/// Project member role
+enum ProjectMemberRole {
+  PROJECT_OWNER
+  SCRUM_MASTER
+  DEVELOPER
 }
 
 model ProjectMember {
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  deletedAt    DateTime?
+  user         User              @relation(fields: [userId], references: [id])
+  userId       String
+  project      Project           @relation(fields: [projectId], references: [id])
+  projectId    String
+  project_role ProjectMemberRole
+
   @@id([userId, projectId])
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  project   Project  @relation(fields: [projectId], references: [id])
-  projectId String
-  project_role ProjectRole
 }
 
 model Project {
-  id            String    @id @default(cuid())
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id            String          @id @default(cuid())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   deletedAt     DateTime?
   title         String?
   documentation String?
   members       ProjectMember[]
+  sprints       Sprint[]
+  posts         Post[]
+  UserStory     UserStory[]
 }

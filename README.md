@@ -81,7 +81,7 @@ docker-compose up -d prisma-migrate
 npm run docker:migrate
 ```
 
-### 4. Seed the database data with this script
+### 4. Seed the database data with this script (Optional)
 
 Execute the script with this command:
 

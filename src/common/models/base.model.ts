@@ -1,6 +1,13 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export abstract class BaseModel {
-  id: string;
+  @ApiProperty({ type: Number })
+  id: number;
+
+  @ApiProperty({ type: Date })
   createdAt: Date;
+
+  @ApiProperty({ type: Date })
   updatedAt: Date;
   deletedAt: Date;
 }

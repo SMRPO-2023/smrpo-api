@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "engines": {
-    "node": "^18.14.1"
+    "node": "^16.19.1"
   },
   "keywords": [
     "nestjs",

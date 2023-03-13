@@ -12,9 +12,19 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import config from './common/configs/config';
-import { loggingMiddleware } from './common/middleware/logging.middleware';
 import { ProjectModule } from './project/project.module';
 import { UserMiddleware } from './common/middleware/user.middleware';
+import { AcceptanceCriteriesModule } from './acceptance-criteries/acceptance-criteries.module';
+import { PostsModule } from './posts/posts.module';
+import { ProjectMembersModule } from './project-members/project-members.module';
+import { ProjectsModule } from './projects/projects.module';
+import { SprintsModule } from './sprints/sprints.module';
+import { StoryCommentsModule } from './story-comments/story-comments.module';
+import { TasksModule } from './tasks/tasks.module';
+import { TimeLogsModule } from './time-logs/time-logs.module';
+import { UserStoriesModule } from './user-stories/user-stories.module';
+import { PrismaLoggingMiddleware } from './common/middleware/prisma.logging.middleware';
+import { ExpressLoggerMiddleware } from './common/middleware/express.logging.middleware';
 
 @Module({
   imports: [
@@ -22,18 +32,28 @@ import { UserMiddleware } from './common/middleware/user.middleware';
     PrismaModule.forRoot({
       isGlobal: true,
       prismaServiceOptions: {
-        middlewares: [loggingMiddleware(new Logger('PrismaMiddleware'))], // configure your prisma middleware
+        middlewares: [PrismaLoggingMiddleware(new Logger('PrismaMiddleware'))], // configure your prisma middleware
       },
     }),
     AuthModule,
     UsersModule,
     ProjectModule,
+    AcceptanceCriteriesModule,
+    PostsModule,
+    ProjectMembersModule,
+    ProjectsModule,
+    SprintsModule,
+    StoryCommentsModule,
+    TasksModule,
+    TimeLogsModule,
+    UserStoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ExpressLoggerMiddleware).forRoutes('*');
     consumer
       .apply(UserMiddleware)
       .forRoutes({ path: '*', method: RequestMethod.ALL });

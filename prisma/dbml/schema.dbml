@@ -3,54 +3,134 @@
 //// ------------------------------------------------------
 
 Table User {
-  id String [pk]
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  deletedAt DateTime
+  username String [unique, not null]
   email String [unique, not null]
   password String [not null]
   firstname String
   lastname String
+  role Role [not null, default: 'USER']
+  storyComment StoryComment [not null]
+  projects ProjectMember [not null]
+  tasks Task [not null]
+  timeLogs TimeLog [not null]
   posts Post [not null]
-  membership ProjectMember [not null]
-  role Role [not null]
 }
 
-Table Post {
-  id String [pk]
+Table Sprint {
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  deletedAt DateTime
-  published Boolean [not null]
-  title String [not null]
-  content String
-  author User
-  authorId String
+  start DateTime [not null]
+  end DateTime [not null]
+  velocity Int [not null]
+  Project Project
+  projectId Int
+  UserStory UserStory
+  userStoryId Int
+}
+
+Table StoryComment {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  userStoryId Int [not null]
+  message String [not null]
+  User User [not null]
+  userId Int [not null]
+  UserStory UserStory [not null]
 }
 
 Table ProjectMember {
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [not null]
-  deletedAt DateTime
-  user User [not null]
-  userId String [not null]
-  project Project [not null]
-  projectId String [not null]
-  project_role ProjectRole [not null]
-
-  indexes {
-    (userId, projectId) [pk]
-  }
+  projectId Int [not null]
+  projectRole ProjectMemberRole [not null, default: 'DEVELOPER']
+  Project Project [not null]
+  User User
+  userId Int
 }
 
 Table Project {
-  id String [pk]
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  deletedAt DateTime
-  title String
+  title String [not null]
   documentation String
+  sprints Sprint [not null]
   members ProjectMember [not null]
+  posts Post [not null]
+  UserStory UserStory [not null]
+}
+
+Table Task {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  title String [not null]
+  description String
+  hours Int [not null]
+  accepted Boolean [not null]
+  status TaskStatus [not null, default: 'UNASSIGNED']
+  assignedTo User
+  userId Int
+  timeLogs TimeLog [not null]
+  userStory UserStory
+  userStoryId Int
+}
+
+Table UserStory {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  project Project
+  sprints Sprint [not null]
+  title String [not null]
+  description String [not null]
+  importance StoryImportance [not null, default: 'LOW']
+  points Int [not null]
+  realised Boolean [not null]
+  projectId Int
+  sprintId Int
+  acceptanceCriteria AcceptanceCriteria [not null]
+  acceptanceCriteriaId Int [not null]
+  comments StoryComment [not null]
+  Task Task [not null]
+}
+
+Table TimeLog {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  day DateTime [not null]
+  hours Int [not null]
+  User User
+  userId Int
+  Task Task
+  taskId Int
+}
+
+Table AcceptanceCriteria {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  userStoryId Int [not null]
+  title String [not null]
+  completed Boolean [not null]
+  UserStory UserStory [not null]
+}
+
+Table Post {
+  id Int [pk, increment]
+  message String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  User User
+  userId Int
+  Project Project
+  projectId Int
 }
 
 Enum Role {
@@ -58,14 +138,50 @@ Enum Role {
   USER
 }
 
-Enum ProjectRole {
-  PRODUCT_LEADER
-  METHODOLOGY_MASTER
-  MEMBER
+Enum ProjectMemberRole {
+  PROJECT_OWNER
+  SCRUM_MASTER
+  DEVELOPER
 }
 
-Ref: Post.authorId > User.id
+Enum TaskStatus {
+  UNASSIGNED
+  ASSIGNED
+  FINISHED
+  ACTIVE
+}
+
+Enum StoryImportance {
+  BLOCKER
+  HIGH
+  MEDIUM
+  LOW
+}
+
+Ref: Sprint.projectId > Project.id
+
+Ref: Sprint.userStoryId > UserStory.id
+
+Ref: StoryComment.userId > User.id
+
+Ref: StoryComment.userStoryId > UserStory.id
+
+Ref: ProjectMember.projectId > Project.id
 
 Ref: ProjectMember.userId > User.id
 
-Ref: ProjectMember.projectId > Project.id
+Ref: Task.userId > User.id
+
+Ref: Task.userStoryId > UserStory.id
+
+Ref: UserStory.projectId > Project.id
+
+Ref: UserStory.acceptanceCriteriaId > AcceptanceCriteria.id
+
+Ref: TimeLog.userId > User.id
+
+Ref: TimeLog.taskId > Task.id
+
+Ref: Post.userId > User.id
+
+Ref: Post.projectId > Project.id
