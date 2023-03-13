@@ -19,8 +19,8 @@ export class ProjectMembersController {
   constructor(private readonly projectMembersService: ProjectMembersService) {}
 
   @Get()
-  async findAll(@Query('pid', ParseIntPipe) pid: number) {
-    return this.projectMembersService.findAll(pid);
+  async findAll(@Query('pid') pid?: number) {
+    return this.projectMembersService.findAll(Number(pid));
   }
 
   @Post()
