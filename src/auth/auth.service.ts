@@ -1,11 +1,12 @@
 import { PrismaService } from 'nestjs-prisma';
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import {
   Injectable,
   NotFoundException,
   BadRequestException,
   UnauthorizedException,
   Logger,
+  ConflictException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -32,18 +33,23 @@ export class AuthService {
     try {
       const user = await this.usersService.createUser({
         ...payload,
-        role: 'USER',
       });
       this.logger.log(`User ${payload.email} created successfully.`);
 
       return this.generateTokens({
         userId: user.id,
       });
-    } catch (error) {
-      this.logger.error(
-        `Failed to creating user ${payload.email} with an error ${error}.`
-      );
-      throw new Error(error);
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        const message = `User already exists.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
+      }
+      this.logger.warn(`Creating user failed with an error ${e}`);
+      throw new Error(e);
     }
   }
 

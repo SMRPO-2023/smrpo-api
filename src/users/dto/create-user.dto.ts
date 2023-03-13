@@ -1,8 +1,30 @@
-import { IsNotEmpty } from 'class-validator';
-import { Role } from '@prisma/client';
-import { SignupDto } from 'src/auth/dto/signup.dto';
+import {
+  IsEmail,
+  IsNotEmpty,
+  MinLength,
+  MaxLength,
+  IsAlpha,
+  IsOptional,
+} from 'class-validator';
 
-export class CreateUserDto extends SignupDto {
+export class CreateUserDto {
+  @IsEmail()
+  email: string;
+
   @IsNotEmpty()
-  role: Role;
+  @MinLength(3)
+  username: string;
+
+  @IsNotEmpty()
+  @MinLength(8)
+  @MaxLength(128)
+  password: string;
+
+  @IsOptional()
+  @IsAlpha()
+  firstname?: string;
+
+  @IsOptional()
+  @IsAlpha()
+  lastname?: string;
 }

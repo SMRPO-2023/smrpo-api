@@ -56,7 +56,7 @@ export class UsersAdminController {
   }
 
   @Roles('ADMIN')
-  @Post()
+  @Post('create-user')
   async createUser(@Body() newUserData: CreateUserDto): Promise<User> {
     return await this.usersService.createUser(newUserData);
   }

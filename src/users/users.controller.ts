@@ -25,7 +25,7 @@ export class UsersController {
   @Put()
   async updateUser(
     @UserEntity() user: User,
-    @Body('data') newUserData: UpdateUserDto
+    @Body() newUserData: UpdateUserDto
   ) {
     return this.usersService.updateUser(user.id, newUserData);
   }
@@ -33,7 +33,7 @@ export class UsersController {
   @Post('change-password')
   async changePassword(
     @UserEntity() user: User,
-    @Body('data') changePassword: ChangePasswordDto
+    @Body() changePassword: ChangePasswordDto
   ) {
     return this.usersService.changePassword(
       user.id,
