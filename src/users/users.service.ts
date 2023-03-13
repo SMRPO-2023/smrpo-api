@@ -19,6 +19,12 @@ export class UsersService {
     private passwordService: PasswordService
   ) {}
 
+  async getUser(where: Prisma.UserWhereUniqueInput): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where,
+    });
+  }
+
   async createUser(payload: CreateUserDto): Promise<User | never> {
     this.logger.debug(`Creating user ${payload.email}.`);
     const hashedPassword = await this.passwordService.hashPassword(

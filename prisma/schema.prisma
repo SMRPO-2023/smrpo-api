@@ -16,6 +16,7 @@ model User {
   id           Int             @id @default(autoincrement())
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
+  deletedAt    DateTime?
   username     String          @unique
   email        String          @unique
   password     String
@@ -39,6 +40,7 @@ model Sprint {
   id          Int        @id @default(autoincrement())
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
   start       DateTime
   end         DateTime
   velocity    Int
@@ -52,6 +54,7 @@ model StoryComment {
   id          Int       @id @default(autoincrement())
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
   userStoryId Int
   message     String
   User        User      @relation(fields: [userId], references: [id])
@@ -59,39 +62,11 @@ model StoryComment {
   UserStory   UserStory @relation(fields: [userStoryId], references: [id])
 }
 
-model ProjectMember {
-  id          Int               @id @default(autoincrement())
-  createdAt   DateTime          @default(now())
-  projectId   Int
-  projectRole ProjectMemberRole @default(DEVELOPER)
-  Project     Project           @relation(fields: [projectId], references: [id])
-  User        User?             @relation(fields: [userId], references: [id])
-  userId      Int?
-}
-
-/// Project member role
-enum ProjectMemberRole {
-  PROJECT_OWNER
-  SCRUM_MASTER
-  DEVELOPER
-}
-
-model Project {
-  id            Int             @id @default(autoincrement())
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  title         String
-  documentation String?
-  sprints       Sprint[]
-  members       ProjectMember[]
-  posts         Post[]
-  UserStory     UserStory[]
-}
-
 model Task {
   id          Int        @id @default(autoincrement())
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
   title       String
   description String?
   hours       Int
@@ -115,6 +90,7 @@ model UserStory {
   id                   Int                @id @default(autoincrement())
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
+  deletedAt            DateTime?
   project              Project?           @relation(fields: [projectId], references: [id])
   sprints              Sprint[]
   title                String
@@ -138,14 +114,15 @@ enum StoryImportance {
 }
 
 model TimeLog {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
   day       DateTime
   hours     Int
-  User      User?    @relation(fields: [userId], references: [id])
+  User      User?     @relation(fields: [userId], references: [id])
   userId    Int?
-  Task      Task?    @relation(fields: [taskId], references: [id])
+  Task      Task?     @relation(fields: [taskId], references: [id])
   taskId    Int?
 }
 
@@ -153,6 +130,7 @@ model AcceptanceCriteria {
   id          Int         @id @default(autoincrement())
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
   userStoryId Int
   title       String
   completed   Boolean
@@ -160,12 +138,48 @@ model AcceptanceCriteria {
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   message   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  User      User?    @relation(fields: [userId], references: [id])
-  userId    Int?
-  Project   Project? @relation(fields: [projectId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  published Boolean
+  title     String
+  content   String?
+  user    User?     @relation(fields: [userId], references: [id])
+  userId  Int?
+  Project   Project?  @relation(fields: [projectId], references: [id])
   projectId Int?
+}
+
+/// Project member role
+enum ProjectMemberRole {
+  PROJECT_OWNER
+  SCRUM_MASTER
+  DEVELOPER
+}
+
+model ProjectMember {
+  id           Int               @id @default(autoincrement())
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  deletedAt    DateTime?
+  user         User              @relation(fields: [userId], references: [id])
+  userId       Int
+  project      Project           @relation(fields: [projectId], references: [id])
+  projectId    Int
+  project_role ProjectMemberRole
+}
+
+model Project {
+  id            Int             @id @default(autoincrement())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  deletedAt     DateTime?
+  title         String?
+  documentation String?
+  members       ProjectMember[]
+  sprints       Sprint[]
+  posts         Post[]
+  UserStory     UserStory[]
 }

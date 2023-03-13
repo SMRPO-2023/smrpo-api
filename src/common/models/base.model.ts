@@ -9,4 +9,5 @@ export abstract class BaseModel {
 
   @ApiProperty({ type: Date })
   updatedAt: Date;
+  deletedAt: Date;
 }

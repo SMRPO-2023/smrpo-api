@@ -1,4 +1,12 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateProjectMemberDto } from './create-project-member.dto';
+import { IsNotEmpty } from 'class-validator';
 
-export class UpdateProjectMemberDto extends PartialType(CreateProjectMemberDto) {}
+export class UpdateProjectMemberDto {
+  @IsNotEmpty()
+  userId: number;
+
+  @IsNotEmpty()
+  projectId: number;
+
+  @IsNotEmpty()
+  project_role: any;
+}

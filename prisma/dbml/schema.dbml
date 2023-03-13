@@ -6,6 +6,7 @@ Table User {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
+  deletedAt DateTime
   username String [unique, not null]
   email String [unique, not null]
   password String [not null]
@@ -23,6 +24,7 @@ Table Sprint {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
+  deletedAt DateTime
   start DateTime [not null]
   end DateTime [not null]
   velocity Int [not null]
@@ -36,6 +38,7 @@ Table StoryComment {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
+  deletedAt DateTime
   userStoryId Int [not null]
   message String [not null]
   User User [not null]
@@ -43,32 +46,11 @@ Table StoryComment {
   UserStory UserStory [not null]
 }
 
-Table ProjectMember {
-  id Int [pk, increment]
-  createdAt DateTime [default: `now()`, not null]
-  projectId Int [not null]
-  projectRole ProjectMemberRole [not null, default: 'DEVELOPER']
-  Project Project [not null]
-  User User
-  userId Int
-}
-
-Table Project {
-  id Int [pk, increment]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [not null]
-  title String [not null]
-  documentation String
-  sprints Sprint [not null]
-  members ProjectMember [not null]
-  posts Post [not null]
-  UserStory UserStory [not null]
-}
-
 Table Task {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
+  deletedAt DateTime
   title String [not null]
   description String
   hours Int [not null]
@@ -85,6 +67,7 @@ Table UserStory {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
+  deletedAt DateTime
   project Project
   sprints Sprint [not null]
   title String [not null]
@@ -104,6 +87,7 @@ Table TimeLog {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
+  deletedAt DateTime
   day DateTime [not null]
   hours Int [not null]
   User User
@@ -116,6 +100,7 @@ Table AcceptanceCriteria {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
+  deletedAt DateTime
   userStoryId Int [not null]
   title String [not null]
   completed Boolean [not null]
@@ -127,21 +112,44 @@ Table Post {
   message String [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  User User
+  deletedAt DateTime
+  published Boolean [not null]
+  title String [not null]
+  content String
+  user User
   userId Int
   Project Project
   projectId Int
 }
 
+Table ProjectMember {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+  user User [not null]
+  userId Int [not null]
+  project Project [not null]
+  projectId Int [not null]
+  project_role ProjectMemberRole [not null]
+}
+
+Table Project {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+  title String
+  documentation String
+  members ProjectMember [not null]
+  sprints Sprint [not null]
+  posts Post [not null]
+  UserStory UserStory [not null]
+}
+
 Enum Role {
   ADMIN
   USER
-}
-
-Enum ProjectMemberRole {
-  PROJECT_OWNER
-  SCRUM_MASTER
-  DEVELOPER
 }
 
 Enum TaskStatus {
@@ -158,6 +166,12 @@ Enum StoryImportance {
   LOW
 }
 
+Enum ProjectMemberRole {
+  PROJECT_OWNER
+  SCRUM_MASTER
+  DEVELOPER
+}
+
 Ref: Sprint.projectId > Project.id
 
 Ref: Sprint.userStoryId > UserStory.id
@@ -165,10 +179,6 @@ Ref: Sprint.userStoryId > UserStory.id
 Ref: StoryComment.userId > User.id
 
 Ref: StoryComment.userStoryId > UserStory.id
-
-Ref: ProjectMember.projectId > Project.id
-
-Ref: ProjectMember.userId > User.id
 
 Ref: Task.userId > User.id
 
@@ -185,3 +195,7 @@ Ref: TimeLog.taskId > Task.id
 Ref: Post.userId > User.id
 
 Ref: Post.projectId > Project.id
+
+Ref: ProjectMember.userId > User.id
+
+Ref: ProjectMember.projectId > Project.id
