@@ -13,7 +13,7 @@ async function main() {
       firstname: 'Lisa',
       lastname: 'Simpson',
       // cspell:disable-next-line -- disables checking till the end of the next line.
-      password: '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6xNekdHgTGmrpHEfIoxm', // secret42
+      password: '$2b$10$DRzCId0X0guJa7wtynJ0FOrAijm7IY9l2Ora9KygCK4lwH1lSvV12', // secret12345678
       role: 'USER',
       username: 'simpsonl',
     },
@@ -25,7 +25,7 @@ async function main() {
       lastname: 'Simpson',
       role: 'ADMIN',
       // cspell:disable-next-line -- disables checking till the end of the next line.
-      password: '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6xNekdHgTGmrpHEfIoxm', // secret42
+      password: '$2b$10$DRzCId0X0guJa7wtynJ0FOrAijm7IY9l2Ora9KygCK4lwH1lSvV12', // secret12345678
       username: 'simpsonb',
     },
   });
