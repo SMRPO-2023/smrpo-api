@@ -65,17 +65,9 @@ export class UsersAdminController {
   @Put(':id')
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateUserDto
+    @Body() newUserData: UpdateUserDto
   ): Promise<User> {
-    if (!dto.password) {
-      delete dto.password;
-    } else {
-      dto.password = await this.passwordService.hashPassword(dto.password);
-    }
-    return await this.prisma.user.update({
-      data: { ...dto },
-      where: { id },
-    });
+    return this.usersService.updateUserAdmin(id, newUserData);
   }
 
   @Roles('ADMIN')

@@ -24,7 +24,7 @@ export class UsersService {
       where: {
         ...where,
         deletedAt: null,
-      }
+      },
     });
   }
 
@@ -63,6 +63,32 @@ export class UsersService {
         where: {
           id: userId,
         },
+      });
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        const message = `User already exists.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
+      }
+      this.logger.warn(`Updating user failed with an error ${e}.`);
+      throw new Error(e);
+    }
+  }
+
+  async updateUserAdmin(id: number, data: UpdateUserDto) {
+    this.logger.debug(`Updating user ${id}.`);
+    try {
+      if (!data.password) {
+        delete data.password;
+      } else {
+        data.password = await this.passwordService.hashPassword(data.password);
+      }
+      return await this.prisma.user.update({
+        data: { ...data },
+        where: { id },
       });
     } catch (e) {
       if (
