@@ -20,6 +20,10 @@ export class ProjectService {
   }
 
   async create(data: Prisma.ProjectCreateInput) {
+    const exists = await this.prisma.project.findFirst({ where: { title: data.title } });
+    if (exists) {
+      throw new BadRequestException('Object with same name already exists');
+    }
     return this.prisma.project.create({
       data,
     });
