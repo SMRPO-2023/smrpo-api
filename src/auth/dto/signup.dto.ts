@@ -1,3 +1,4 @@
+import { Role } from '@prisma/client';
 import {
   IsEmail,
   IsNotEmpty,
@@ -27,4 +28,7 @@ export class SignupDto {
   @IsOptional()
   @IsAlpha()
   lastname?: string;
+
+  @IsOptional()
+  role: Role;
 }

@@ -43,25 +43,36 @@ export class UsersService {
         e instanceof Prisma.PrismaClientKnownRequestError &&
         e.code === 'P2002'
       ) {
-        const message = `Email ${payload.email} already used.`;
+        const message = `User already exists.`;
         this.logger.warn(message);
         throw new ConflictException(message);
       }
-      this.logger.warn(
-        `Creating user ${payload.email} failed with an error ${e}`
-      );
+      this.logger.warn(`Creating user failed with an error ${e}.`);
       throw new Error(e);
     }
   }
 
   updateUser(userId: number, data: UpdateUserDto) {
     this.logger.debug(`Updating user ${userId}.`);
-    return this.prisma.user.update({
-      data,
-      where: {
-        id: userId,
-      },
-    });
+    try {
+      return this.prisma.user.update({
+        data,
+        where: {
+          id: userId,
+        },
+      });
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        const message = `User already exists.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
+      }
+      this.logger.warn(`Updating user failed with an error ${e}.`);
+      throw new Error(e);
+    }
   }
 
   async changePassword(
@@ -87,11 +98,16 @@ export class UsersService {
 
     this.logger.debug(`User ${userId} password is valid.`);
 
-    return this.prisma.user.update({
-      data: {
-        password: hashedPassword,
-      },
-      where: { id: userId },
-    });
+    try {
+      return this.prisma.user.update({
+        data: {
+          password: hashedPassword,
+        },
+        where: { id: userId },
+      });
+    } catch (e) {
+      this.logger.warn(`Changing user password failed with an error ${e}.`);
+      throw new Error(e);
+    }
   }
 }
