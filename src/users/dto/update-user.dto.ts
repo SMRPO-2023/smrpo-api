@@ -15,7 +15,7 @@ export class UpdateUserDto {
   @MinLength(3)
   username: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(12)
   @MaxLength(128)
   password: string;
