@@ -38,6 +38,7 @@ export class AuthService {
 
       return this.generateTokens({
         userId: user.id,
+        role: user.role,
       });
     } catch (e) {
       if (
@@ -53,12 +54,16 @@ export class AuthService {
     }
   }
 
-  async login(email: string, password: string): Promise<Token> {
-    this.logger.debug(`User ${email} login.`);
-    const user = await this.prisma.user.findUnique({ where: { email } });
+  async login(user_identifier: string, password: string): Promise<Token> {
+    this.logger.debug(`User ${user_identifier} login.`);
+    const user = await this.prisma.user.findFirstOrThrow({
+      where: {
+        OR: [{ email: user_identifier }, { username: user_identifier }],
+      },
+    });
 
     if (!user) {
-      const message = `No user found for email: ${email}.`;
+      const message = `No user found for email: ${user_identifier}.`;
       this.logger.debug(message);
       throw new NotFoundException(message);
     }
@@ -69,15 +74,16 @@ export class AuthService {
     );
 
     if (!passwordValid) {
-      const message = `Invalid password for user ${email}.`;
+      const message = `Invalid password for user ${user_identifier}.`;
       this.logger.warn(message);
       throw new BadRequestException(message);
     }
 
-    this.logger.log(`User ${email} login successful.`);
+    this.logger.log(`User ${user_identifier} login successful.`);
 
     return this.generateTokens({
       userId: user.id,
+      role: user.role,
     });
   }
 
@@ -92,10 +98,11 @@ export class AuthService {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
-  generateTokens(payload: { userId: number }): Token {
+  generateTokens(payload: { userId: number; role: string }): Token {
     this.logger.log(`Generating tokens for user ${payload.userId}.`);
     return {
       userId: payload.userId,
+      role: payload.role,
       accessToken: this.generateAccessToken(payload),
       refreshToken: this.generateRefreshToken(payload),
     };
@@ -118,12 +125,13 @@ export class AuthService {
   refreshToken(token: string) {
     this.logger.debug(`Generating access token from a refresh token ${token}.`);
     try {
-      const { userId } = this.jwtService.verify(token, {
+      const { userId, role } = this.jwtService.verify(token, {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
       });
 
       return this.generateTokens({
         userId,
+        role,
       });
     } catch (e) {
       this.logger.error(
