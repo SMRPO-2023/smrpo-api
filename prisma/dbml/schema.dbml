@@ -68,17 +68,17 @@ Table UserStory {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   deletedAt DateTime
-  project Project
-  sprints Sprint [not null]
   title String [not null]
   description String [not null]
   importance StoryImportance [not null, default: 'LOW']
   points Int [not null]
   realised Boolean [not null]
   projectId Int
+  project Project
   sprintId Int
-  acceptanceCriteria AcceptanceCriteria [not null]
-  acceptanceCriteriaId Int [not null]
+  sprints Sprint [not null]
+  acceptanceCriteriaId Int
+  acceptanceCriteria AcceptanceCriteria
   comments StoryComment [not null]
   Task Task [not null]
 }

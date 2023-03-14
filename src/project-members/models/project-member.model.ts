@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ProjectMemberRole } from '@prisma/client';
-import { Project } from 'src/projects/models/project.model';
+import { Project } from 'src/project/models/project.model';
 import { User } from 'src/users/models/user.model';
 import { BaseModel } from '../../common/models/base.model';
 

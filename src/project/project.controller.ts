@@ -6,9 +6,10 @@ import {
   Param,
   ParseIntPipe,
   Post,
-  Put, Req,
-  UseGuards
-} from "@nestjs/common";
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { JwtAuthGuard } from '../auth/jwt-auth-guard.service';
 import { ProjectDto } from './dto/project.dto';

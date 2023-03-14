@@ -1,26 +1,49 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserStoryDto } from './dto/create-user-story.dto';
-import { UpdateUserStoryDto } from './dto/update-user-story.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { PrismaService } from 'nestjs-prisma';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UserStoriesService {
-  create(createUserStoryDto: CreateUserStoryDto) {
-    return 'This action adds a new userStory';
+  constructor(private prisma: PrismaService) {}
+
+  async create(data: Prisma.UserStoryCreateInput) {
+    const exists = await this.prisma.userStory.findFirst({
+      where: { title: data.title },
+    });
+    if (exists) {
+      throw new BadRequestException('Object with same name already exists');
+    }
+    return this.prisma.userStory.create({ data });
   }
 
-  findAll() {
-    return `This action returns all userStories`;
+  async findAll(projectId?: number, sprintId?: number) {
+    const where = { deletedAt: null };
+    if (projectId) {
+      where['projectId'] = projectId;
+    }
+    if (sprintId) {
+      where['sprintId'] = sprintId;
+    }
+    return this.prisma.userStory.findMany({
+      where,
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} userStory`;
+  async findOne(id: number) {
+    return this.prisma.userStory.findUniqueOrThrow({ where: { id } });
   }
 
-  update(id: number, updateUserStoryDto: UpdateUserStoryDto) {
-    return `This action updates a #${id} userStory`;
+  async update(id: number, data: Prisma.UserStoryUpdateInput) {
+    await this.findOne(id);
+    return this.prisma.userStory.update({ where: { id }, data });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} userStory`;
+  async remove(id: number) {
+    const story = await this.findOne(id);
+    story.deletedAt = new Date();
+    return this.prisma.project.update({
+      where: { id },
+      data: story,
+    });
   }
 }

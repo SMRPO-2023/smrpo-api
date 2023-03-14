@@ -91,17 +91,17 @@ model UserStory {
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
   deletedAt            DateTime?
-  project              Project?           @relation(fields: [projectId], references: [id])
-  sprints              Sprint[]
   title                String
   description          String
   importance           StoryImportance    @default(LOW)
   points               Int
   realised             Boolean
   projectId            Int?
+  project              Project?           @relation(fields: [projectId], references: [id])
   sprintId             Int?
-  acceptanceCriteria   AcceptanceCriteria @relation(fields: [acceptanceCriteriaId], references: [id])
-  acceptanceCriteriaId Int
+  sprints              Sprint[]
+  acceptanceCriteriaId Int?
+  acceptanceCriteria   AcceptanceCriteria? @relation(fields: [acceptanceCriteriaId], references: [id])
   comments             StoryComment[]
   Task                 Task[]
 }

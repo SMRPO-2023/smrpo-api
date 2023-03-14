@@ -13,10 +13,9 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import config from './common/configs/config';
 import { ProjectModule } from './project/project.module';
-import { AcceptanceCriteriesModule } from './acceptance-criteries/acceptance-criteries.module';
+import { AcceptanceCriteriaModule } from './acceptance-criteria/acceptance-criteria.module';
 import { PostsModule } from './posts/posts.module';
 import { ProjectMembersModule } from './project-members/project-members.module';
-import { ProjectsModule } from './projects/projects.module';
 import { SprintsModule } from './sprints/sprints.module';
 import { StoryCommentsModule } from './story-comments/story-comments.module';
 import { TasksModule } from './tasks/tasks.module';
@@ -25,9 +24,9 @@ import { UserStoriesModule } from './user-stories/user-stories.module';
 import { UserMiddleware } from './common/middleware/user.middleware';
 import { PrismaLoggingMiddleware } from './common/middleware/prisma.logging.middleware';
 import { ExpressLoggerMiddleware } from './common/middleware/express.logging.middleware';
-import { UsersService } from "./users/users.service";
-import { PasswordService } from "./auth/password.service";
-import { JwtService } from "@nestjs/jwt";
+import { UsersService } from './users/users.service';
+import { PasswordService } from './auth/password.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -41,10 +40,9 @@ import { JwtService } from "@nestjs/jwt";
     AuthModule,
     UsersModule,
     ProjectModule,
-    AcceptanceCriteriesModule,
+    AcceptanceCriteriaModule,
     PostsModule,
     ProjectMembersModule,
-    ProjectsModule,
     SprintsModule,
     StoryCommentsModule,
     TasksModule,

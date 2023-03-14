@@ -4,6 +4,6 @@ import { UserStoriesController } from './user-stories.controller';
 
 @Module({
   controllers: [UserStoriesController],
-  providers: [UserStoriesService]
+  providers: [UserStoriesService],
 })
 export class UserStoriesModule {}

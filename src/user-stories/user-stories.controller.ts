@@ -6,8 +6,8 @@ import {
   Patch,
   Param,
   Delete,
-  ParseIntPipe,
-} from '@nestjs/common';
+  ParseIntPipe, Query
+} from "@nestjs/common";
 import { UserStoriesService } from './user-stories.service';
 import { CreateUserStoryDto } from './dto/create-user-story.dto';
 import { UpdateUserStoryDto } from './dto/update-user-story.dto';
@@ -17,18 +17,21 @@ export class UserStoriesController {
   constructor(private readonly userStoriesService: UserStoriesService) {}
 
   @Post()
-  create(@Body() createUserStoryDto: CreateUserStoryDto) {
-    return this.userStoriesService.create(createUserStoryDto);
+  create(@Body() data: CreateUserStoryDto) {
+    return this.userStoriesService.create(data);
   }
 
   @Get()
-  findAll() {
-    return this.userStoriesService.findAll();
+  findAll(
+    @Query('pid') projectId: number, //
+    @Query('sid') sprintId: number
+  ) {
+    return this.userStoriesService.findAll(+projectId, +sprintId);
   }
 
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.userStoriesService.findOne(+id);
+    return this.userStoriesService.findOne(id);
   }
 
   @Patch(':id')
