@@ -3,9 +3,10 @@ import {
   IsNotEmpty,
   MinLength,
   MaxLength,
-  IsAlpha,
   IsOptional,
+  Validate,
 } from 'class-validator';
+import { AlphaSpacesValidator } from '../../common/validators/alpha-spaces.validator';
 
 export class CreateUserDto {
   @IsEmail()
@@ -13,6 +14,7 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   @MinLength(3)
+  @MaxLength(15)
   username: string;
 
   @IsNotEmpty()
@@ -21,10 +23,14 @@ export class CreateUserDto {
   password: string;
 
   @IsOptional()
-  @IsAlpha()
+  @MinLength(3)
+  @MaxLength(30)
+  @Validate(AlphaSpacesValidator)
   firstname?: string;
 
   @IsOptional()
-  @IsAlpha()
+  @MinLength(3)
+  @MaxLength(30)
+  @Validate(AlphaSpacesValidator)
   lastname?: string;
 }

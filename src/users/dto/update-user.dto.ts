@@ -1,18 +1,20 @@
 import { Role } from '@prisma/client';
 import {
-  IsAlpha,
   IsEmail,
   IsNotEmpty,
   IsOptional,
   MaxLength,
   MinLength,
+  Validate,
 } from 'class-validator';
+import { AlphaSpacesValidator } from 'src/common/validators/alpha-spaces.validator';
 export class UpdateUserDto {
   @IsEmail()
   email: string;
 
   @IsNotEmpty()
   @MinLength(3)
+  @MaxLength(15)
   username: string;
 
   @IsOptional()
@@ -21,11 +23,15 @@ export class UpdateUserDto {
   password: string;
 
   @IsOptional()
-  @IsAlpha()
+  @MinLength(3)
+  @MaxLength(30)
+  @Validate(AlphaSpacesValidator)
   firstname?: string;
 
   @IsOptional()
-  @IsAlpha()
+  @MinLength(3)
+  @MaxLength(30)
+  @Validate(AlphaSpacesValidator)
   lastname?: string;
 
   @IsOptional()

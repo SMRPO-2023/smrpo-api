@@ -4,9 +4,10 @@ import {
   IsNotEmpty,
   MinLength,
   MaxLength,
-  IsAlpha,
   IsOptional,
+  Validate,
 } from 'class-validator';
+import { AlphaSpacesValidator } from 'src/common/validators/alpha-spaces.validator';
 
 export class SignupDto {
   @IsEmail()
@@ -22,11 +23,11 @@ export class SignupDto {
   password: string;
 
   @IsOptional()
-  @IsAlpha()
+  @Validate(AlphaSpacesValidator)
   firstname?: string;
 
   @IsOptional()
-  @IsAlpha()
+  @Validate(AlphaSpacesValidator)
   lastname?: string;
 
   @IsOptional()
