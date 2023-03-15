@@ -17,6 +17,7 @@ model User {
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   deletedAt    DateTime?
+  lastLogin    DateTime?
   username     String          @unique
   email        String          @unique
   password     String
@@ -87,17 +88,17 @@ enum TaskStatus {
 }
 
 model UserStory {
-  id                   Int                @id @default(autoincrement())
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+  id                   Int                 @id @default(autoincrement())
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
   deletedAt            DateTime?
   title                String
   description          String
-  importance           StoryImportance    @default(LOW)
+  importance           StoryImportance     @default(LOW)
   points               Int
   realised             Boolean
   projectId            Int?
-  project              Project?           @relation(fields: [projectId], references: [id])
+  project              Project?            @relation(fields: [projectId], references: [id])
   sprintId             Int?
   sprints              Sprint[]
   acceptanceCriteriaId Int?
@@ -146,8 +147,8 @@ model Post {
   published Boolean
   title     String
   content   String?
-  user    User?     @relation(fields: [userId], references: [id])
-  userId  Int?
+  user      User?     @relation(fields: [userId], references: [id])
+  userId    Int?
   Project   Project?  @relation(fields: [projectId], references: [id])
   projectId Int?
 }

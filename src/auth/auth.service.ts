@@ -81,6 +81,23 @@ export class AuthService {
 
     this.logger.log(`User ${user_identifier} login successful.`);
 
+    try {
+      await this.prisma.user.update({
+        data: {
+          lastLogin: new Date(),
+        },
+        where: { id: user.id },
+      });
+      this.logger.debug(
+        `User ${user_identifier} last login update successful.`
+      );
+    } catch (e) {
+      this.logger.warn(
+        `User ${user_identifier} last login update failed with an error ${e}.`
+      );
+      throw new Error(e);
+    }
+
     return this.generateTokens({
       userId: user.id,
       role: user.role,
