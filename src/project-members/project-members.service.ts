@@ -13,7 +13,7 @@ export class ProjectMembersService {
       deletedAt: null,
     };
     if (pid) {
-      where['id'] = pid;
+      where['projectId'] = pid;
     }
     return this.prisma.projectMember.findMany({ where });
   }
