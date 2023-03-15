@@ -30,6 +30,10 @@ services:
       - 5432:5432
     env_file:
       - .env
+    environment:
+      POSTGRES_INITDB_ARGS: "--locale-provider=icu --icu-locale=sl-SI"
+      LANG: sl_SI.utf8
+      TZ: 'Europe/Ljubljana'
     volumes:
       - postgres:/var/lib/postgresql/data
 
