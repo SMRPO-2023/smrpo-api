@@ -49,7 +49,13 @@ export class UserStoriesService {
 
   async findOne(id: number) {
     return this.prisma.userStory.findFirst({
-      where: { AND: [{ deletedAt: null }, { id }] },
+      where: {
+        id,
+        deletedAt: null,
+      },
+      include: {
+        acceptanceCriteria: true,
+      },
     });
   }
 
@@ -78,7 +84,12 @@ export class UserStoriesService {
       this.logger.warn(message);
       throw new UnauthorizedException(message);
     }
-    const story = await this.findOne(id);
+    const story = await this.prisma.userStory.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+      },
+    });
     story.deletedAt = new Date();
     return this.prisma.userStory.update({
       where: { id },

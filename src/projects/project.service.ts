@@ -22,6 +22,12 @@ export class ProjectService {
         ...where,
         deletedAt: null,
       },
+      include: {
+        UserStory: true,
+        developers: true,
+        sprints: true,
+        posts: true,
+      },
     });
   }
 
