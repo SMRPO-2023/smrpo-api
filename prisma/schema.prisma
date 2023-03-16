@@ -90,30 +90,30 @@ enum TaskStatus {
 }
 
 model UserStory {
-  id                   Int                 @id @default(autoincrement())
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
-  deletedAt            DateTime?
-  title                String
-  description          String
-  importance           StoryImportance     @default(LOW)
-  points               Int
-  realised             Boolean
-  projectId            Int?
-  project              Project?            @relation(fields: [projectId], references: [id])
-  sprintId             Int?
-  sprints              Sprint[]
-  acceptanceCriteriaId Int?
-  acceptanceCriteria   AcceptanceCriteria? @relation(fields: [acceptanceCriteriaId], references: [id])
-  comments             StoryComment[]
-  Task                 Task[]
+  id                 Int                  @id @default(autoincrement())
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  deletedAt          DateTime?
+  title              String
+  description        String?
+  priority           StoryPriority
+  points             Int?
+  implemented        Boolean              @default(false)
+  projectId          Int
+  project            Project              @relation(fields: [projectId], references: [id])
+  sprintId           Int?
+  sprints            Sprint[]
+  acceptanceCriteria AcceptanceCriteria[]
+  comments           StoryComment[]
+  Task               Task[]
+  businessValue      String?
 }
 
-enum StoryImportance {
-  BLOCKER
-  HIGH
-  MEDIUM
-  LOW
+enum StoryPriority {
+  MUST_HAVE
+  COULD_HAVE
+  SHOULD_HAVE
+  WONT_HAVE
 }
 
 model TimeLog {
@@ -130,14 +130,15 @@ model TimeLog {
 }
 
 model AcceptanceCriteria {
-  id          Int         @id @default(autoincrement())
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
   userStoryId Int
   title       String
-  completed   Boolean
-  UserStory   UserStory[]
+  description String?
+  completed   Boolean   @default(false)
+  UserStory   UserStory @relation(fields: [userStoryId], references: [id])
 }
 
 model Post {

@@ -10,8 +10,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ProjectDevelopersService } from './project-developers.service';
-import { CreateProjectDeveloperDto } from './dto/create-project-developer.dto';
-import { CreateProjectDevelopersDto } from './dto/create-project-developers.dto';
+import { ProjectDeveloperDto } from './dto/project-developer.dto';
+import { ProjectDevelopersDto } from './dto/project-developers.dto';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
 import { Roles } from 'src/common/decorators/roles.decorator';
@@ -33,13 +33,13 @@ export class ProjectDevelopersController {
 
   @Post()
   @Roles('ADMIN')
-  async create(@Body() data: CreateProjectDeveloperDto) {
+  async create(@Body() data: ProjectDeveloperDto) {
     return this.projectMembersService.create(data);
   }
 
   @Post('multi')
   @Roles('ADMIN')
-  async createMulti(@Body() data: CreateProjectDevelopersDto) {
+  async createMulti(@Body() data: ProjectDevelopersDto) {
     return this.projectMembersService.createMulti(data);
   }
 

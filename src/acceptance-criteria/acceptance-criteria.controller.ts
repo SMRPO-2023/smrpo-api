@@ -6,29 +6,33 @@ import {
   Param,
   Delete,
   ParseIntPipe,
-  Query,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { AcceptanceCriteriaService } from './acceptance-criteria.service';
-import { CreateAcceptanceCriteriaDto } from './dto/create-acceptance-criteria.dto';
-import { UpdateAcceptanceCriteriaDto } from './dto/update-acceptance-criteria.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { AcceptanceCriteriaDto } from './dto/acceptance-criteria.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
+import { User } from '@prisma/client';
+import { UserEntity } from 'src/common/decorators/user.decorator';
 
 @Controller('acceptance-criteria')
-@ApiTags('Acceptance criteria')
+@ApiTags('User stories')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class AcceptanceCriteriaController {
   constructor(
     private readonly acceptanceCriteriaService: AcceptanceCriteriaService
   ) {}
 
   @Post()
-  async create(@Body() data: CreateAcceptanceCriteriaDto) {
-    return this.acceptanceCriteriaService.create(data);
+  async create(@Body() data: AcceptanceCriteriaDto, @UserEntity() user: User) {
+    return this.acceptanceCriteriaService.create(data, user.id);
   }
 
   @Get()
-  async findAll(@Query('usid') userStoryId: number) {
-    return this.acceptanceCriteriaService.findAll(+userStoryId);
+  async findAll() {
+    return this.acceptanceCriteriaService.findAll();
   }
 
   @Get(':id')
@@ -39,13 +43,17 @@ export class AcceptanceCriteriaController {
   @Put(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: UpdateAcceptanceCriteriaDto
+    @UserEntity() user: User,
+    @Body() data: AcceptanceCriteriaDto
   ) {
-    return this.acceptanceCriteriaService.update(+id, data);
+    return this.acceptanceCriteriaService.update(+id, data, user.id);
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    return this.acceptanceCriteriaService.remove(+id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @UserEntity() user: User
+  ) {
+    return this.acceptanceCriteriaService.remove(+id, user.id);
   }
 }

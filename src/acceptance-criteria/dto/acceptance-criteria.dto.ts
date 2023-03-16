@@ -1,26 +1,25 @@
 import {
+  IsBoolean,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
-  MinLength,
 } from 'class-validator';
 
-export class ProjectDto {
+export class AcceptanceCriteriaDto {
   @IsNotEmpty()
-  @MinLength(3)
+  @IsNumber()
+  userStoryId: number;
+
+  @IsNotEmpty()
   @IsString()
   title: string;
 
   @IsOptional()
   @IsString()
-  documentation: string;
+  description: string;
 
   @IsOptional()
-  @IsNumber()
-  projectOwnerId: number;
-
-  @IsOptional()
-  @IsNumber()
-  scrumMasterId: number;
+  @IsBoolean()
+  completed: boolean;
 }
