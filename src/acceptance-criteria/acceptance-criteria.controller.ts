@@ -10,8 +10,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { AcceptanceCriteriaService } from './acceptance-criteria.service';
-import { CreateAcceptanceCriteriaDto } from './dto/create-acceptance-criteria.dto';
-import { UpdateAcceptanceCriteriaDto } from './dto/update-acceptance-criteria.dto';
+import { AcceptanceCriteriaDto } from './dto/acceptance-criteria.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @Controller('acceptance-criteria')
@@ -22,7 +21,7 @@ export class AcceptanceCriteriaController {
   ) {}
 
   @Post()
-  async create(@Body() data: CreateAcceptanceCriteriaDto) {
+  async create(@Body() data: AcceptanceCriteriaDto) {
     return this.acceptanceCriteriaService.create(data);
   }
 
@@ -39,7 +38,7 @@ export class AcceptanceCriteriaController {
   @Put(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: UpdateAcceptanceCriteriaDto
+    @Body() data: AcceptanceCriteriaDto
   ) {
     return this.acceptanceCriteriaService.update(+id, data);
   }

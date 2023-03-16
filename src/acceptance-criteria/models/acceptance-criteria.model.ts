@@ -1,23 +1,18 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { BaseModel } from 'src/common/models/base.model';
 import { UserStory } from 'src/user-stories/models/user-story.model';
 
-export class AcceptanceCriteria {
-  @ApiProperty({ type: Number })
-  id: number;
-
-  @ApiProperty({ type: Date })
-  createdAt: Date;
-
-  @ApiProperty({ type: Date })
-  updatedAt: Date;
-
+export class AcceptanceCriteria extends BaseModel {
   @ApiProperty({ type: Number })
   userStoryId: number;
 
   @ApiProperty({ type: String })
   title: string;
 
-  @ApiProperty({ type: Boolean })
+  @ApiPropertyOptional({ type: String })
+  description: string;
+
+  @ApiPropertyOptional({ type: Boolean })
   completed: boolean;
 
   @ApiProperty({ isArray: true, type: () => UserStory })

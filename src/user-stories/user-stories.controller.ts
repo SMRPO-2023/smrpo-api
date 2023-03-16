@@ -10,8 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { UserStoriesService } from './user-stories.service';
-import { CreateUserStoryDto } from './dto/create-user-story.dto';
-import { UpdateUserStoryDto } from './dto/update-user-story.dto';
+import { UserStoryDto } from './dto/user-story.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @Controller('user-stories')
@@ -20,7 +19,7 @@ export class UserStoriesController {
   constructor(private readonly userStoriesService: UserStoriesService) {}
 
   @Post()
-  create(@Body() data: CreateUserStoryDto) {
+  create(@Body() data: UserStoryDto) {
     return this.userStoriesService.create(data);
   }
 
@@ -40,7 +39,7 @@ export class UserStoriesController {
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserStoryDto: UpdateUserStoryDto
+    @Body() updateUserStoryDto: UserStoryDto
   ) {
     return this.userStoriesService.update(+id, updateUserStoryDto);
   }

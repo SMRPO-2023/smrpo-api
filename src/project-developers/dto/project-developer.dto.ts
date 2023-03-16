@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class UpdateProjectDeveloperDto {
+export class ProjectDeveloperDto {
   @IsNotEmpty()
   @IsNumber()
   userId: number;

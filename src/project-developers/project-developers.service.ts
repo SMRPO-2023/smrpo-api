@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { Prisma } from '@prisma/client';
-import { CreateProjectDeveloperDto } from './dto/create-project-developer.dto';
-import { CreateProjectDevelopersDto } from './dto/create-project-developers.dto';
+import { ProjectDeveloperDto } from './dto/project-developer.dto';
+import { ProjectDevelopersDto } from './dto/project-developers.dto';
 
 @Injectable()
 export class ProjectDevelopersService {
@@ -27,7 +27,7 @@ export class ProjectDevelopersService {
     });
   }
 
-  async create(data: CreateProjectDeveloperDto) {
+  async create(data: ProjectDeveloperDto) {
     this.prisma.project.findFirstOrThrow({
       where: {
         id: data?.projectId,
@@ -36,7 +36,7 @@ export class ProjectDevelopersService {
     return this.prisma.projectDeveloper.create({ data });
   }
 
-  async createMulti(data: CreateProjectDevelopersDto) {
+  async createMulti(data: ProjectDevelopersDto) {
     for (const member of data.developers) {
       await this.create(member);
     }

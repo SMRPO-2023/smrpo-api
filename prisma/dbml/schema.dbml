@@ -72,18 +72,18 @@ Table UserStory {
   updatedAt DateTime [not null]
   deletedAt DateTime
   title String [not null]
-  description String [not null]
-  importance StoryImportance [not null, default: 'LOW']
-  points Int [not null]
-  realised Boolean [not null]
+  description String
+  priority StoryPriority [not null]
+  points Int
+  implemented Boolean [not null, default: false]
   projectId Int
   project Project
   sprintId Int
   sprints Sprint [not null]
-  acceptanceCriteriaId Int
-  acceptanceCriteria AcceptanceCriteria
+  acceptanceCriteria AcceptanceCriteria [not null]
   comments StoryComment [not null]
   Task Task [not null]
+  businessValue String
 }
 
 Table TimeLog {
@@ -106,7 +106,8 @@ Table AcceptanceCriteria {
   deletedAt DateTime
   userStoryId Int [not null]
   title String [not null]
-  completed Boolean [not null]
+  description String
+  completed Boolean [not null, default: false]
   UserStory UserStory [not null]
 }
 
@@ -165,11 +166,11 @@ Enum TaskStatus {
   ACTIVE
 }
 
-Enum StoryImportance {
-  BLOCKER
-  HIGH
-  MEDIUM
-  LOW
+Enum StoryPriority {
+  MUST_HAVE
+  COULD_HAVE
+  SHOULD_HAVE
+  WONT_HAVE
 }
 
 Ref: Sprint.projectId > Project.id
@@ -186,11 +187,11 @@ Ref: Task.userStoryId > UserStory.id
 
 Ref: UserStory.projectId > Project.id
 
-Ref: UserStory.acceptanceCriteriaId > AcceptanceCriteria.id
-
 Ref: TimeLog.userId > User.id
 
 Ref: TimeLog.taskId > Task.id
+
+Ref: AcceptanceCriteria.userStoryId > UserStory.id
 
 Ref: Post.userId > User.id
 
