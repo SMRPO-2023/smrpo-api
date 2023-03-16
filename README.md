@@ -208,4 +208,4 @@ npm run docker:migrate
 
 ## Database model
 
-[Database model](https://dbdiagram.io/d/640ddf35296d97641d874715) available with online.
+[Database model](https://dbdiagram.io/d/640ddf35296d97641d874715) scheme available online.
