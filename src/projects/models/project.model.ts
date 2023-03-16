@@ -1,19 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { BaseModel } from 'src/common/models/base.model';
 import { Post } from 'src/posts/models/post.model';
-import { ProjectMember } from 'src/project-members/models/project-member.model';
+import { ProjectDeveloper } from 'src/project-developers/models/project-developer.model';
 import { Sprint } from 'src/sprints/models/sprint.model';
 import { UserStory } from 'src/user-stories/models/user-story.model';
+import { User } from 'src/users/models/user.model';
 
-export class Project {
-  @ApiProperty({ type: Number })
-  id: number;
-
-  @ApiProperty({ type: Date })
-  createdAt: Date;
-
-  @ApiProperty({ type: Date })
-  updatedAt: Date;
-
+export class Project extends BaseModel {
   @ApiProperty({ type: String })
   title: string;
 
@@ -23,12 +16,18 @@ export class Project {
   @ApiProperty({ isArray: true, type: () => Sprint })
   sprints: Sprint[];
 
-  @ApiProperty({ isArray: true, type: () => ProjectMember })
-  members: ProjectMember[];
+  @ApiProperty({ isArray: true, type: () => ProjectDeveloper })
+  developers: ProjectDeveloper[];
 
   @ApiProperty({ isArray: true, type: () => Post })
   posts: Post[];
 
   @ApiProperty({ isArray: true, type: () => UserStory })
   UserStory: UserStory[];
+
+  @ApiPropertyOptional({ type: () => User })
+  projectOwner: User;
+
+  @ApiPropertyOptional({ type: () => User })
+  scrumMaster: User;
 }

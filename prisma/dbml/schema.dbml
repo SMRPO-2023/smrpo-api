@@ -15,10 +15,12 @@ Table User {
   lastname String
   role Role [not null, default: 'USER']
   storyComment StoryComment [not null]
-  projects ProjectMember [not null]
+  developerProjects ProjectDeveloper [not null]
   tasks Task [not null]
   timeLogs TimeLog [not null]
   posts Post [not null]
+  projectOwnerProjects Project [not null]
+  ScrumMasterProjects Project [not null]
 }
 
 Table Sprint {
@@ -123,7 +125,7 @@ Table Post {
   projectId Int
 }
 
-Table ProjectMember {
+Table ProjectDeveloper {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
@@ -132,7 +134,6 @@ Table ProjectMember {
   userId Int [not null]
   project Project [not null]
   projectId Int [not null]
-  project_role ProjectMemberRole [not null]
 }
 
 Table Project {
@@ -142,10 +143,14 @@ Table Project {
   deletedAt DateTime
   title String
   documentation String
-  members ProjectMember [not null]
+  projectOwner User
+  scrumMaster User
+  developers ProjectDeveloper [not null]
   sprints Sprint [not null]
   posts Post [not null]
   UserStory UserStory [not null]
+  projectOwnerId Int
+  scrumMasterId Int
 }
 
 Enum Role {
@@ -165,12 +170,6 @@ Enum StoryImportance {
   HIGH
   MEDIUM
   LOW
-}
-
-Enum ProjectMemberRole {
-  PROJECT_OWNER
-  SCRUM_MASTER
-  DEVELOPER
 }
 
 Ref: Sprint.projectId > Project.id
@@ -197,6 +196,10 @@ Ref: Post.userId > User.id
 
 Ref: Post.projectId > Project.id
 
-Ref: ProjectMember.userId > User.id
+Ref: ProjectDeveloper.userId > User.id
 
-Ref: ProjectMember.projectId > Project.id
+Ref: ProjectDeveloper.projectId > Project.id
+
+Ref: Project.projectOwnerId > User.id
+
+Ref: Project.scrumMasterId > User.id

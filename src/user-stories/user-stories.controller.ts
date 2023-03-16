@@ -6,13 +6,16 @@ import {
   Patch,
   Param,
   Delete,
-  ParseIntPipe, Query
-} from "@nestjs/common";
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
 import { UserStoriesService } from './user-stories.service';
 import { CreateUserStoryDto } from './dto/create-user-story.dto';
 import { UpdateUserStoryDto } from './dto/update-user-story.dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('user-stories')
+@ApiTags('Stories')
 export class UserStoriesController {
   constructor(private readonly userStoriesService: UserStoriesService) {}
 

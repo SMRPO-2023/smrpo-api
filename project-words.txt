@@ -2,6 +2,7 @@ datasource
 dockerized
 firstname
 lastname
+middlewares
 nestjs
 simpsonb
 simpsonl

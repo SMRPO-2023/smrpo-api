@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import {
   IsEmail,
@@ -35,5 +36,6 @@ export class UpdateUserDto {
   lastname?: string;
 
   @IsOptional()
+  @ApiProperty({ enum: Role, enumName: 'role' })
   role: Role;
 }

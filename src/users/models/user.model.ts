@@ -1,12 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BaseModel } from 'src/common/models/base.model';
 import { IsEmail } from 'class-validator';
-import { ProjectMember } from 'src/project-members/models/project-member.model';
 import { StoryComment } from 'src/story-comments/models/story-comment.model';
 import { Task } from 'src/tasks/models/task.model';
 import { TimeLog } from 'src/time-logs/models/time-log.model';
 import { Role } from './role.model';
 import { Post } from 'src/posts/models/post.model';
+import { ProjectDeveloper } from 'src/project-developers/models/project-developer.model';
 
 export class User extends BaseModel {
   @ApiProperty({ type: String })
@@ -31,8 +31,8 @@ export class User extends BaseModel {
   @ApiProperty({ isArray: true, type: () => StoryComment })
   storyComment: StoryComment[];
 
-  @ApiProperty({ isArray: true, type: () => ProjectMember })
-  projects: ProjectMember[];
+  @ApiProperty({ isArray: true, type: () => ProjectDeveloper })
+  developerProjects: ProjectDeveloper[];
 
   @ApiProperty({ isArray: true, type: () => Task })
   tasks: Task[];

@@ -3,17 +3,19 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   ParseIntPipe,
-  Query, Put
-} from "@nestjs/common";
+  Query,
+  Put,
+} from '@nestjs/common';
 import { AcceptanceCriteriaService } from './acceptance-criteria.service';
 import { CreateAcceptanceCriteriaDto } from './dto/create-acceptance-criteria.dto';
 import { UpdateAcceptanceCriteriaDto } from './dto/update-acceptance-criteria.dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('acceptance-criteria')
+@ApiTags('Acceptance criteria')
 export class AcceptanceCriteriaController {
   constructor(
     private readonly acceptanceCriteriaService: AcceptanceCriteriaService

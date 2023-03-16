@@ -19,11 +19,12 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @Controller('admin/users')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
+@ApiTags('Users')
 export class UsersAdminController {
   constructor(
     private usersService: UsersService,

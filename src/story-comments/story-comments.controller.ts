@@ -11,8 +11,10 @@ import {
 import { StoryCommentsService } from './story-comments.service';
 import { CreateStoryCommentDto } from './dto/create-story-comment.dto';
 import { UpdateStoryCommentDto } from './dto/update-story-comment.dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('story-comments')
+@ApiTags('Stories')
 export class StoryCommentsController {
   constructor(private readonly storyCommentsService: StoryCommentsService) {}
 

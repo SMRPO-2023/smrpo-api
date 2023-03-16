@@ -30,7 +30,95 @@ async function main() {
     },
   });
 
-  console.log({ user1, user2 });
+  const user3 = await prisma.user.create({
+    data: {
+      email: 'user@gmail.com',
+      firstname: 'firstname',
+      lastname: 'lastname',
+      role: 'ADMIN',
+      // cspell:disable-next-line -- disables checking till the end of the next line.
+      password: '$2b$10$DRzCId0X0guJa7wtynJ0FOrAijm7IY9l2Ora9KygCK4lwH1lSvV12', // secret12345678
+      username: 'user',
+    },
+  });
+
+  const project1 = await prisma.project.create({
+    data: {
+      title: 'project 1',
+      documentation: 'project 1 documentation',
+      projectOwnerId: user1.id,
+      scrumMasterId: user2.id,
+    },
+  });
+
+  const project2 = await prisma.project.create({
+    data: {
+      title: 'project 2',
+      documentation: 'project 2 documentation',
+      projectOwnerId: user3.id,
+      scrumMasterId: user1.id,
+    },
+  });
+
+  const project3 = await prisma.project.create({
+    data: {
+      title: 'project 3',
+      documentation: 'project 3 documentation',
+      projectOwnerId: user2.id,
+      scrumMasterId: user1.id,
+    },
+  });
+
+  await prisma.projectDeveloper.create({
+    data: {
+      userId: user1.id,
+      projectId: project1.id,
+    },
+  });
+
+  await prisma.projectDeveloper.create({
+    data: {
+      userId: user1.id,
+      projectId: project2.id,
+    },
+  });
+
+  await prisma.projectDeveloper.create({
+    data: {
+      userId: user1.id,
+      projectId: project3.id,
+    },
+  });
+
+  await prisma.projectDeveloper.create({
+    data: {
+      userId: user2.id,
+      projectId: project1.id,
+    },
+  });
+
+  await prisma.projectDeveloper.create({
+    data: {
+      userId: user2.id,
+      projectId: project2.id,
+    },
+  });
+
+  await prisma.projectDeveloper.create({
+    data: {
+      userId: user3.id,
+      projectId: project1.id,
+    },
+  });
+
+  await prisma.projectDeveloper.create({
+    data: {
+      userId: user3.id,
+      projectId: project3.id,
+    },
+  });
+
+  console.log('Seeding finished.');
 }
 
 main()
