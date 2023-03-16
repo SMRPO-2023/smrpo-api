@@ -42,19 +42,22 @@ export class UserStoriesService {
     if (sprintId) {
       where['sprintId'] = sprintId;
     }
+    where['deletedAt'] = null;
     return this.prisma.userStory.findMany({
       where,
     });
   }
 
   async findOne(id: number) {
-    return this.prisma.userStory.findUniqueOrThrow({ where: { id } });
+    return this.prisma.userStory.findFirst({
+      where: { AND: [{ deletedAt: null }, { id }] },
+    });
   }
 
   async update(id: number, data: UserStoryDto, userId: number) {
-    await this.findOne(id);
+    const userStory = await this.findOne(id);
     const project = await this.prisma.project.findUnique({
-      where: { id },
+      where: { id: userStory.projectId },
     });
 
     if (userId != project.projectOwnerId && userId != project.scrumMasterId) {
@@ -66,8 +69,9 @@ export class UserStoriesService {
   }
 
   async remove(id: number, userId: number) {
+    const userStory = await this.findOne(id);
     const project = await this.prisma.project.findUnique({
-      where: { id },
+      where: { id: userStory.projectId },
     });
 
     if (userId != project.projectOwnerId && userId != project.scrumMasterId) {
@@ -77,7 +81,7 @@ export class UserStoriesService {
     }
     const story = await this.findOne(id);
     story.deletedAt = new Date();
-    return this.prisma.project.update({
+    return this.prisma.userStory.update({
       where: { id },
       data: story,
     });

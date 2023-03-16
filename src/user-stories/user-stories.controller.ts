@@ -7,15 +7,19 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { UserStoriesService } from './user-stories.service';
 import { UserStoryDto } from './dto/user-story.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserEntity } from 'src/common/decorators/user.decorator';
 import { User } from 'src/users/models/user.model';
+import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
 
 @Controller('user-stories')
-@ApiTags('Stories')
+@ApiTags('User stories')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class UserStoriesController {
   constructor(private readonly userStoriesService: UserStoriesService) {}
 

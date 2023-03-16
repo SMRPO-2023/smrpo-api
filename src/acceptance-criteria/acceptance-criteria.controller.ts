@@ -8,13 +8,17 @@ import {
   ParseIntPipe,
   Query,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { AcceptanceCriteriaService } from './acceptance-criteria.service';
 import { AcceptanceCriteriaDto } from './dto/acceptance-criteria.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
 
 @Controller('acceptance-criteria')
-@ApiTags('Stories')
+@ApiTags('User stories')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class AcceptanceCriteriaController {
   constructor(
     private readonly acceptanceCriteriaService: AcceptanceCriteriaService
