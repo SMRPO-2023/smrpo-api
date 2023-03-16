@@ -7,23 +7,22 @@ import {
   ParseIntPipe,
   Post,
   Put,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { JwtAuthGuard } from '../auth/jwt-auth-guard.service';
 import { ProjectDto } from './dto/project.dto';
 import { Roles } from '../common/decorators/roles.decorator';
-import { IRequest } from '../common/middleware/user.middleware';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 @Controller('project')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
+@ApiTags('Projects')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
   @Get()
-  getProjects(@Req() req: IRequest) {
+  getProjects() {
     return this.projectService.findAll();
   }
 

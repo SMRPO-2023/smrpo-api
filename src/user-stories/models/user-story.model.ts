@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { StoryImportance } from '@prisma/client';
 import { AcceptanceCriteria } from 'src/acceptance-criteria/models/acceptance-criteria.model';
-import { Project } from 'src/project/models/project.model';
+import { Project } from 'src/projects/models/project.model';
 import { Sprint } from 'src/sprints/models/sprint.model';
 import { StoryComment } from 'src/story-comments/models/story-comment.model';
 import { Task } from 'src/tasks/models/task.model';

@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { Prisma } from '@prisma/client';
-import { CreateProjectMemberDto } from './dto/create-project-member.dto';
-import { CreateProjectMembersDto } from './dto/create-project-members.dto';
+import { CreateProjectDeveloperDto } from './dto/create-project-developer.dto';
+import { CreateProjectDevelopersDto } from './dto/create-project-developers.dto';
 
 @Injectable()
-export class ProjectMembersService {
+export class ProjectDevelopersService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(pid?: number) {
@@ -15,11 +15,11 @@ export class ProjectMembersService {
     if (pid) {
       where['projectId'] = pid;
     }
-    return this.prisma.projectMember.findMany({ where });
+    return this.prisma.projectDeveloper.findMany({ where });
   }
 
-  async findOne(where: Prisma.ProjectMemberWhereUniqueInput) {
-    return this.prisma.projectMember.findFirstOrThrow({
+  async findOne(where: Prisma.ProjectDeveloperWhereUniqueInput) {
+    return this.prisma.projectDeveloper.findFirstOrThrow({
       where: {
         ...where,
         deletedAt: null,
@@ -27,44 +27,44 @@ export class ProjectMembersService {
     });
   }
 
-  async create(data: CreateProjectMemberDto) {
+  async create(data: CreateProjectDeveloperDto) {
     this.prisma.project.findFirstOrThrow({
       where: {
         id: data?.projectId,
       },
     });
-    return this.prisma.projectMember.create({ data });
+    return this.prisma.projectDeveloper.create({ data });
   }
 
-  async createMulti(data: CreateProjectMembersDto) {
-    for (const member of data.members) {
+  async createMulti(data: CreateProjectDevelopersDto) {
+    for (const member of data.developers) {
       await this.create(member);
     }
   }
 
   async update(
-    where: Prisma.ProjectMemberWhereUniqueInput,
-    data: Prisma.ProjectMemberUpdateInput
+    where: Prisma.ProjectDeveloperWhereUniqueInput,
+    data: Prisma.ProjectDeveloperUpdateInput
   ) {
     const member = await this.findOne(where);
     if (!member) {
       throw new BadRequestException('Object is deleted');
     }
-    return this.prisma.projectMember.update({
+    return this.prisma.projectDeveloper.update({
       data,
       where,
     });
   }
 
-  async remove(where: Prisma.ProjectMemberWhereUniqueInput) {
-    const data = await this.prisma.projectMember.findFirstOrThrow({
+  async remove(where: Prisma.ProjectDeveloperWhereUniqueInput) {
+    const data = await this.prisma.projectDeveloper.findFirstOrThrow({
       where: {
         ...where,
         deletedAt: null,
       },
     });
     data.deletedAt = new Date();
-    return this.prisma.projectMember.update({
+    return this.prisma.projectDeveloper.update({
       data,
       where,
     });

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Project } from 'src/project/models/project.model';
+import { Project } from 'src/projects/models/project.model';
 import { UserStory } from 'src/user-stories/models/user-story.model';
 
 export class Sprint {

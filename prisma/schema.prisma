@@ -13,22 +13,24 @@ generator dbml {
 }
 
 model User {
-  id           Int             @id @default(autoincrement())
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-  deletedAt    DateTime?
-  lastLogin    DateTime?
-  username     String          @unique
-  email        String          @unique
-  password     String
-  firstname    String?
-  lastname     String?
-  role         Role            @default(USER)
-  storyComment StoryComment[]
-  projects     ProjectMember[]
-  tasks        Task[]
-  timeLogs     TimeLog[]
-  posts        Post[]
+  id                   Int                @id @default(autoincrement())
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  deletedAt            DateTime?
+  lastLogin            DateTime?
+  username             String             @unique
+  email                String             @unique
+  password             String
+  firstname            String?
+  lastname             String?
+  role                 Role               @default(USER)
+  storyComment         StoryComment[]
+  developerProjects    ProjectDeveloper[]
+  tasks                Task[]
+  timeLogs             TimeLog[]
+  posts                Post[]
+  projectOwnerProjects Project[]          @relation("UserProjectOwner")
+  ScrumMasterProjects  Project[]          @relation("UserScrumMaster")
 }
 
 /// user type
@@ -153,34 +155,30 @@ model Post {
   projectId Int?
 }
 
-/// Project member role
-enum ProjectMemberRole {
-  PROJECT_OWNER
-  SCRUM_MASTER
-  DEVELOPER
-}
-
-model ProjectMember {
-  id           Int               @id @default(autoincrement())
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
-  deletedAt    DateTime?
-  user         User              @relation(fields: [userId], references: [id])
-  userId       Int
-  project      Project           @relation(fields: [projectId], references: [id])
-  projectId    Int
-  project_role ProjectMemberRole
+model ProjectDeveloper {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  user      User      @relation(fields: [userId], references: [id])
+  userId    Int
+  project   Project   @relation(fields: [projectId], references: [id])
+  projectId Int
 }
 
 model Project {
-  id            Int             @id @default(autoincrement())
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  deletedAt     DateTime?
-  title         String?
-  documentation String?
-  members       ProjectMember[]
-  sprints       Sprint[]
-  posts         Post[]
-  UserStory     UserStory[]
+  id             Int                @id @default(autoincrement())
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  deletedAt      DateTime?
+  title          String?
+  documentation  String?
+  projectOwner   User?              @relation(fields: [projectOwnerId], references: [id], name: "UserProjectOwner")
+  scrumMaster    User?              @relation(fields: [scrumMasterId], references: [id], name: "UserScrumMaster")
+  developers     ProjectDeveloper[]
+  sprints        Sprint[]
+  posts          Post[]
+  UserStory      UserStory[]
+  projectOwnerId Int?
+  scrumMasterId  Int?
 }

@@ -1,7 +1,6 @@
-import { ProjectMemberRole } from '@prisma/client';
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class UpdateProjectMemberDto {
+export class UpdateProjectDeveloperDto {
   @IsNotEmpty()
   @IsNumber()
   userId: number;
@@ -9,7 +8,4 @@ export class UpdateProjectMemberDto {
   @IsNotEmpty()
   @IsNumber()
   projectId: number;
-
-  @IsNotEmpty()
-  project_role: ProjectMemberRole;
 }

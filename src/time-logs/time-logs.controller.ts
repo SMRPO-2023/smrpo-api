@@ -11,8 +11,10 @@ import {
 import { TimeLogsService } from './time-logs.service';
 import { CreateTimeLogDto } from './dto/create-time-log.dto';
 import { UpdateTimeLogDto } from './dto/update-time-log.dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('time-logs')
+@ApiTags('Time logs')
 export class TimeLogsController {
   constructor(private readonly timeLogsService: TimeLogsService) {}
 
