@@ -205,3 +205,7 @@ npm run docker:migrate
 ## Rest Api
 
 [RESTful API](http://localhost:3000/api) documentation available with Swagger.
+
+## Database model
+
+[Database model](https://dbdiagram.io/d/640ddf35296d97641d874715) available with online.
