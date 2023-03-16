@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   Logger,
   UnauthorizedException,
@@ -61,6 +62,13 @@ export class UserStoriesService {
 
   async update(id: number, data: UserStoryDto, userId: number) {
     const userStory = await this.findOne(id);
+
+    if (userStory.sprintId != null || userStory.implemented) {
+      const message = `User story can't be changed.`;
+      this.logger.warn(message);
+      throw new ForbiddenException(message);
+    }
+
     const project = await this.prisma.project.findUnique({
       where: { id: userStory.projectId },
     });
@@ -75,6 +83,13 @@ export class UserStoriesService {
 
   async remove(id: number, userId: number) {
     const userStory = await this.findOne(id);
+
+    if (userStory.sprintId != null || userStory.implemented) {
+      const message = `User story can't be deleted.`;
+      this.logger.warn(message);
+      throw new ForbiddenException(message);
+    }
+
     const project = await this.prisma.project.findUnique({
       where: { id: userStory.projectId },
     });
