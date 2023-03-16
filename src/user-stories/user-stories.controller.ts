@@ -7,11 +7,12 @@ import {
   Param,
   Delete,
   ParseIntPipe,
-  Query,
 } from '@nestjs/common';
 import { UserStoriesService } from './user-stories.service';
 import { UserStoryDto } from './dto/user-story.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { UserEntity } from 'src/common/decorators/user.decorator';
+import { User } from 'src/users/models/user.model';
 
 @Controller('user-stories')
 @ApiTags('Stories')
@@ -19,16 +20,13 @@ export class UserStoriesController {
   constructor(private readonly userStoriesService: UserStoriesService) {}
 
   @Post()
-  create(@Body() data: UserStoryDto) {
-    return this.userStoriesService.create(data);
+  create(@Body() data: UserStoryDto, @UserEntity() user: User) {
+    return this.userStoriesService.create(data, user.id);
   }
 
   @Get()
-  findAll(
-    @Query('pid') projectId: number, //
-    @Query('sid') sprintId: number
-  ) {
-    return this.userStoriesService.findAll(+projectId, +sprintId);
+  findAll() {
+    return this.userStoriesService.findAll();
   }
 
   @Get(':id')
@@ -39,13 +37,14 @@ export class UserStoriesController {
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
+    @UserEntity() user: User,
     @Body() updateUserStoryDto: UserStoryDto
   ) {
-    return this.userStoriesService.update(+id, updateUserStoryDto);
+    return this.userStoriesService.update(+id, updateUserStoryDto, user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.userStoriesService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number, @UserEntity() user: User) {
+    return this.userStoriesService.remove(+id, user.id);
   }
 }

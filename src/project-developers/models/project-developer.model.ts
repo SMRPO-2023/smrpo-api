@@ -11,8 +11,8 @@ export class ProjectDeveloper extends BaseModel {
   Project: Project;
 
   @ApiPropertyOptional({ type: Number })
-  userId?: number;
+  userId: number;
 
-  @ApiPropertyOptional({ type: () => User })
-  User?: User;
+  @ApiProperty({ type: () => User })
+  User: User;
 }

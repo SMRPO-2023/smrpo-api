@@ -3,7 +3,7 @@ import { BaseModel } from 'src/common/models/base.model';
 import { UserStory } from 'src/user-stories/models/user-story.model';
 
 export class AcceptanceCriteria extends BaseModel {
-  @ApiProperty({ type: Number })
+  @ApiPropertyOptional({ type: Number })
   userStoryId: number;
 
   @ApiProperty({ type: String })
@@ -15,6 +15,6 @@ export class AcceptanceCriteria extends BaseModel {
   @ApiPropertyOptional({ type: Boolean })
   completed: boolean;
 
-  @ApiProperty({ isArray: true, type: () => UserStory })
-  UserStory: UserStory[];
+  @ApiPropertyOptional({ isArray: true, type: () => UserStory })
+  UserStory?: UserStory[];
 }

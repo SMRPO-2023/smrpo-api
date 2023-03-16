@@ -99,8 +99,8 @@ model UserStory {
   priority           StoryPriority
   points             Int?
   implemented        Boolean              @default(false)
-  projectId          Int?
-  project            Project?             @relation(fields: [projectId], references: [id])
+  projectId          Int
+  project            Project              @relation(fields: [projectId], references: [id])
   sprintId           Int?
   sprints            Sprint[]
   acceptanceCriteria AcceptanceCriteria[]
@@ -130,15 +130,15 @@ model TimeLog {
 }
 
 model AcceptanceCriteria {
-  id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id          Int        @id @default(autoincrement())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   deletedAt   DateTime?
   userStoryId Int
   title       String
   description String?
-  completed   Boolean   @default(false)
-  UserStory   UserStory @relation(fields: [userStoryId], references: [id])
+  completed   Boolean    @default(false)
+  UserStory   UserStory? @relation(fields: [userStoryId], references: [id])
 }
 
 model Post {

@@ -8,8 +8,8 @@ import { StoryComment } from 'src/story-comments/models/story-comment.model';
 import { Task } from 'src/tasks/models/task.model';
 
 export class UserStory extends BaseModel {
-  @ApiPropertyOptional({ type: () => Project })
-  project?: Project;
+  @ApiProperty({ type: () => Project })
+  project: Project;
 
   @ApiProperty({ isArray: true, type: () => Sprint })
   sprints: Sprint[];
@@ -29,8 +29,8 @@ export class UserStory extends BaseModel {
   @ApiProperty({ type: Boolean })
   implemented: boolean;
 
-  @ApiPropertyOptional({ type: Number })
-  projectId?: number;
+  @ApiProperty({ type: Number })
+  projectId: number;
 
   @ApiPropertyOptional({ type: Number })
   sprintId?: number;

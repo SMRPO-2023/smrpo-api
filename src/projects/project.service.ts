@@ -1,9 +1,15 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProjectService {
+  private readonly logger = new Logger(ProjectService.name);
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
@@ -24,7 +30,9 @@ export class ProjectService {
       where: { title: data.title },
     });
     if (exists) {
-      throw new BadRequestException('Object with same name already exists');
+      const message = `Project already exists.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
     }
     return this.prisma.project.create({
       data,

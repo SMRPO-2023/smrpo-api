@@ -1,4 +1,4 @@
-import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { StoryPriority } from '@prisma/client';
 import { IsNotEmpty, IsOptional, IsNumber, IsString } from 'class-validator';
 
@@ -21,9 +21,8 @@ export class UserStoryDto {
   @IsOptional()
   implemented: boolean;
 
-  @IsOptional()
   @IsNumber()
-  projectId?: number;
+  projectId: number;
 
   @IsOptional()
   @IsNumber()

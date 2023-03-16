@@ -76,8 +76,8 @@ Table UserStory {
   priority StoryPriority [not null]
   points Int
   implemented Boolean [not null, default: false]
-  projectId Int
-  project Project
+  projectId Int [not null]
+  project Project [not null]
   sprintId Int
   sprints Sprint [not null]
   acceptanceCriteria AcceptanceCriteria [not null]
@@ -108,7 +108,7 @@ Table AcceptanceCriteria {
   title String [not null]
   description String
   completed Boolean [not null, default: false]
-  UserStory UserStory [not null]
+  UserStory UserStory
 }
 
 Table Post {

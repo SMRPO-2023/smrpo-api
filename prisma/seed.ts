@@ -118,6 +118,71 @@ async function main() {
     },
   });
 
+  const story1 = await prisma.userStory.create({
+    data: {
+      priority: 'MUST_HAVE',
+      title: 'story 1',
+      description: 'story 1 description',
+      points: 3,
+      businessValue: 'business value',
+      projectId: project3.id,
+    },
+  });
+
+  const story2 = await prisma.userStory.create({
+    data: {
+      priority: 'MUST_HAVE',
+      title: 'story 2',
+      description: 'story 2 description',
+      points: 3,
+      businessValue: 'business value',
+      projectId: project2.id,
+    },
+  });
+
+  const story3 = await prisma.userStory.create({
+    data: {
+      priority: 'MUST_HAVE',
+      title: 'story 3',
+      description: 'story 3 description',
+      points: 7,
+      businessValue: 'business value',
+      projectId: project1.id,
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story1.id,
+      title: 'criteria 1',
+      description: 'criteria 1 description',
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story1.id,
+      title: 'criteria 2',
+      description: 'criteria 2 description',
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story2.id,
+      title: 'criteria 3',
+      description: 'criteria 3 description',
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story3.id,
+      title: 'criteria 3',
+      description: 'criteria 3 description',
+    },
+  });
+
   console.log('Seeding finished.');
 }
 

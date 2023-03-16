@@ -14,7 +14,7 @@ import { AcceptanceCriteriaDto } from './dto/acceptance-criteria.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @Controller('acceptance-criteria')
-@ApiTags('Acceptance criteria')
+@ApiTags('Stories')
 export class AcceptanceCriteriaController {
   constructor(
     private readonly acceptanceCriteriaService: AcceptanceCriteriaService

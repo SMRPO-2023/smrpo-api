@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AcceptanceCriteriaService {
+  private readonly logger = new Logger(AcceptanceCriteriaService.name);
   constructor(private prisma: PrismaService) {}
 
   async create(data: Prisma.AcceptanceCriteriaCreateInput) {
@@ -11,7 +12,9 @@ export class AcceptanceCriteriaService {
       where: { title: data.title },
     });
     if (exists) {
-      throw new BadRequestException('Object with same name already exists');
+      const message = `Acceptance criteria already exists.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
     }
     return this.prisma.acceptanceCriteria.create({ data });
   }
