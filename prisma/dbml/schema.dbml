@@ -108,7 +108,7 @@ Table AcceptanceCriteria {
   title String [not null]
   description String
   completed Boolean [not null, default: false]
-  UserStory UserStory
+  UserStory UserStory [not null]
 }
 
 Table Post {
