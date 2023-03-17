@@ -26,8 +26,8 @@ export class ProjectDevelopersController {
   ) {}
 
   @Get()
-  @ApiQuery({ name: 'project id', required: false, type: Number })
-  async findAll(@Query('project id') pid?: number) {
+  @ApiQuery({ name: 'project-id', required: false, type: Number })
+  async findAll(@Query('project-id') pid?: number) {
     return this.projectMembersService.findAll(Number(pid));
   }
 
