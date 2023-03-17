@@ -1,17 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { BaseModel } from 'src/common/models/base.model';
 import { Project } from 'src/projects/models/project.model';
 import { UserStory } from 'src/user-stories/models/user-story.model';
 
-export class Sprint {
-  @ApiProperty({ type: Number })
-  id: number;
-
-  @ApiProperty({ type: Date })
-  createdAt: Date;
-
-  @ApiProperty({ type: Date })
-  updatedAt: Date;
-
+export class Sprint extends BaseModel {
   @ApiProperty({ type: Date })
   start: Date;
 

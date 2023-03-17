@@ -42,7 +42,6 @@ export class UserStoriesService {
     if (sprintId) {
       where['sprintId'] = sprintId;
     }
-    where['deletedAt'] = null;
     return this.prisma.userStory.findMany({
       where,
     });
