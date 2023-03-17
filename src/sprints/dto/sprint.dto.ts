@@ -1,29 +1,30 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
   IsOptional,
   IsNumber,
-  IsDate,
   Min,
-  MinDate,
-  MaxDate,
   IsString,
+  Max,
+  IsDate,
 } from 'class-validator';
 
 export class SprintDto {
   @IsNotEmpty()
+  @Type(() => Date)
   @IsDate()
-  @MinDate(new Date('2023-03-1')) // Rough validation
   start: Date;
 
   @IsNotEmpty()
+  @Type(() => Date)
   @IsDate()
-  @MaxDate(new Date('2024-01-1')) // Rough validation
   end: Date;
 
   @IsNotEmpty()
   @IsNumber()
   @Min(0)
-  @Min(100)
+  @Max(100)
   velocity: number;
 
   @IsOptional()

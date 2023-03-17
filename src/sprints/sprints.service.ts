@@ -23,7 +23,7 @@ export class SprintsService {
       this.logger.warn(message);
       throw new BadRequestException(message);
     }
-    if (this.checkConflict(data)) {
+    if (await this.checkConflict(data)) {
       const message = `Sprint overlaps with another sprint.`;
       this.logger.warn(message);
       throw new ConflictException(message);
@@ -47,28 +47,27 @@ export class SprintsService {
     });
   }
 
-  update(id: number, data: SprintDto) {
-    if (this.getDaysDelta(data.start, new Date()) < 1) {
-      const message = `Sprint doesn't start in the future.`;
-      this.logger.warn(message);
-      throw new BadRequestException(message);
+  async update(id: number, data: SprintDto) {
+    const oldSprint = await this.findOne(id);
+    if (oldSprint.start != data.start || oldSprint.end != data.end) {
+      if (this.getDaysDelta(data.start, new Date()) < 1) {
+        const message = `Sprint doesn't start in the future.`;
+        this.logger.warn(message);
+        throw new BadRequestException(message);
+      }
+      if (this.getDaysDelta(data.end, data.start) < 0) {
+        const message = `Sprint ends before it starts.`;
+        this.logger.warn(message);
+        throw new BadRequestException(message);
+      }
+      if (await this.checkConflict(data)) {
+        const message = `Sprint overlaps with another sprint.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
+      }
     }
-    if (this.getDaysDelta(data.end, new Date()) < 0) {
-      const message = `Sprint doesn't end in the future.`;
-      this.logger.warn(message);
-      throw new BadRequestException(message);
-    }
-    if (this.getDaysDelta(data.end, data.start) < 0) {
-      const message = `Sprint ends before it starts.`;
-      this.logger.warn(message);
-      throw new BadRequestException(message);
-    }
-    if (this.checkConflict(data)) {
-      const message = `Sprint overlaps with another sprint.`;
-      this.logger.warn(message);
-      throw new ConflictException(message);
-    }
-    return this.prisma.sprint.update({ where: { id }, data });
+
+    return this.prisma.sprint.update({ data: { ...data }, where: { id } });
   }
 
   remove(id: number) {
@@ -82,31 +81,22 @@ export class SprintsService {
   }
 
   async checkConflict(data: SprintDto): Promise<Sprint> {
-    return await this.prisma.sprint.findFirst({
+    const response = await this.prisma.sprint.findFirst({
       where: {
-        OR: [
-          {
-            AND: {
-              start: {
-                gte: data.start,
-              },
-              end: {
-                lte: data.end,
-              },
-            },
+        projectId: data.projectId,
+        OR: {
+          start: {
+            gte: data.start,
+            lte: data.end,
           },
-          {
-            AND: {
-              start: {
-                gte: data.start,
-              },
-              end: {
-                lte: data.end,
-              },
-            },
+          end: {
+            gte: data.start,
+            lte: data.end,
           },
-        ],
+        },
       },
     });
+    console.log(response);
+    return response;
   }
 }

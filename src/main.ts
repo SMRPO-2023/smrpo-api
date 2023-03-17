@@ -46,6 +46,7 @@ async function bootstrap() {
   if (corsConfig.enabled) {
     app.enableCors();
   }
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   await app.listen(process.env.PORT || nestConfig.port || 3000);
 }
