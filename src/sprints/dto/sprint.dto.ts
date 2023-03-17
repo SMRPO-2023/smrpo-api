@@ -6,6 +6,7 @@ import {
   Min,
   MinDate,
   MaxDate,
+  IsString,
 } from 'class-validator';
 
 export class SprintDto {
@@ -29,7 +30,7 @@ export class SprintDto {
   @IsNumber()
   projectId: number;
 
+  @IsString()
   @IsOptional()
-  @IsNumber()
-  userStoryId: number;
+  name: string;
 }

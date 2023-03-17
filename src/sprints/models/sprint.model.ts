@@ -19,9 +19,9 @@ export class Sprint extends BaseModel {
   @ApiPropertyOptional({ type: Number })
   projectId?: number;
 
-  @ApiPropertyOptional({ type: () => UserStory })
-  UserStory?: UserStory;
+  @ApiProperty({ isArray: true, type: () => UserStory })
+  UserStory: UserStory[];
 
-  @ApiPropertyOptional({ type: Number })
-  userStoryId?: number;
+  @ApiPropertyOptional({ type: String })
+  name?: string;
 }

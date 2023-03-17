@@ -33,8 +33,8 @@ Table Sprint {
   velocity Int [not null]
   Project Project
   projectId Int
-  UserStory UserStory
-  userStoryId Int
+  UserStories UserStory [not null]
+  name String
 }
 
 Table StoryComment {
@@ -79,11 +79,11 @@ Table UserStory {
   projectId Int [not null]
   project Project [not null]
   sprintId Int
-  sprints Sprint [not null]
   acceptanceCriteria AcceptanceCriteria [not null]
   comments StoryComment [not null]
   Task Task [not null]
   businessValue String
+  Sprint Sprint
 }
 
 Table TimeLog {
@@ -175,8 +175,6 @@ Enum StoryPriority {
 
 Ref: Sprint.projectId > Project.id
 
-Ref: Sprint.userStoryId > UserStory.id
-
 Ref: StoryComment.userId > User.id
 
 Ref: StoryComment.userStoryId > UserStory.id
@@ -186,6 +184,8 @@ Ref: Task.userId > User.id
 Ref: Task.userStoryId > UserStory.id
 
 Ref: UserStory.projectId > Project.id
+
+Ref: UserStory.sprintId > Sprint.id
 
 Ref: TimeLog.userId > User.id
 

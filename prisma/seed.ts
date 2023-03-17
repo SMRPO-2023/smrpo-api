@@ -183,6 +183,66 @@ async function main() {
     },
   });
 
+  await prisma.sprint.create({
+    data: {
+      start: new Date('2023-03-17T21:43:28.434Z'),
+      end: new Date('2023-03-14T21:43:28.434Z'),
+      velocity: 5,
+      projectId: project1.id,
+      name: 'sprint 1',
+    },
+  });
+
+  await prisma.sprint.create({
+    data: {
+      start: new Date('2023-04-17T21:43:28.434Z'),
+      end: new Date('2023-04-22T21:43:28.434Z'),
+      velocity: 10,
+      projectId: project1.id,
+      name: 'sprint 2',
+    },
+  });
+
+  await prisma.sprint.create({
+    data: {
+      start: new Date('2023-05-17T21:43:28.434Z'),
+      end: new Date('2023-05-22T21:43:28.434Z'),
+      velocity: 15,
+      projectId: project1.id,
+      name: 'sprint 3',
+    },
+  });
+
+  await prisma.sprint.create({
+    data: {
+      start: new Date('2023-01-11T21:43:28.434Z'),
+      end: new Date('2023-01-18T21:43:28.434Z'),
+      velocity: 9,
+      projectId: project2.id,
+      name: 'sprint 1',
+    },
+  });
+
+  await prisma.sprint.create({
+    data: {
+      start: new Date('2023-02-01T21:43:28.434Z'),
+      end: new Date('2023-02-15T21:43:28.434Z'),
+      velocity: 23,
+      projectId: project2.id,
+      name: 'sprint 2',
+    },
+  });
+
+  await prisma.sprint.create({
+    data: {
+      start: new Date('2023-03-12T21:43:28.434Z'),
+      end: new Date('2023-03-22T21:43:28.434Z'),
+      velocity: 20,
+      projectId: project2.id,
+      name: 'sprint 3',
+    },
+  });
+
   console.log('Seeding finished.');
 }
 
