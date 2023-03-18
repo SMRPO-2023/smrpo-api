@@ -13,21 +13,7 @@ export class SprintsService {
   private readonly logger = new Logger(SprintsService.name);
   constructor(private prisma: PrismaService) {}
   async create(data: SprintDto) {
-    if (this.getDaysDelta(data.start, new Date()) < 1) {
-      const message = `Sprint doesn't start in the future.`;
-      this.logger.warn(message);
-      throw new BadRequestException(message);
-    }
-    if (this.getDaysDelta(data.end, data.start) < 0) {
-      const message = `Sprint ends before it starts.`;
-      this.logger.warn(message);
-      throw new BadRequestException(message);
-    }
-    if (await this.checkConflict(data)) {
-      const message = `Sprint overlaps with another sprint.`;
-      this.logger.warn(message);
-      throw new ConflictException(message);
-    }
+    await this.validateSprint(data);
     return this.prisma.sprint.create({ data });
   }
 
@@ -50,21 +36,7 @@ export class SprintsService {
   async update(id: number, data: SprintDto) {
     const oldSprint = await this.findOne(id);
     if (oldSprint.start != data.start || oldSprint.end != data.end) {
-      if (this.getDaysDelta(data.start, new Date()) < 1) {
-        const message = `Sprint doesn't start in the future.`;
-        this.logger.warn(message);
-        throw new BadRequestException(message);
-      }
-      if (this.getDaysDelta(data.end, data.start) < 0) {
-        const message = `Sprint ends before it starts.`;
-        this.logger.warn(message);
-        throw new BadRequestException(message);
-      }
-      if (await this.checkConflict(data)) {
-        const message = `Sprint overlaps with another sprint.`;
-        this.logger.warn(message);
-        throw new ConflictException(message);
-      }
+      await this.validateSprint(data);
     }
 
     return this.prisma.sprint.update({ data: { ...data }, where: { id } });
@@ -78,6 +50,25 @@ export class SprintsService {
     const difference = date_1.getTime() - date_2.getTime();
     const TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
     return TotalDays;
+  }
+
+  async validateSprint(data: SprintDto): Promise<void> {
+    this.logger.debug('Validating sprint.');
+    if (this.getDaysDelta(data.start, new Date()) < 1) {
+      const message = `Sprint doesn't start in the future.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+    if (this.getDaysDelta(data.end, data.start) < 0) {
+      const message = `Sprint ends before it starts.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+    if (await this.checkConflict(data)) {
+      const message = `Sprint overlaps with another sprint.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
   }
 
   async checkConflict(data: SprintDto): Promise<Sprint> {
