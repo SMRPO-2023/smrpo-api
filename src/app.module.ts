@@ -34,6 +34,7 @@ import { ProjectDevelopersModule } from './project-developers/project-developers
     PrismaModule.forRoot({
       isGlobal: true,
       prismaServiceOptions: {
+        prismaOptions: { log: ['query', 'info', 'warn', 'error'] },
         middlewares: [PrismaLoggingMiddleware(new Logger('PrismaMiddleware'))], // configure your prisma middleware
       },
     }),

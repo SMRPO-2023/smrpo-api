@@ -81,19 +81,24 @@ export class SprintsService {
   }
 
   async checkConflict(data: SprintDto): Promise<Sprint> {
+    this.logger.debug('checking sprint conflict.');
     const response = await this.prisma.sprint.findFirst({
       where: {
         projectId: data.projectId,
-        OR: {
-          start: {
-            gte: data.start,
-            lte: data.end,
+        OR: [
+          {
+            start: {
+              gte: data.start,
+              lte: data.end,
+            },
           },
-          end: {
-            gte: data.start,
-            lte: data.end,
+          {
+            end: {
+              gte: data.start,
+              lte: data.end,
+            },
           },
-        },
+        ],
       },
     });
     console.log(response);
