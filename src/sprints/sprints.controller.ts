@@ -8,12 +8,14 @@ import {
   Delete,
   ParseIntPipe,
   UseGuards,
+  Put,
 } from '@nestjs/common';
 import { SprintsService } from './sprints.service';
 import { SprintDto } from './dto/sprint.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
-import { Roles } from 'src/common/decorators/roles.decorator';
+import { UserEntity } from 'src/common/decorators/user.decorator';
+import { User } from 'src/users/models/user.model';
 
 @Controller('sprints')
 @ApiTags('Sprints')
@@ -22,10 +24,9 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 export class SprintsController {
   constructor(private readonly sprintsService: SprintsService) {}
 
-  @Roles('ADMIN')
   @Post()
-  create(@Body() createSprintDto: SprintDto) {
-    return this.sprintsService.create(createSprintDto);
+  create(@Body() createSprintDto: SprintDto, @UserEntity() user: User) {
+    return this.sprintsService.create(createSprintDto, user.id);
   }
 
   @Get()
@@ -38,18 +39,17 @@ export class SprintsController {
     return this.sprintsService.findOne(+id);
   }
 
-  @Patch(':id')
-  @Roles('ADMIN')
+  @Put(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateSprintDto: SprintDto
+    @Body() updateSprintDto: SprintDto,
+    @UserEntity() user: User
   ) {
-    return this.sprintsService.update(+id, updateSprintDto);
+    return this.sprintsService.update(+id, updateSprintDto, user.id);
   }
 
-  @Roles('ADMIN')
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.sprintsService.remove(+id);
+  markDeleted(@Param('id', ParseIntPipe) id: number, @UserEntity() user: User) {
+    return this.sprintsService.markDeleted(+id, user.id);
   }
 }

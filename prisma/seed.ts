@@ -65,7 +65,7 @@ async function main() {
       title: 'project 3',
       documentation: 'project 3 documentation',
       projectOwnerId: user2.id,
-      scrumMasterId: user1.id,
+      scrumMasterId: user3.id,
     },
   });
 
@@ -115,6 +115,66 @@ async function main() {
     data: {
       userId: user3.id,
       projectId: project3.id,
+    },
+  });
+
+  const sprint1 = await prisma.sprint.create({
+    data: {
+      start: new Date('2023-03-17T21:43:28.434Z'),
+      end: new Date('2023-03-14T21:43:28.434Z'),
+      velocity: 5,
+      projectId: project1.id,
+      name: 'sprint 1',
+    },
+  });
+
+  const sprint2 = await prisma.sprint.create({
+    data: {
+      start: new Date('2023-04-17T21:43:28.434Z'),
+      end: new Date('2023-04-22T21:43:28.434Z'),
+      velocity: 10,
+      projectId: project1.id,
+      name: 'sprint 2',
+    },
+  });
+
+  const sprint3 = await prisma.sprint.create({
+    data: {
+      start: new Date('2023-05-17T21:43:28.434Z'),
+      end: new Date('2023-05-22T21:43:28.434Z'),
+      velocity: 15,
+      projectId: project1.id,
+      name: 'sprint 3',
+    },
+  });
+
+  const sprint4 = await prisma.sprint.create({
+    data: {
+      start: new Date('2023-01-11T21:43:28.434Z'),
+      end: new Date('2023-01-18T21:43:28.434Z'),
+      velocity: 9,
+      projectId: project2.id,
+      name: 'sprint 4',
+    },
+  });
+
+  const sprint5 = await prisma.sprint.create({
+    data: {
+      start: new Date('2023-02-01T21:43:28.434Z'),
+      end: new Date('2023-02-15T21:43:28.434Z'),
+      velocity: 23,
+      projectId: project2.id,
+      name: 'sprint 5',
+    },
+  });
+
+  const sprint6 = await prisma.sprint.create({
+    data: {
+      start: new Date('2023-03-12T21:43:28.434Z'),
+      end: new Date('2023-03-22T21:43:28.434Z'),
+      velocity: 20,
+      projectId: project2.id,
+      name: 'sprint 6',
     },
   });
 
@@ -126,6 +186,7 @@ async function main() {
       points: 3,
       businessValue: 'business value',
       projectId: project3.id,
+      sprintId: sprint1.id,
     },
   });
 
@@ -137,6 +198,7 @@ async function main() {
       points: 3,
       businessValue: 'business value',
       projectId: project2.id,
+      sprintId: sprint2.id,
     },
   });
 
@@ -148,6 +210,7 @@ async function main() {
       points: 7,
       businessValue: 'business value',
       projectId: project1.id,
+      sprintId: sprint3.id,
     },
   });
 
@@ -180,66 +243,6 @@ async function main() {
       userStoryId: story3.id,
       title: 'criteria 3',
       description: 'criteria 3 description',
-    },
-  });
-
-  await prisma.sprint.create({
-    data: {
-      start: new Date('2023-03-17T21:43:28.434Z'),
-      end: new Date('2023-03-14T21:43:28.434Z'),
-      velocity: 5,
-      projectId: project1.id,
-      name: 'sprint 1',
-    },
-  });
-
-  await prisma.sprint.create({
-    data: {
-      start: new Date('2023-04-17T21:43:28.434Z'),
-      end: new Date('2023-04-22T21:43:28.434Z'),
-      velocity: 10,
-      projectId: project1.id,
-      name: 'sprint 2',
-    },
-  });
-
-  await prisma.sprint.create({
-    data: {
-      start: new Date('2023-05-17T21:43:28.434Z'),
-      end: new Date('2023-05-22T21:43:28.434Z'),
-      velocity: 15,
-      projectId: project1.id,
-      name: 'sprint 3',
-    },
-  });
-
-  await prisma.sprint.create({
-    data: {
-      start: new Date('2023-01-11T21:43:28.434Z'),
-      end: new Date('2023-01-18T21:43:28.434Z'),
-      velocity: 9,
-      projectId: project2.id,
-      name: 'sprint 1',
-    },
-  });
-
-  await prisma.sprint.create({
-    data: {
-      start: new Date('2023-02-01T21:43:28.434Z'),
-      end: new Date('2023-02-15T21:43:28.434Z'),
-      velocity: 23,
-      projectId: project2.id,
-      name: 'sprint 2',
-    },
-  });
-
-  await prisma.sprint.create({
-    data: {
-      start: new Date('2023-03-12T21:43:28.434Z'),
-      end: new Date('2023-03-22T21:43:28.434Z'),
-      velocity: 20,
-      projectId: project2.id,
-      name: 'sprint 3',
     },
   });
 

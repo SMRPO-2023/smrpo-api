@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { SprintDto } from './dto/sprint.dto';
 import { PrismaService } from 'nestjs-prisma';
@@ -12,7 +13,8 @@ import { Sprint } from '@prisma/client';
 export class SprintsService {
   private readonly logger = new Logger(SprintsService.name);
   constructor(private prisma: PrismaService) {}
-  async create(data: SprintDto) {
+  async create(data: SprintDto, userId: number) {
+    await this.checkPermission(data, userId);
     await this.validateSprint(data);
     return this.prisma.sprint.create({ data });
   }
@@ -21,6 +23,9 @@ export class SprintsService {
     const where = { deletedAt: null };
     return this.prisma.sprint.findMany({
       where,
+      include: {
+        UserStories: true,
+      },
     });
   }
 
@@ -30,20 +35,40 @@ export class SprintsService {
         id,
         deletedAt: null,
       },
+      include: {
+        UserStories: true,
+      },
     });
   }
 
-  async update(id: number, data: SprintDto) {
+  async update(id: number, data: SprintDto, userId: number) {
+    await this.checkPermission(data, userId);
     const oldSprint = await this.findOne(id);
-    if (oldSprint.start != data.start || oldSprint.end != data.end) {
+    if (
+      oldSprint.start.getTime() != data.start.getTime() ||
+      oldSprint.end.getTime() != data.end.getTime()
+    ) {
       await this.validateSprint(data);
     }
 
     return this.prisma.sprint.update({ data: { ...data }, where: { id } });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} sprint`;
+  async markDeleted(id: number, userId: number) {
+    const sprint = await this.prisma.sprint.findFirstOrThrow({
+      where: {
+        id,
+        deletedAt: null,
+      },
+    });
+    await this.checkPermission(sprint, userId);
+    sprint.deletedAt = new Date();
+    return this.prisma.sprint.update({
+      data: sprint,
+      where: {
+        id,
+      },
+    });
   }
 
   getDaysDelta(date_1: Date, date_2: Date): number {
@@ -94,5 +119,17 @@ export class SprintsService {
     });
     console.log(response);
     return response;
+  }
+
+  async checkPermission(data: SprintDto, userId: number): Promise<void> {
+    this.logger.debug('Checking user permissions.');
+    const project = await this.prisma.project.findFirst({
+      where: { id: data.projectId },
+    });
+    if (userId != project.scrumMasterId) {
+      const message = `User isn't the scrum master.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
   }
 }
