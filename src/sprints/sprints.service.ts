@@ -1,26 +1,98 @@
-import { Injectable } from '@nestjs/common';
-import { CreateSprintDto } from './dto/create-sprint.dto';
-import { UpdateSprintDto } from './dto/update-sprint.dto';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
+import { SprintDto } from './dto/sprint.dto';
+import { PrismaService } from 'nestjs-prisma';
+import { Sprint } from '@prisma/client';
 
 @Injectable()
 export class SprintsService {
-  create(createSprintDto: CreateSprintDto) {
-    return 'This action adds a new sprint';
+  private readonly logger = new Logger(SprintsService.name);
+  constructor(private prisma: PrismaService) {}
+  async create(data: SprintDto) {
+    await this.validateSprint(data);
+    return this.prisma.sprint.create({ data });
   }
 
   findAll() {
-    return `This action returns all sprints`;
+    const where = { deletedAt: null };
+    return this.prisma.sprint.findMany({
+      where,
+    });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} sprint`;
+    return this.prisma.sprint.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+      },
+    });
   }
 
-  update(id: number, updateSprintDto: UpdateSprintDto) {
-    return `This action updates a #${id} sprint`;
+  async update(id: number, data: SprintDto) {
+    const oldSprint = await this.findOne(id);
+    if (oldSprint.start != data.start || oldSprint.end != data.end) {
+      await this.validateSprint(data);
+    }
+
+    return this.prisma.sprint.update({ data: { ...data }, where: { id } });
   }
 
   remove(id: number) {
     return `This action removes a #${id} sprint`;
+  }
+
+  getDaysDelta(date_1: Date, date_2: Date): number {
+    const difference = date_1.getTime() - date_2.getTime();
+    const TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
+    return TotalDays;
+  }
+
+  async validateSprint(data: SprintDto): Promise<void> {
+    this.logger.debug('Validating sprint.');
+    if (this.getDaysDelta(data.start, new Date()) < 1) {
+      const message = `Sprint doesn't start in the future.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+    if (this.getDaysDelta(data.end, data.start) < 0) {
+      const message = `Sprint ends before it starts.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+    if (await this.checkConflict(data)) {
+      const message = `Sprint overlaps with another sprint.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
+  }
+
+  async checkConflict(data: SprintDto): Promise<Sprint> {
+    this.logger.debug('checking sprint conflict.');
+    const response = await this.prisma.sprint.findFirst({
+      where: {
+        projectId: data.projectId,
+        OR: [
+          {
+            start: {
+              gte: data.start,
+              lte: data.end,
+            },
+          },
+          {
+            end: {
+              gte: data.start,
+              lte: data.end,
+            },
+          },
+        ],
+      },
+    });
+    console.log(response);
+    return response;
   }
 }

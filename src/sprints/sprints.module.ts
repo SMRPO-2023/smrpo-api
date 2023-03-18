@@ -4,6 +4,6 @@ import { SprintsController } from './sprints.controller';
 
 @Module({
   controllers: [SprintsController],
-  providers: [SprintsService]
+  providers: [SprintsService],
 })
 export class SprintsModule {}

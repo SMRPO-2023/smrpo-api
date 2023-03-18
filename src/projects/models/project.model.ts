@@ -26,8 +26,8 @@ export class Project extends BaseModel {
   UserStory: UserStory[];
 
   @ApiPropertyOptional({ type: () => User })
-  projectOwner: User;
+  projectOwner?: User;
 
   @ApiPropertyOptional({ type: () => User })
-  scrumMaster: User;
+  scrumMaster?: User;
 }

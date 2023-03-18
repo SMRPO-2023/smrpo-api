@@ -40,17 +40,17 @@ enum Role {
 }
 
 model Sprint {
-  id          Int        @id @default(autoincrement())
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id          Int         @id @default(autoincrement())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   deletedAt   DateTime?
   start       DateTime
   end         DateTime
   velocity    Int
-  Project     Project?   @relation(fields: [projectId], references: [id])
+  Project     Project?    @relation(fields: [projectId], references: [id])
   projectId   Int?
-  UserStory   UserStory? @relation(fields: [userStoryId], references: [id])
-  userStoryId Int?
+  UserStories UserStory[]
+  name        String?
 }
 
 model StoryComment {
@@ -102,11 +102,11 @@ model UserStory {
   projectId          Int
   project            Project              @relation(fields: [projectId], references: [id])
   sprintId           Int?
-  sprints            Sprint[]
   acceptanceCriteria AcceptanceCriteria[]
   comments           StoryComment[]
   Task               Task[]
   businessValue      String?
+  Sprint             Sprint?              @relation(fields: [sprintId], references: [id])
 }
 
 enum StoryPriority {
