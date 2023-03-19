@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   Logger,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
@@ -62,6 +63,12 @@ export class UserStoriesService {
   async update(id: number, data: UserStoryDto, userId: number) {
     const userStory = await this.findOne(id);
 
+    if (!userStory) {
+      const message = 'User story not found.';
+      this.logger.debug(message);
+      throw new NotFoundException(message);
+    }
+
     if (userStory.sprintId != null || userStory.implemented) {
       const message = `User story can't be changed.`;
       this.logger.warn(message);
@@ -82,6 +89,12 @@ export class UserStoriesService {
 
   async remove(id: number, userId: number) {
     const userStory = await this.findOne(id);
+
+    if (!userStory) {
+      const message = 'User story not found.';
+      this.logger.debug(message);
+      throw new NotFoundException(message);
+    }
 
     if (userStory.sprintId != null || userStory.implemented) {
       const message = `User story can't be deleted.`;
