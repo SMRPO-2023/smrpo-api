@@ -13,7 +13,18 @@ export class ProjectService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.project.findMany({ where: { deletedAt: null } });
+    return this.prisma.project.findMany({
+      where: { deletedAt: null },
+      include: {
+        developers: {
+          select: {
+            user: true,
+          },
+        },
+        projectOwner: true,
+        scrumMaster: true,
+      },
+    });
   }
 
   async findOne(where: Prisma.ProjectWhereUniqueInput) {
