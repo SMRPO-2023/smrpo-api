@@ -24,9 +24,16 @@ export class ProjectService {
       },
       include: {
         UserStory: true,
-        developers: true,
+        developers: {
+          select: {
+            id: true,
+            user: true,
+          },
+        },
         sprints: true,
         posts: true,
+        projectOwner: true,
+        scrumMaster: true,
       },
     });
   }
