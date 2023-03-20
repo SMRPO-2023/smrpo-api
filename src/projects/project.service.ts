@@ -18,6 +18,7 @@ export class ProjectService {
       include: {
         developers: {
           select: {
+            id: true,
             user: true,
           },
           where: {
