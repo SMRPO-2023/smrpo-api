@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { UserStoriesService } from './user-stories.service';
 import { UserStoryDto } from './dto/user-story.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UserEntity } from 'src/common/decorators/user.decorator';
 import { User } from 'src/users/models/user.model';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
@@ -31,7 +31,9 @@ export class UserStoriesController {
   }
 
   @Get()
-  findAll(@Query('sprintId') sid: string, @Query('projectId') pid: string) {
+  @ApiQuery({ name: 'sprintId', required: false, type: Number })
+  @ApiQuery({ name: 'projectId', required: false, type: Number })
+  findAll(@Query('sprintId') sid?: string, @Query('projectId') pid?: string) {
     return this.userStoriesService.findAll(+pid, +sid);
   }
 
