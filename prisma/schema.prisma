@@ -165,6 +165,8 @@ model ProjectDeveloper {
   userId    Int
   project   Project   @relation(fields: [projectId], references: [id])
   projectId Int
+
+  @@unique([userId, projectId])
 }
 
 model Project {

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { Prisma } from '@prisma/client';
 import { ProjectDeveloperDto } from './dto/project-developer.dto';
@@ -6,6 +6,7 @@ import { ProjectDevelopersDto } from './dto/project-developers.dto';
 
 @Injectable()
 export class ProjectDevelopersService {
+  private readonly logger = new Logger(ProjectDevelopersService.name);
   constructor(private prisma: PrismaService) {}
 
   async findAll(pid?: number) {
@@ -33,27 +34,33 @@ export class ProjectDevelopersService {
         id: data?.projectId,
       },
     });
-    return this.prisma.projectDeveloper.create({ data });
+    return this.prisma.projectDeveloper.create({ data }).catch((e) => {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        const message = `User is already on the project.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
+      }
+    });
   }
 
   async createMulti(data: ProjectDevelopersDto) {
-    for (const member of data.developers) {
-      await this.create(member);
+    try {
+      for (const member of data.developers) {
+        await this.create(member);
+      }
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        const message = `User is already on the project.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
+      }
     }
-  }
-
-  async update(
-    where: Prisma.ProjectDeveloperWhereUniqueInput,
-    data: Prisma.ProjectDeveloperUpdateInput
-  ) {
-    const member = await this.findOne(where);
-    if (!member) {
-      throw new BadRequestException('Object is deleted');
-    }
-    return this.prisma.projectDeveloper.update({
-      data,
-      where,
-    });
   }
 
   async remove(where: Prisma.ProjectDeveloperWhereUniqueInput) {
