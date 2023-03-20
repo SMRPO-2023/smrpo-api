@@ -34,6 +34,15 @@ export class ProjectDevelopersService {
         id: data?.projectId,
       },
     });
+    const deletedUser = await this.checkDeletedUser(data);
+    if (deletedUser) {
+      return this.prisma.projectDeveloper.update({
+        where: {
+          id: deletedUser.id,
+        },
+        data: { deletedAt: null },
+      });
+    }
     return this.prisma.projectDeveloper.create({ data }).catch((e) => {
       if (
         e instanceof Prisma.PrismaClientKnownRequestError &&
@@ -74,6 +83,17 @@ export class ProjectDevelopersService {
     return this.prisma.projectDeveloper.update({
       data,
       where,
+    });
+  }
+
+  async checkDeletedUser(data: ProjectDeveloperDto) {
+    return this.prisma.projectDeveloper.findFirst({
+      where: {
+        ...data,
+        deletedAt: {
+          not: null,
+        },
+      },
     });
   }
 }
