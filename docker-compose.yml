@@ -4,6 +4,21 @@ services:
   smrpo-api:
     image: lgaljo/smrpo-api:latest
     container_name: smrpo-api
+    command: npm run start:prod
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - ${PORT:-3000}:${PORT:-3000}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://api:${HTTP_PORT:-3000}" ]
+    depends_on:
+      - smrpo-db
+    env_file:
+      - .env
+
+  smrpo-api-dev:
+    container_name: smrpo-api-dev
     build:
       context: .
       dockerfile: Dockerfile
