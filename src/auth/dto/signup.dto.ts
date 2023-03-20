@@ -23,9 +23,14 @@ export class SignupDto {
   password: string;
 
   @IsOptional()
+  @MinLength(3)
+  @MaxLength(30)
   @IsString()
   firstname?: string;
 
+  @IsOptional()
+  @MinLength(3)
+  @MaxLength(30)
   @IsString()
   lastname?: string;
 
