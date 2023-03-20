@@ -82,7 +82,7 @@ Table UserStory {
   acceptanceCriteria AcceptanceCriteria [not null]
   comments StoryComment [not null]
   Task Task [not null]
-  businessValue String
+  businessValue Int
   Sprint Sprint
 }
 
