@@ -7,8 +7,9 @@ import {
   Param,
   Delete,
   ParseIntPipe,
-  UseGuards, Query
-} from "@nestjs/common";
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { UserStoriesService } from './user-stories.service';
 import { UserStoryDto } from './dto/user-story.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
