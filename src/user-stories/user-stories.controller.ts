@@ -7,16 +7,15 @@ import {
   Param,
   Delete,
   ParseIntPipe,
-  UseGuards,
-} from '@nestjs/common';
+  UseGuards, Query
+} from "@nestjs/common";
 import { UserStoriesService } from './user-stories.service';
 import { UserStoryDto } from './dto/user-story.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserEntity } from 'src/common/decorators/user.decorator';
 import { User } from 'src/users/models/user.model';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
-import { StoryPriority, UserStory } from '@prisma/client';
-import { StoryListDto } from "../sprints/dto/story-list.dto";
+import { StoryListDto } from './dto/story-list.dto';
 
 @Controller('user-stories')
 @ApiTags('User stories')
@@ -31,8 +30,8 @@ export class UserStoriesController {
   }
 
   @Get()
-  findAll() {
-    return this.userStoriesService.findAll();
+  findAll(@Query('sprintId') sid: string, @Query('projectId') pid: string) {
+    return this.userStoriesService.findAll(+pid, +sid);
   }
 
   @Get(':id')
