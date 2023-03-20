@@ -84,11 +84,13 @@ export class UserStoriesService {
         projectId: projectId,
         deletedAt: null,
         sprintId: null,
-        NOT: {
-          implemented: true,
-          acceptanceCriteria: {
-            every: {
-              OR: [{ completed: true }, { NOT: { deletedAt: null } }],
+        OR: {
+          implemented: false,
+          NOT: {
+            acceptanceCriteria: {
+              every: {
+                OR: [{ completed: true }, { NOT: { deletedAt: null } }],
+              },
             },
           },
         },
@@ -106,14 +108,18 @@ export class UserStoriesService {
   async findUnrealizedWithSprint(projectId: number) {
     return this.prisma.userStory.findMany({
       where: {
-        deletedAt: null,
         projectId: projectId,
+        deletedAt: null,
         NOT: {
           sprintId: null,
-          implemented: true,
-          acceptanceCriteria: {
-            every: {
-              OR: [{ completed: true }, { NOT: { deletedAt: null } }],
+        },
+        OR: {
+          implemented: false,
+          NOT: {
+            acceptanceCriteria: {
+              every: {
+                OR: [{ completed: true }, { NOT: { deletedAt: null } }],
+              },
             },
           },
         },
