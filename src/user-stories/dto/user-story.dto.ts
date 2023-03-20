@@ -1,6 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { StoryPriority } from '@prisma/client';
-import { IsNotEmpty, IsOptional, IsNumber, IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsInt,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class UserStoryDto {
   @IsNotEmpty()
@@ -15,20 +22,24 @@ export class UserStoryDto {
   priority: StoryPriority;
 
   @IsNotEmpty()
-  @IsNumber()
+  @IsInt()
+  @Min(0.1)
+  @Max(20)
   points: number;
 
   @IsOptional()
   implemented: boolean;
 
-  @IsNumber()
+  @IsInt()
   projectId: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   sprintId?: number;
 
   @IsOptional()
-  @IsString()
-  businessValue: string;
+  @IsInt()
+  @Min(1)
+  @Max(10)
+  businessValue: number;
 }

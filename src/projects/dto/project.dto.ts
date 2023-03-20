@@ -1,6 +1,6 @@
 import {
   IsNotEmpty,
-  IsNumber,
+  IsInt,
   IsOptional,
   IsString,
   MinLength,
@@ -17,10 +17,10 @@ export class ProjectDto {
   documentation: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   projectOwnerId: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   scrumMasterId: number;
 }

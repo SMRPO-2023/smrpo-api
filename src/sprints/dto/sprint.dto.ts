@@ -3,11 +3,11 @@ import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
   IsOptional,
-  IsNumber,
   Min,
   IsString,
   Max,
   IsDate,
+  IsInt,
 } from 'class-validator';
 
 export class SprintDto {
@@ -22,13 +22,13 @@ export class SprintDto {
   end: Date;
 
   @IsNotEmpty()
-  @IsNumber()
+  @IsInt()
   @Min(0)
   @Max(100)
   velocity: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   projectId: number;
 
   @IsString()

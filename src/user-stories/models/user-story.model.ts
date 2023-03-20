@@ -44,6 +44,6 @@ export class UserStory extends BaseModel {
   @ApiPropertyOptional({ isArray: true, type: () => Task })
   Task: Task[];
 
-  @ApiPropertyOptional({ type: String })
-  businessValue: string;
+  @ApiPropertyOptional({ type: Number })
+  businessValue: number;
 }
