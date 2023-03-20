@@ -56,14 +56,15 @@ export class AuthService {
 
   async login(user_identifier: string, password: string): Promise<Token> {
     this.logger.debug(`User ${user_identifier} login.`);
-    const user = await this.prisma.user.findFirstOrThrow({
+    const user = await this.prisma.user.findFirst({
       where: {
+        deletedAt: null,
         OR: [{ email: user_identifier }, { username: user_identifier }],
       },
     });
 
     if (!user) {
-      const message = `No user found for email: ${user_identifier}.`;
+      const message = `No user found.`;
       this.logger.debug(message);
       throw new NotFoundException(message);
     }
