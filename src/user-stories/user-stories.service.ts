@@ -103,11 +103,11 @@ export class UserStoriesService {
     });
   }
 
-  async findUnrealizedWithSprint(id: number) {
+  async findUnrealizedWithSprint(projectId: number) {
     return this.prisma.userStory.findMany({
       where: {
-        projectId: id,
         deletedAt: null,
+        projectId: projectId,
         NOT: {
           sprintId: null,
           implemented: true,
