@@ -20,6 +20,9 @@ export class ProjectService {
           select: {
             user: true,
           },
+          where: {
+            deletedAt: null,
+          },
         },
         projectOwner: true,
         scrumMaster: true,
@@ -34,15 +37,30 @@ export class ProjectService {
         deletedAt: null,
       },
       include: {
-        UserStory: true,
+        UserStory: {
+          where: {
+            deletedAt: null,
+          },
+        },
         developers: {
+          where: {
+            deletedAt: null,
+          },
           select: {
             id: true,
             user: true,
           },
         },
-        sprints: true,
-        posts: true,
+        sprints: {
+          where: {
+            deletedAt: null,
+          },
+        },
+        posts: {
+          where: {
+            deletedAt: null,
+          },
+        },
         projectOwner: true,
         scrumMaster: true,
       },

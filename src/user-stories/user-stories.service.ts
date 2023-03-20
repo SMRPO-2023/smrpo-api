@@ -45,6 +45,13 @@ export class UserStoriesService {
     }
     return this.prisma.userStory.findMany({
       where,
+      include: {
+        acceptanceCriteria: {
+          where: {
+            deletedAt: null,
+          },
+        },
+      },
     });
   }
 
@@ -55,7 +62,11 @@ export class UserStoriesService {
         deletedAt: null,
       },
       include: {
-        acceptanceCriteria: true,
+        acceptanceCriteria: {
+          where: {
+            deletedAt: null,
+          },
+        },
       },
     });
   }

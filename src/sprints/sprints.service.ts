@@ -24,7 +24,11 @@ export class SprintsService {
     return this.prisma.sprint.findMany({
       where,
       include: {
-        UserStories: true,
+        UserStories: {
+          where: {
+            deletedAt: null,
+          },
+        },
       },
     });
   }
@@ -36,7 +40,11 @@ export class SprintsService {
         deletedAt: null,
       },
       include: {
-        UserStories: true,
+        UserStories: {
+          where: {
+            deletedAt: null,
+          },
+        },
       },
     });
   }
