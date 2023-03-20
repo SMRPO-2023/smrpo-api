@@ -16,11 +16,9 @@ export class ProjectDto {
   @IsString()
   documentation: string;
 
-  @IsOptional()
   @IsInt()
   projectOwnerId: number;
 
-  @IsOptional()
   @IsInt()
   scrumMasterId: number;
 }
