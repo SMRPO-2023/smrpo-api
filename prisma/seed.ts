@@ -46,7 +46,7 @@ async function main() {
     data: {
       title: 'project 1',
       documentation: 'project 1 documentation',
-      projectOwnerId: user1.id,
+      projectOwnerId: user2.id,
       scrumMasterId: user2.id,
     },
   });
@@ -211,6 +211,202 @@ async function main() {
       businessValue: 5,
       projectId: project1.id,
       sprintId: sprint3.id,
+    },
+  });
+
+  const story4 = await prisma.userStory.create({
+    data: {
+      priority: 'MUST_HAVE',
+      title: 'story 4',
+      description: 'story 4 description',
+      points: 7,
+      businessValue: 5,
+      projectId: project1.id,
+    },
+  });
+
+  const story5 = await prisma.userStory.create({
+    data: {
+      priority: 'MUST_HAVE',
+      title: 'story 5',
+      description: 'story 5 description',
+      points: 7,
+      businessValue: 5,
+      projectId: project1.id,
+    },
+  });
+
+  const story6 = await prisma.userStory.create({
+    data: {
+      priority: 'MUST_HAVE',
+      title: 'story 6',
+      description: 'story 6 description',
+      points: 7,
+      businessValue: 5,
+      projectId: project1.id,
+      sprintId: sprint3.id,
+    },
+  });
+
+  const story7 = await prisma.userStory.create({
+    data: {
+      priority: 'MUST_HAVE',
+      title: 'story 7',
+      description: 'story 7 description',
+      points: 7,
+      businessValue: 5,
+      projectId: project1.id,
+      sprintId: sprint3.id,
+    },
+  });
+
+  const story8 = await prisma.userStory.create({
+    data: {
+      priority: 'MUST_HAVE',
+      title: 'story 7',
+      description: 'story 7 description',
+      points: 7,
+      businessValue: 5,
+      projectId: project1.id,
+      sprintId: sprint3.id,
+    },
+  });
+
+  const story9 = await prisma.userStory.create({
+    data: {
+      priority: 'MUST_HAVE',
+      title: 'story 7',
+      description: 'story 7 description',
+      points: 7,
+      businessValue: 5,
+      projectId: project1.id,
+      sprintId: sprint3.id,
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story8.id,
+      title: 'criteria 1',
+      description: 'criteria 1 description',
+      completed: true,
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story8.id,
+      title: 'criteria 1',
+      description: 'criteria 1 description',
+      completed: false,
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story8.id,
+      title: 'criteria 1',
+      description: 'criteria 1 description',
+      completed: false,
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story7.id,
+      title: 'criteria 1',
+      description: 'criteria 1 description',
+      completed: false,
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story7.id,
+      title: 'criteria 1',
+      description: 'criteria 1 description',
+      completed: false,
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story7.id,
+      title: 'criteria 1',
+      description: 'criteria 1 description',
+      completed: false,
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story6.id,
+      title: 'criteria 1',
+      description: 'criteria 1 description',
+      completed: false,
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story6.id,
+      title: 'criteria 1',
+      description: 'criteria 1 description',
+      completed: true,
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story6.id,
+      title: 'criteria 1',
+      description: 'criteria 1 description',
+      completed: false,
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story6.id,
+      title: 'criteria 1',
+      description: 'criteria 1 description',
+      completed: false,
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story5.id,
+      title: 'criteria 1',
+      description: 'criteria 1 description',
+      completed: true,
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story5.id,
+      title: 'criteria 1',
+      description: 'criteria 1 description',
+      completed: true,
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story4.id,
+      title: 'criteria 1',
+      description: 'criteria 1 description',
+      completed: true,
+    },
+  });
+
+  await prisma.acceptanceCriteria.create({
+    data: {
+      userStoryId: story4.id,
+      title: 'criteria 1',
+      description: 'criteria 1 description',
+      completed: true,
     },
   });
 
