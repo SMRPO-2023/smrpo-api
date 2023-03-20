@@ -153,10 +153,21 @@ export class UserStoriesService {
       throw new NotFoundException(message);
     }
 
-    if (userStory.sprintId != null || userStory.implemented) {
-      const message = `User story can't be changed.`;
-      this.logger.warn(message);
-      throw new ForbiddenException(message);
+    if (
+      data.priority != userStory.priority ||
+      data.businessValue != userStory.businessValue ||
+      data.description != userStory.description ||
+      data.points != userStory.points ||
+      data.priority != userStory.priority ||
+      data.title != userStory.title ||
+      data.sprintId != userStory.sprintId ||
+      data.projectId != userStory.projectId
+    ) {
+      if (userStory.sprintId != null || userStory.implemented) {
+        const message = `User story can't be changed.`;
+        this.logger.warn(message);
+        throw new ForbiddenException(message);
+      }
     }
 
     const project = await this.prisma.project.findUnique({
