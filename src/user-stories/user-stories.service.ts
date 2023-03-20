@@ -56,6 +56,78 @@ export class UserStoriesService {
     });
   }
 
+  async findRealized(projectId: number) {
+    return this.prisma.userStory.findMany({
+      where: {
+        projectId: projectId,
+        deletedAt: null,
+        implemented: true,
+        acceptanceCriteria: {
+          every: {
+            OR: [{ completed: true }, { NOT: { deletedAt: null } }],
+          },
+        },
+      },
+      include: {
+        acceptanceCriteria: {
+          where: {
+            deletedAt: null,
+          },
+        },
+      },
+    });
+  }
+
+  async findUnrealizedWithoutSprint(projectId: number) {
+    return this.prisma.userStory.findMany({
+      where: {
+        projectId: projectId,
+        deletedAt: null,
+        sprintId: null,
+        NOT: {
+          implemented: true,
+          acceptanceCriteria: {
+            every: {
+              OR: [{ completed: true }, { NOT: { deletedAt: null } }],
+            },
+          },
+        },
+      },
+      include: {
+        acceptanceCriteria: {
+          where: {
+            deletedAt: null,
+          },
+        },
+      },
+    });
+  }
+
+  async findUnrealizedWithSprint(id: number) {
+    return this.prisma.userStory.findMany({
+      where: {
+        projectId: id,
+        deletedAt: null,
+        NOT: {
+          sprintId: null,
+          implemented: true,
+          acceptanceCriteria: {
+            every: {
+              OR: [{ completed: true }, { NOT: { deletedAt: null } }],
+            },
+          },
+        },
+      },
+      include: {
+        acceptanceCriteria: {
+          where: {
+            deletedAt: null,
+          },
+        },
+      },
+    });
+  }
+
   async findOne(id: number) {
     return this.prisma.userStory.findFirst({
       where: {

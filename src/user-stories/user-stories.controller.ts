@@ -37,6 +37,24 @@ export class UserStoriesController {
     return this.userStoriesService.findAll(+pid, +sid);
   }
 
+  @Get('realized')
+  @ApiQuery({ name: 'project-id', required: true, type: Number })
+  findRealized(projectId: number) {
+    return this.userStoriesService.findRealized(projectId);
+  }
+
+  @Get('unrealized-without-sprint')
+  @ApiQuery({ name: 'project-id', required: true, type: Number })
+  findUnrealized(projectId: number) {
+    return this.userStoriesService.findUnrealizedWithoutSprint(projectId);
+  }
+
+  @Get('unrealized-with-sprint')
+  @ApiQuery({ name: 'project-id', required: true, type: Number })
+  findUnrealizedWithSprint(projectId: number) {
+    return this.userStoriesService.findUnrealizedWithSprint(projectId);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userStoriesService.findOne(id);

@@ -27,6 +27,7 @@ export class ProjectService {
         },
         projectOwner: true,
         scrumMaster: true,
+        UserStory: true,
       },
     });
   }
