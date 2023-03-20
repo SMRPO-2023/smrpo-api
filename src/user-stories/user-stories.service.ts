@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { UserStoryDto } from './dto/user-story.dto';
+import { StoryListDto } from '../sprints/dto/story-list.dto';
 
 @Injectable()
 export class UserStoriesService {
@@ -132,6 +133,39 @@ export class UserStoriesService {
     return this.prisma.userStory.update({
       where: { id },
       data: story,
+    });
+  }
+
+  async addStories(data: StoryListDto) {
+    const sprint = await this.prisma.sprint.findFirstOrThrow({
+      where: {
+        id: data.sprintId,
+        deletedAt: null,
+      },
+    });
+    await this.prisma.userStory.updateMany({
+      where: {
+        id: { in: data.stories },
+        deletedAt: null,
+        implemented: false,
+        sprintId: null,
+        points: { not: null },
+      },
+      data: {
+        sprintId: sprint.id,
+      },
+    });
+    await this.prisma.userStory.updateMany({
+      where: {
+        id: { notIn: data.stories },
+      },
+      data: {
+        sprintId: null,
+      },
+    });
+
+    return this.prisma.userStory.findMany({
+      where: { sprintId: data.sprintId },
     });
   }
 }

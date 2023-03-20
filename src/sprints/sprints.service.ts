@@ -8,6 +8,7 @@ import {
 import { SprintDto } from './dto/sprint.dto';
 import { PrismaService } from 'nestjs-prisma';
 import { Sprint } from '@prisma/client';
+import { StoryListDto } from "./dto/story-list.dto";
 
 @Injectable()
 export class SprintsService {

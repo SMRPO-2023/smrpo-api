@@ -16,6 +16,7 @@ import { UserEntity } from 'src/common/decorators/user.decorator';
 import { User } from 'src/users/models/user.model';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
 import { StoryPriority, UserStory } from '@prisma/client';
+import { StoryListDto } from "../sprints/dto/story-list.dto";
 
 @Controller('user-stories')
 @ApiTags('User stories')
@@ -51,5 +52,10 @@ export class UserStoriesController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number, @UserEntity() user: User) {
     return this.userStoriesService.remove(+id, user.id);
+  }
+
+  @Post('attach')
+  addStories(@Body() data: StoryListDto) {
+    return this.userStoriesService.addStories(data);
   }
 }
