@@ -148,7 +148,7 @@ async function main() {
     },
   });
 
-  const sprint4 = await prisma.sprint.create({
+  await prisma.sprint.create({
     data: {
       start: new Date('2023-01-11T21:43:28.434Z'),
       end: new Date('2023-01-18T21:43:28.434Z'),
@@ -158,7 +158,7 @@ async function main() {
     },
   });
 
-  const sprint5 = await prisma.sprint.create({
+  await prisma.sprint.create({
     data: {
       start: new Date('2023-02-01T21:43:28.434Z'),
       end: new Date('2023-02-15T21:43:28.434Z'),
@@ -168,7 +168,7 @@ async function main() {
     },
   });
 
-  const sprint6 = await prisma.sprint.create({
+  await prisma.sprint.create({
     data: {
       start: new Date('2023-03-12T21:43:28.434Z'),
       end: new Date('2023-03-22T21:43:28.434Z'),
