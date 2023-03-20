@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import {
   IsEmail,
@@ -23,9 +23,14 @@ export class SignupDto {
   password: string;
 
   @IsOptional()
+  @MinLength(3)
+  @MaxLength(30)
   @IsString()
   firstname?: string;
 
+  @IsOptional()
+  @MinLength(3)
+  @MaxLength(30)
   @IsString()
   lastname?: string;
 
