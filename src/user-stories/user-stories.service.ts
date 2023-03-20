@@ -84,16 +84,18 @@ export class UserStoriesService {
         projectId: projectId,
         deletedAt: null,
         sprintId: null,
-        OR: {
-          implemented: false,
-          NOT: {
-            acceptanceCriteria: {
-              every: {
-                OR: [{ completed: true }, { NOT: { deletedAt: null } }],
+        OR: [
+          { implemented: false },
+          {
+            NOT: {
+              acceptanceCriteria: {
+                every: {
+                  OR: [{ completed: true }, { NOT: { deletedAt: null } }],
+                },
               },
             },
           },
-        },
+        ],
       },
       include: {
         acceptanceCriteria: {
@@ -113,16 +115,18 @@ export class UserStoriesService {
         NOT: {
           sprintId: null,
         },
-        OR: {
-          implemented: false,
-          NOT: {
-            acceptanceCriteria: {
-              every: {
-                OR: [{ completed: true }, { NOT: { deletedAt: null } }],
+        OR: [
+          { implemented: false },
+          {
+            NOT: {
+              acceptanceCriteria: {
+                every: {
+                  OR: [{ completed: true }, { NOT: { deletedAt: null } }],
+                },
               },
             },
           },
-        },
+        ],
       },
       include: {
         acceptanceCriteria: {
