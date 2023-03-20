@@ -47,9 +47,11 @@ COPY --chown=node:node tsconfig*.json ./
 # In the previous development stage we ran `npm ci` which installed all dependencies, so we can copy over the node_modules directory from the development image
 COPY --chown=node:node --from=development /app/node_modules ./node_modules
 COPY --chown=node:node . .
+COPY prisma ./prisma/
 
 # Run the build command which creates the production bundle
 RUN npm run build
+RUN npm run prisma:generate
 
 # Set NODE_ENV environment variable
 ENV NODE_ENV production
@@ -57,7 +59,7 @@ ENV NODE_ENV production
 # Running `npm ci` removes the existing node_modules directory.
 # Passing in --only=production ensures that only the production dependencies are installed.
 # This ensures that the node_modules directory is as optimized as possible.
-RUN npm ci --only=production && npm cache clean --force
+RUN npm cache clean --force
 
 USER node
 
