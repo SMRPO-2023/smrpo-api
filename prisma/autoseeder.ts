@@ -54,7 +54,7 @@ async function main() {
   });
   const user3 = await prisma.user.create({
     data: {
-      email: 'joihn@simpson.com',
+      email: 'john@simpson.com',
       firstname: 'John',
       lastname: 'Simpson',
       // cspell:disable-next-line -- disables checking till the end of the next line.
@@ -65,7 +65,7 @@ async function main() {
   });
 
   // const projects = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 4; i++) {
     const users = [];
     for (let i = 0; i < 2; i++) {
       const fn = faker.name.firstName();
