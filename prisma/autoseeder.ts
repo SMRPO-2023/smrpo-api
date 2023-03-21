@@ -106,29 +106,38 @@ async function main() {
       });
     }
 
-    let startdate = faker.date.past();
-    for (let s = 0; s < +faker.random.numeric(); s++) {
+    for (let s = 0; s < +faker.datatype.number({ min: 1, max: 8 }); s++) {
+      let startdate = faker.date.past();
       const sprint = await prisma.sprint.create({
         data: {
-          start: faker.date.past(0, startdate),
-          end: faker.date.future(0, startdate),
-          velocity: 5,
+          start: startdate,
+          end: faker.date.soon(14, startdate),
+          velocity: +faker.datatype.number({ min: 2, max: 15 }),
           projectId: project.id,
           name: `sprint ${s}`,
         },
       });
       startdate = faker.date.past(0, startdate);
 
-      for (let us = 0; us < 15; us++) {
+      for (let us = 0; us < 20; us++) {
+        let sprintRelation = {};
+        if (+faker.datatype.number({ min: 1, max: 3 }) < 2) {
+          sprintRelation = {
+            Sprint: { connect: { id: sprint.id } },
+          };
+        }
+
         const story = await prisma.userStory.create({
           data: {
+            ...sprintRelation,
             priority: getPriority(+faker.random.numeric() % 4),
             title: faker.random.words(4),
             description: faker.random.words(40),
-            points: +faker.random.numeric(),
-            businessValue: +faker.random.numeric(),
+            points: +faker.datatype.number({ min: 4, max: 15 }),
+            businessValue: +faker.datatype.number({ min: 1, max: 7 }),
             project: { connect: { id: project.id } },
-            Sprint: { connect: { id: sprint.id } },
+            implemented:
+              +faker.datatype.number({ min: 1, max: 5 }) < 3 ? true : false,
           },
         });
 
@@ -138,7 +147,8 @@ async function main() {
               userStoryId: story.id,
               title: faker.random.words(4),
               description: faker.random.words(20),
-              completed: false,
+              completed:
+                +faker.datatype.number({ min: 1, max: 5 }) < 4 ? true : false,
             },
           });
         }
