@@ -52,6 +52,17 @@ async function main() {
       username: 'simpsonb',
     },
   });
+  const user3 = await prisma.user.create({
+    data: {
+      email: 'joihn@simpson.com',
+      firstname: 'John',
+      lastname: 'Simpson',
+      // cspell:disable-next-line -- disables checking till the end of the next line.
+      password: '$2b$10$DRzCId0X0guJa7wtynJ0FOrAijm7IY9l2Ora9KygCK4lwH1lSvV12', // secret12345678
+      role: 'USER',
+      username: 'simpsonj',
+    },
+  });
 
   // const projects = [];
   for (let i = 0; i < 5; i++) {
@@ -119,7 +130,7 @@ async function main() {
       });
       startdate = faker.date.past(0, startdate);
 
-      for (let us = 0; us < 20; us++) {
+      for (let us = 0; us < 10; us++) {
         let sprintRelation = {};
         if (+faker.datatype.number({ min: 1, max: 3 }) < 2) {
           sprintRelation = {
