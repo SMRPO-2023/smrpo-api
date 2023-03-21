@@ -64,6 +64,18 @@ async function main() {
     },
   });
 
+  const user4 = await prisma.user.create({
+    data: {
+      email: 'sara@simpson.com',
+      firstname: 'Sara',
+      lastname: 'Simpson',
+      // cspell:disable-next-line -- disables checking till the end of the next line.
+      password: '$2b$10$DRzCId0X0guJa7wtynJ0FOrAijm7IY9l2Ora9KygCK4lwH1lSvV12', // secret12345678
+      role: 'USER',
+      username: 'simpsons',
+    },
+  });
+
   // const projects = [];
   for (let i = 0; i < 4; i++) {
     const users = [];
