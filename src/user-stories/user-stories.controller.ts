@@ -32,8 +32,8 @@ export class UserStoriesController {
 
   @Get()
   @ApiQuery({ name: 'sprintId', required: false, type: Number })
-  @ApiQuery({ name: 'projectId', required: false, type: Number })
-  findAll(@Query('sprintId') sid?: string, @Query('projectId') pid?: string) {
+  @ApiQuery({ name: 'project-id', required: false, type: Number })
+  findAll(@Query('sprintId') sid?: string, @Query('project-id') pid?: string) {
     return this.userStoriesService.findAll(+pid, +sid);
   }
 
