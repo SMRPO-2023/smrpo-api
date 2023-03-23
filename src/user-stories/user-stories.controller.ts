@@ -17,6 +17,7 @@ import { UserEntity } from 'src/common/decorators/user.decorator';
 import { User } from 'src/users/models/user.model';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
 import { StoryListDto } from './dto/story-list.dto';
+import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
 
 @Controller('user-stories')
 @ApiTags('User stories')
@@ -60,13 +61,22 @@ export class UserStoriesController {
     return this.userStoriesService.findOne(id);
   }
 
-  @Patch(':id')
+  @Post(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @UserEntity() user: User,
     @Body() updateUserStoryDto: UserStoryDto
   ) {
     return this.userStoriesService.update(+id, updateUserStoryDto, user.id);
+  }
+
+  @Patch('accept:id')
+  accept(
+    @Param('id', ParseIntPipe) id: number,
+    @UserEntity() user: User,
+    @Body() updateUserStoryDto: AcceptUserStoryDto
+  ) {
+    return this.userStoriesService.accept(+id, updateUserStoryDto, user.id);
   }
 
   @Delete(':id')
