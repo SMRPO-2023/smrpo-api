@@ -46,13 +46,6 @@ export class UserStoriesService {
     }
     return this.prisma.userStory.findMany({
       where,
-      include: {
-        acceptanceCriteria: {
-          where: {
-            deletedAt: null,
-          },
-        },
-      },
     });
   }
 
@@ -61,19 +54,7 @@ export class UserStoriesService {
       where: {
         projectId: projectId,
         deletedAt: null,
-        implemented: true,
-        acceptanceCriteria: {
-          every: {
-            OR: [{ completed: true }, { NOT: { deletedAt: null } }],
-          },
-        },
-      },
-      include: {
-        acceptanceCriteria: {
-          where: {
-            deletedAt: null,
-          },
-        },
+        accepted: true,
       },
     });
   }
@@ -84,25 +65,7 @@ export class UserStoriesService {
         projectId: projectId,
         deletedAt: null,
         sprintId: null,
-        OR: [
-          { implemented: false },
-          {
-            NOT: {
-              acceptanceCriteria: {
-                every: {
-                  OR: [{ completed: true }, { NOT: { deletedAt: null } }],
-                },
-              },
-            },
-          },
-        ],
-      },
-      include: {
-        acceptanceCriteria: {
-          where: {
-            deletedAt: null,
-          },
-        },
+        accepted: false,
       },
     });
   }
@@ -115,25 +78,7 @@ export class UserStoriesService {
         NOT: {
           sprintId: null,
         },
-        OR: [
-          { implemented: false },
-          {
-            NOT: {
-              acceptanceCriteria: {
-                every: {
-                  OR: [{ completed: true }, { NOT: { deletedAt: null } }],
-                },
-              },
-            },
-          },
-        ],
-      },
-      include: {
-        acceptanceCriteria: {
-          where: {
-            deletedAt: null,
-          },
-        },
+        accepted: false,
       },
     });
   }
@@ -143,13 +88,6 @@ export class UserStoriesService {
       where: {
         id,
         deletedAt: null,
-      },
-      include: {
-        acceptanceCriteria: {
-          where: {
-            deletedAt: null,
-          },
-        },
       },
     });
   }
@@ -173,7 +111,7 @@ export class UserStoriesService {
       data.sprintId != userStory.sprintId ||
       data.projectId != userStory.projectId
     ) {
-      if (userStory.sprintId != null || userStory.implemented) {
+      if (userStory.sprintId != null || userStory.accepted) {
         const message = `User story can't be changed.`;
         this.logger.warn(message);
         throw new ForbiddenException(message);
@@ -201,7 +139,7 @@ export class UserStoriesService {
       throw new NotFoundException(message);
     }
 
-    if (userStory.sprintId != null || userStory.implemented) {
+    if (userStory.sprintId != null || userStory.accepted) {
       const message = `User story can't be deleted.`;
       this.logger.warn(message);
       throw new ForbiddenException(message);
@@ -240,7 +178,7 @@ export class UserStoriesService {
       where: {
         id: { in: data.stories },
         deletedAt: null,
-        implemented: false,
+        accepted: false,
         sprintId: null,
         points: { not: null },
       },

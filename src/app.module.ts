@@ -13,7 +13,6 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import config from './common/configs/config';
 import { ProjectModule } from './projects/project.module';
-import { AcceptanceCriteriaModule } from './acceptance-criteria/acceptance-criteria.module';
 import { PostsModule } from './posts/posts.module';
 import { SprintsModule } from './sprints/sprints.module';
 import { StoryCommentsModule } from './story-comments/story-comments.module';
@@ -41,7 +40,6 @@ import { ProjectDevelopersModule } from './project-developers/project-developers
     AuthModule,
     UsersModule,
     ProjectModule,
-    AcceptanceCriteriaModule,
     PostsModule,
     ProjectDevelopersModule,
     SprintsModule,

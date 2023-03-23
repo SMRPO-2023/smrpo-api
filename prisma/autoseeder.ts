@@ -17,7 +17,6 @@ function getPriority(i: number) {
 }
 
 async function main() {
-  await prisma.acceptanceCriteria.deleteMany();
   await prisma.userStory.deleteMany();
   await prisma.sprint.deleteMany();
   await prisma.projectDeveloper.deleteMany();
@@ -156,25 +155,26 @@ async function main() {
             priority: getPriority(+faker.random.numeric() % 4),
             title: faker.random.words(4),
             description: faker.random.words(40),
+            acceptanceCriteria: faker.random.words(40),
             points: +faker.datatype.number({ min: 4, max: 15 }),
             businessValue: +faker.datatype.number({ min: 1, max: 7 }),
             project: { connect: { id: project.id } },
-            implemented:
+            accepted:
               +faker.datatype.number({ min: 1, max: 5 }) < 3 ? true : false,
           },
         });
 
-        for (let ac = 0; ac < 3; ac++) {
-          await prisma.acceptanceCriteria.create({
-            data: {
-              userStoryId: story.id,
-              title: faker.random.words(4),
-              description: faker.random.words(20),
-              completed:
-                +faker.datatype.number({ min: 1, max: 5 }) < 4 ? true : false,
-            },
-          });
-        }
+        // for (let ac = 0; ac < 3; ac++) {
+        //   await prisma.acceptanceCriteria.create({
+        //     data: {
+        //       userStoryId: story.id,
+        //       title: faker.random.words(4),
+        //       description: faker.random.words(20),
+        //       completed:
+        //         +faker.datatype.number({ min: 1, max: 5 }) < 4 ? true : false,
+        //     },
+        //   });
+        // }
       }
     }
   }
