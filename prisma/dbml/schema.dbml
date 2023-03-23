@@ -57,7 +57,7 @@ Table Task {
   title String [not null]
   description String
   hours Int [not null]
-  accepted Boolean [not null]
+  done Boolean [not null, default: false]
   status TaskStatus [not null, default: 'UNASSIGNED']
   assignedTo User
   userId Int
@@ -75,7 +75,7 @@ Table UserStory {
   description String [not null]
   priority StoryPriority [not null]
   points Int
-  accepted Boolean [not null, default: false]
+  acceptanceTest Boolean [not null, default: false]
   projectId Int [not null]
   project Project [not null]
   sprintId Int

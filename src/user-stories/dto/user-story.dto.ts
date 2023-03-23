@@ -28,7 +28,7 @@ export class UserStoryDto {
   points?: number;
 
   @IsOptional()
-  accepted: boolean;
+  acceptanceTest: boolean;
 
   @IsInt()
   projectId: number;

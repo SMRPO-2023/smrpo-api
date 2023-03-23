@@ -26,7 +26,7 @@ export class UserStory extends BaseModel {
   points?: number;
 
   @ApiProperty({ type: Boolean })
-  accepted: boolean;
+  acceptanceTest: boolean;
 
   @ApiProperty({ type: Number })
   projectId: number;

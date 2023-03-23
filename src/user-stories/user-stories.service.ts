@@ -55,7 +55,7 @@ export class UserStoriesService {
       where: {
         projectId: projectId,
         deletedAt: null,
-        accepted: true,
+        acceptanceTest: true,
       },
     });
   }
@@ -66,7 +66,7 @@ export class UserStoriesService {
         projectId: projectId,
         deletedAt: null,
         sprintId: null,
-        accepted: false,
+        acceptanceTest: false,
       },
     });
   }
@@ -79,7 +79,7 @@ export class UserStoriesService {
         NOT: {
           sprintId: null,
         },
-        accepted: false,
+        acceptanceTest: false,
       },
     });
   }
@@ -102,12 +102,10 @@ export class UserStoriesService {
       throw new NotFoundException(message);
     }
 
-    if (userStory.accepted) {
-      if (userStory.sprintId != null || userStory.accepted) {
-        const message = `User story can't be changed.`;
-        this.logger.warn(message);
-        throw new ForbiddenException(message);
-      }
+    if (userStory.sprintId != null || userStory.acceptanceTest) {
+      const message = `User story can't be changed.`;
+      this.logger.warn(message);
+      throw new ForbiddenException(message);
     }
 
     const project = await this.prisma.project.findUnique({
@@ -124,7 +122,7 @@ export class UserStoriesService {
 
   async accept(id: number, data: AcceptUserStoryDto, userId: number) {
     const userStory = await this.findOne(id);
-    const acceptedValue = data.accepted;
+    const acceptanceTest = data.acceptanceTest;
 
     if (!userStory) {
       const message = 'User story not found.';
@@ -143,10 +141,10 @@ export class UserStoriesService {
     }
 
     const tasks = await this.prisma.task.findMany({
-      where: { userStoryId: id, accepted: false },
+      where: { userStoryId: id, done: false },
     });
 
-    if (acceptedValue && tasks.length > 0) {
+    if (acceptanceTest && tasks.length > 0) {
       const message = 'User story has unfinished tasks.';
       this.logger.warn(message);
       throw new ForbiddenException(message);
@@ -155,7 +153,7 @@ export class UserStoriesService {
     return this.prisma.userStory.update({
       where: { id },
       data: {
-        accepted: acceptedValue,
+        acceptanceTest: acceptanceTest,
       },
     });
   }
@@ -169,7 +167,7 @@ export class UserStoriesService {
       throw new NotFoundException(message);
     }
 
-    if (userStory.sprintId != null || userStory.accepted) {
+    if (userStory.sprintId != null || userStory.acceptanceTest) {
       const message = `User story can't be deleted.`;
       this.logger.warn(message);
       throw new ForbiddenException(message);
@@ -208,7 +206,7 @@ export class UserStoriesService {
       where: {
         id: { in: data.stories },
         deletedAt: null,
-        accepted: false,
+        acceptanceTest: false,
         sprintId: null,
         points: { not: null },
       },

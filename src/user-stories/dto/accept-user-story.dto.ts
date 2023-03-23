@@ -1,6 +1,6 @@
-import { IsInt, IsBoolean } from 'class-validator';
+import { IsBoolean } from 'class-validator';
 
 export class AcceptUserStoryDto {
   @IsBoolean()
-  accepted: boolean;
+  acceptanceTest: boolean;
 }
