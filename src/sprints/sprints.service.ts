@@ -1,7 +1,14 @@
-import { BadRequestException, ConflictException, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
-import { SprintDto } from "./dto/sprint.dto";
-import { PrismaService } from "nestjs-prisma";
-import { Role, Sprint } from "@prisma/client";
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { SprintDto } from './dto/sprint.dto';
+import { PrismaService } from 'nestjs-prisma';
+import { Role, Sprint } from '@prisma/client';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class SprintsService {
@@ -131,6 +138,16 @@ export class SprintsService {
     }
     if (await this.checkConflict(data)) {
       const message = `Sprint overlaps with another sprint.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
+    if ([0, 6].includes(dayjs(data.start).day())) {
+      const message = `Sprint starts on weekend.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
+    if ([0, 6].includes(dayjs(data.end).day())) {
+      const message = `Sprint ends on weekend.`;
       this.logger.warn(message);
       throw new ConflictException(message);
     }
