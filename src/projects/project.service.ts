@@ -87,6 +87,12 @@ export class ProjectService {
       throw new ConflictException(message);
     }
 
+    if (data.projectOwnerId == data.scrumMasterId) {
+      const message = `The same person can't be project owner and scrum master.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
+
     return this.prisma.project.create({
       data,
     });
@@ -94,7 +100,7 @@ export class ProjectService {
 
   async update(params: {
     where: Prisma.ProjectWhereUniqueInput;
-    data: Prisma.ProjectUpdateInput;
+    data: ProjectDto;
   }) {
     const { where, data } = params;
     const project = await this.findOne(where);
@@ -115,6 +121,12 @@ export class ProjectService {
 
       if (exists) {
         const message = `Project already exists.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
+      }
+
+      if (data.projectOwnerId === data.scrumMasterId) {
+        const message = `The same person can't be project owner and scrum master.`;
         this.logger.warn(message);
         throw new ConflictException(message);
       }
