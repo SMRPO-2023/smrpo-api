@@ -22,7 +22,6 @@ function getPriority(i: number) {
 }
 
 async function main() {
-  await prisma.acceptanceCriteria.deleteMany();
   await prisma.userStory.deleteMany();
   await prisma.sprint.deleteMany();
   await prisma.projectDeveloper.deleteMany();
@@ -57,9 +56,32 @@ async function main() {
       username: 'simpsonb',
     },
   });
+  const user3 = await prisma.user.create({
+    data: {
+      email: 'john@simpson.com',
+      firstname: 'John',
+      lastname: 'Simpson',
+      // cspell:disable-next-line -- disables checking till the end of the next line.
+      password: '$2b$10$DRzCId0X0guJa7wtynJ0FOrAijm7IY9l2Ora9KygCK4lwH1lSvV12', // secret12345678
+      role: 'USER',
+      username: 'simpsonj',
+    },
+  });
+
+  const user4 = await prisma.user.create({
+    data: {
+      email: 'sara@simpson.com',
+      firstname: 'Sara',
+      lastname: 'Simpson',
+      // cspell:disable-next-line -- disables checking till the end of the next line.
+      password: '$2b$10$DRzCId0X0guJa7wtynJ0FOrAijm7IY9l2Ora9KygCK4lwH1lSvV12', // secret12345678
+      role: 'USER',
+      username: 'simpsons',
+    },
+  });
 
   // const projects = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 4; i++) {
     const users = [];
     for (let i = 0; i < 2; i++) {
       const fn = faker.name.firstName();
@@ -111,45 +133,53 @@ async function main() {
       });
     }
 
-    let startdate = faker.date.past();
-    for (let s = 0; s < +faker.random.numeric(); s++) {
+    for (let s = 0; s < +faker.datatype.number({ min: 1, max: 8 }); s++) {
+      let startdate = faker.date.past();
       const sprint = await prisma.sprint.create({
         data: {
-          start: faker.date.past(0, startdate),
-          end: faker.date.future(0, startdate),
-          velocity: 5,
+          start: startdate,
+          end: faker.date.soon(14, startdate),
+          velocity: +faker.datatype.number({ min: 2, max: 15 }),
           projectId: project.id,
           name: `sprint ${s}`,
         },
       });
       startdate = faker.date.past(0, startdate);
 
-      for (let us = 0; us < 15; us++) {
+      for (let us = 0; us < 10; us++) {
+        let sprintRelation = {};
+        if (+faker.datatype.number({ min: 1, max: 3 }) < 2) {
+          sprintRelation = {
+            Sprint: { connect: { id: sprint.id } },
+          };
+        }
+
         const story = await prisma.userStory.create({
           data: {
+            ...sprintRelation,
             priority: getPriority(+faker.random.numeric() % 4),
             title: faker.random.words(4),
             description: faker.random.words(40),
-            points: +faker.random.numeric(),
-            businessValue: +faker.random.numeric(),
+            acceptanceCriteria: faker.random.words(40),
+            points: +faker.datatype.number({ min: 4, max: 15 }),
+            businessValue: +faker.datatype.number({ min: 1, max: 7 }),
             project: { connect: { id: project.id } },
-            Sprint:
-              +faker.random.numeric() < 2
-                ? { connect: { id: sprint.id } }
-                : undefined,
+            accepted:
+              +faker.datatype.number({ min: 1, max: 5 }) < 3 ? true : false,
           },
         });
 
-        for (let ac = 0; ac < 3; ac++) {
-          await prisma.acceptanceCriteria.create({
-            data: {
-              userStoryId: story.id,
-              title: faker.random.words(4),
-              description: faker.random.words(20),
-              completed: false,
-            },
-          });
-        }
+        // for (let ac = 0; ac < 3; ac++) {
+        //   await prisma.acceptanceCriteria.create({
+        //     data: {
+        //       userStoryId: story.id,
+        //       title: faker.random.words(4),
+        //       description: faker.random.words(20),
+        //       completed:
+        //         +faker.datatype.number({ min: 1, max: 5 }) < 4 ? true : false,
+        //     },
+        //   });
+        // }
       }
     }
   }

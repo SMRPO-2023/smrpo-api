@@ -9,6 +9,7 @@ import {
 import { PrismaService } from 'nestjs-prisma';
 import { UserStoryDto } from './dto/user-story.dto';
 import { StoryListDto } from './dto/story-list.dto';
+import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
 
 @Injectable()
 export class UserStoriesService {
@@ -46,13 +47,6 @@ export class UserStoriesService {
     }
     return this.prisma.userStory.findMany({
       where,
-      include: {
-        acceptanceCriteria: {
-          where: {
-            deletedAt: null,
-          },
-        },
-      },
     });
   }
 
@@ -61,19 +55,7 @@ export class UserStoriesService {
       where: {
         projectId: projectId,
         deletedAt: null,
-        implemented: true,
-        acceptanceCriteria: {
-          every: {
-            OR: [{ completed: true }, { NOT: { deletedAt: null } }],
-          },
-        },
-      },
-      include: {
-        acceptanceCriteria: {
-          where: {
-            deletedAt: null,
-          },
-        },
+        acceptanceTest: true,
       },
     });
   }
@@ -84,46 +66,20 @@ export class UserStoriesService {
         projectId: projectId,
         deletedAt: null,
         sprintId: null,
-        NOT: {
-          implemented: true,
-          acceptanceCriteria: {
-            every: {
-              OR: [{ completed: true }, { NOT: { deletedAt: null } }],
-            },
-          },
-        },
-      },
-      include: {
-        acceptanceCriteria: {
-          where: {
-            deletedAt: null,
-          },
-        },
+        acceptanceTest: false,
       },
     });
   }
 
-  async findUnrealizedWithSprint(id: number) {
+  async findUnrealizedWithSprint(projectId: number) {
     return this.prisma.userStory.findMany({
       where: {
-        projectId: id,
+        projectId: projectId,
         deletedAt: null,
         NOT: {
           sprintId: null,
-          implemented: true,
-          acceptanceCriteria: {
-            every: {
-              OR: [{ completed: true }, { NOT: { deletedAt: null } }],
-            },
-          },
         },
-      },
-      include: {
-        acceptanceCriteria: {
-          where: {
-            deletedAt: null,
-          },
-        },
+        acceptanceTest: false,
       },
     });
   }
@@ -133,13 +89,6 @@ export class UserStoriesService {
       where: {
         id,
         deletedAt: null,
-      },
-      include: {
-        acceptanceCriteria: {
-          where: {
-            deletedAt: null,
-          },
-        },
       },
     });
   }
@@ -153,21 +102,10 @@ export class UserStoriesService {
       throw new NotFoundException(message);
     }
 
-    if (
-      data.priority != userStory.priority ||
-      data.businessValue != userStory.businessValue ||
-      data.description != userStory.description ||
-      data.points != userStory.points ||
-      data.priority != userStory.priority ||
-      data.title != userStory.title ||
-      data.sprintId != userStory.sprintId ||
-      data.projectId != userStory.projectId
-    ) {
-      if (userStory.sprintId != null || userStory.implemented) {
-        const message = `User story can't be changed.`;
-        this.logger.warn(message);
-        throw new ForbiddenException(message);
-      }
+    if (userStory.sprintId != null || userStory.acceptanceTest) {
+      const message = `User story can't be changed.`;
+      this.logger.warn(message);
+      throw new ForbiddenException(message);
     }
 
     const project = await this.prisma.project.findUnique({
@@ -175,11 +113,49 @@ export class UserStoriesService {
     });
 
     if (userId != project.projectOwnerId && userId != project.scrumMasterId) {
-      const message = `User doesn't have access to the project.`;
+      const message = `Missing access right.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
     }
     return this.prisma.userStory.update({ where: { id }, data });
+  }
+
+  async accept(id: number, data: AcceptUserStoryDto, userId: number) {
+    const userStory = await this.findOne(id);
+    const acceptanceTest = data.acceptanceTest;
+
+    if (!userStory) {
+      const message = 'User story not found.';
+      this.logger.warn(message);
+      throw new NotFoundException(message);
+    }
+
+    const project = await this.prisma.project.findUnique({
+      where: { id: userStory.projectId },
+    });
+
+    if (userId != project.projectOwnerId) {
+      const message = `User is not the project owner.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
+
+    const tasks = await this.prisma.task.findMany({
+      where: { userStoryId: id, done: false },
+    });
+
+    if (acceptanceTest && tasks.length > 0) {
+      const message = 'User story has unfinished tasks.';
+      this.logger.warn(message);
+      throw new ForbiddenException(message);
+    }
+
+    return this.prisma.userStory.update({
+      where: { id },
+      data: {
+        acceptanceTest: acceptanceTest,
+      },
+    });
   }
 
   async remove(id: number, userId: number) {
@@ -191,7 +167,7 @@ export class UserStoriesService {
       throw new NotFoundException(message);
     }
 
-    if (userStory.sprintId != null || userStory.implemented) {
+    if (userStory.sprintId != null || userStory.acceptanceTest) {
       const message = `User story can't be deleted.`;
       this.logger.warn(message);
       throw new ForbiddenException(message);
@@ -230,7 +206,7 @@ export class UserStoriesService {
       where: {
         id: { in: data.stories },
         deletedAt: null,
-        implemented: false,
+        acceptanceTest: false,
         sprintId: null,
         points: { not: null },
       },

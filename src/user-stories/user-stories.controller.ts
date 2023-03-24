@@ -17,6 +17,7 @@ import { UserEntity } from 'src/common/decorators/user.decorator';
 import { User } from 'src/users/models/user.model';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
 import { StoryListDto } from './dto/story-list.dto';
+import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
 
 @Controller('user-stories')
 @ApiTags('User stories')
@@ -32,26 +33,26 @@ export class UserStoriesController {
 
   @Get()
   @ApiQuery({ name: 'sprintId', required: false, type: Number })
-  @ApiQuery({ name: 'projectId', required: false, type: Number })
-  findAll(@Query('sprintId') sid?: string, @Query('projectId') pid?: string) {
+  @ApiQuery({ name: 'project-id', required: false, type: Number })
+  findAll(@Query('sprintId') sid?: string, @Query('project-id') pid?: string) {
     return this.userStoriesService.findAll(+pid, +sid);
   }
 
   @Get('realized')
   @ApiQuery({ name: 'project-id', required: true, type: Number })
-  findRealized(projectId: number) {
+  findRealized(@Query('project-id') projectId: number) {
     return this.userStoriesService.findRealized(projectId);
   }
 
   @Get('unrealized-without-sprint')
   @ApiQuery({ name: 'project-id', required: true, type: Number })
-  findUnrealized(projectId: number) {
+  findUnrealized(@Query('project-id') projectId: number) {
     return this.userStoriesService.findUnrealizedWithoutSprint(projectId);
   }
 
   @Get('unrealized-with-sprint')
   @ApiQuery({ name: 'project-id', required: true, type: Number })
-  findUnrealizedWithSprint(projectId: number) {
+  findUnrealizedWithSprint(@Query('project-id') projectId: number) {
     return this.userStoriesService.findUnrealizedWithSprint(projectId);
   }
 
@@ -60,13 +61,22 @@ export class UserStoriesController {
     return this.userStoriesService.findOne(id);
   }
 
-  @Patch(':id')
+  @Post(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @UserEntity() user: User,
     @Body() updateUserStoryDto: UserStoryDto
   ) {
     return this.userStoriesService.update(+id, updateUserStoryDto, user.id);
+  }
+
+  @Patch('accept:id')
+  accept(
+    @Param('id', ParseIntPipe) id: number,
+    @UserEntity() user: User,
+    @Body() updateUserStoryDto: AcceptUserStoryDto
+  ) {
+    return this.userStoriesService.accept(+id, updateUserStoryDto, user.id);
   }
 
   @Delete(':id')

@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { StoryPriority } from '@prisma/client';
-import { AcceptanceCriteria } from 'src/acceptance-criteria/models/acceptance-criteria.model';
 import { BaseModel } from 'src/common/models/base.model';
 import { Project } from 'src/projects/models/project.model';
 import { Sprint } from 'src/sprints/models/sprint.model';
@@ -17,17 +16,17 @@ export class UserStory extends BaseModel {
   @ApiProperty({ type: String })
   title: string;
 
-  @ApiPropertyOptional({ type: String })
+  @ApiProperty({ type: String })
   description: string;
 
   @ApiProperty({ enum: StoryPriority, enumName: 'StoryPriority' })
   priority: StoryPriority;
 
   @ApiPropertyOptional({ type: Number })
-  points: number;
+  points?: number;
 
   @ApiProperty({ type: Boolean })
-  implemented: boolean;
+  acceptanceTest: boolean;
 
   @ApiProperty({ type: Number })
   projectId: number;
@@ -35,8 +34,8 @@ export class UserStory extends BaseModel {
   @ApiPropertyOptional({ type: Number })
   sprintId?: number;
 
-  @ApiProperty({ isArray: true, type: () => AcceptanceCriteria })
-  acceptanceCriteria: AcceptanceCriteria[];
+  @ApiProperty({ type: String })
+  acceptanceCriteria: string;
 
   @ApiProperty({ isArray: true, type: () => StoryComment })
   comments: StoryComment[];

@@ -23,8 +23,8 @@ export class Task {
   @ApiProperty({ type: Number })
   hours: number;
 
-  @ApiProperty({ type: Boolean })
-  accepted: boolean;
+  @ApiPropertyOptional({ type: Boolean })
+  done: boolean;
 
   @ApiProperty({ enum: TaskStatus, enumName: 'TaskStatus' })
   status: TaskStatus = TaskStatus.UNASSIGNED;

@@ -14,21 +14,21 @@ export class UserStoryDto {
   @IsString()
   title: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   description: string;
 
   @ApiProperty({ enum: StoryPriority, enumName: 'StoryPriority' })
   priority: StoryPriority;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsInt()
   @Min(0.1)
   @Max(20)
-  points: number;
+  points?: number;
 
   @IsOptional()
-  implemented: boolean;
+  acceptanceTest: boolean;
 
   @IsInt()
   projectId: number;
@@ -42,4 +42,8 @@ export class UserStoryDto {
   @Min(1)
   @Max(10)
   businessValue: number;
+
+  @IsNotEmpty()
+  @IsString()
+  acceptanceCriteria: string;
 }

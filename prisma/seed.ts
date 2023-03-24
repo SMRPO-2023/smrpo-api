@@ -187,6 +187,7 @@ async function main() {
       businessValue: 0,
       projectId: project3.id,
       sprintId: sprint1.id,
+      acceptanceCriteria: 'acceptanceCriteria',
     },
   });
 
@@ -199,6 +200,7 @@ async function main() {
       businessValue: 1,
       projectId: project2.id,
       sprintId: sprint2.id,
+      acceptanceCriteria: 'acceptanceCriteria',
     },
   });
 
@@ -211,6 +213,7 @@ async function main() {
       businessValue: 5,
       projectId: project1.id,
       sprintId: sprint3.id,
+      acceptanceCriteria: 'acceptanceCriteria',
     },
   });
 
@@ -222,6 +225,7 @@ async function main() {
       points: 7,
       businessValue: 5,
       projectId: project1.id,
+      acceptanceCriteria: 'acceptanceCriteria',
     },
   });
 
@@ -233,6 +237,7 @@ async function main() {
       points: 7,
       businessValue: 5,
       projectId: project1.id,
+      acceptanceCriteria: 'acceptanceCriteria',
     },
   });
 
@@ -245,6 +250,7 @@ async function main() {
       businessValue: 5,
       projectId: project1.id,
       sprintId: sprint3.id,
+      acceptanceCriteria: 'acceptanceCriteria',
     },
   });
 
@@ -257,6 +263,7 @@ async function main() {
       businessValue: 5,
       projectId: project1.id,
       sprintId: sprint3.id,
+      acceptanceCriteria: 'acceptanceCriteria',
     },
   });
 
@@ -269,6 +276,7 @@ async function main() {
       businessValue: 5,
       projectId: project1.id,
       sprintId: sprint3.id,
+      acceptanceCriteria: 'acceptanceCriteria',
     },
   });
 
@@ -281,164 +289,7 @@ async function main() {
       businessValue: 5,
       projectId: project1.id,
       sprintId: sprint3.id,
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story8.id,
-      title: 'criteria 1',
-      description: 'criteria 1 description',
-      completed: true,
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story8.id,
-      title: 'criteria 1',
-      description: 'criteria 1 description',
-      completed: false,
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story8.id,
-      title: 'criteria 1',
-      description: 'criteria 1 description',
-      completed: false,
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story7.id,
-      title: 'criteria 1',
-      description: 'criteria 1 description',
-      completed: false,
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story7.id,
-      title: 'criteria 1',
-      description: 'criteria 1 description',
-      completed: false,
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story7.id,
-      title: 'criteria 1',
-      description: 'criteria 1 description',
-      completed: false,
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story6.id,
-      title: 'criteria 1',
-      description: 'criteria 1 description',
-      completed: false,
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story6.id,
-      title: 'criteria 1',
-      description: 'criteria 1 description',
-      completed: true,
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story6.id,
-      title: 'criteria 1',
-      description: 'criteria 1 description',
-      completed: false,
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story6.id,
-      title: 'criteria 1',
-      description: 'criteria 1 description',
-      completed: false,
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story5.id,
-      title: 'criteria 1',
-      description: 'criteria 1 description',
-      completed: true,
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story5.id,
-      title: 'criteria 1',
-      description: 'criteria 1 description',
-      completed: true,
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story4.id,
-      title: 'criteria 1',
-      description: 'criteria 1 description',
-      completed: true,
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story4.id,
-      title: 'criteria 1',
-      description: 'criteria 1 description',
-      completed: true,
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story1.id,
-      title: 'criteria 1',
-      description: 'criteria 1 description',
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story1.id,
-      title: 'criteria 2',
-      description: 'criteria 2 description',
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story2.id,
-      title: 'criteria 3',
-      description: 'criteria 3 description',
-    },
-  });
-
-  await prisma.acceptanceCriteria.create({
-    data: {
-      userStoryId: story3.id,
-      title: 'criteria 3',
-      description: 'criteria 3 description',
+      acceptanceCriteria: 'acceptanceCriteria',
     },
   });
 
