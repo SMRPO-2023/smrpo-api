@@ -159,7 +159,7 @@ async function main() {
             points: +faker.datatype.number({ min: 4, max: 15 }),
             businessValue: +faker.datatype.number({ min: 1, max: 7 }),
             project: { connect: { id: project.id } },
-            accepted:
+            acceptanceTest:
               +faker.datatype.number({ min: 1, max: 5 }) < 3 ? true : false,
           },
         });
