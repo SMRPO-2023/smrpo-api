@@ -32,6 +32,8 @@ export class SprintsService {
       this.logger.warn(message);
       throw new ConflictException(message);
     }
+    data.start = dayjs(data.start).startOf('day').toDate();
+    data.end = dayjs(data.end).endOf('day').toDate();
     await this.checkPermission(data, userId);
     await this.validateSprint(data);
     return this.prisma.sprint.create({ data });
@@ -90,6 +92,8 @@ export class SprintsService {
         throw new ConflictException(message);
       }
     }
+    data.start = dayjs(data.start).startOf('day').toDate();
+    data.end = dayjs(data.end).endOf('day').toDate();
 
     if (
       oldSprint.start.getTime() != data.start.getTime() ||
@@ -118,20 +122,14 @@ export class SprintsService {
     });
   }
 
-  getDaysDelta(date_1: Date, date_2: Date): number {
-    const difference = date_1.getTime() - date_2.getTime();
-    const TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
-    return TotalDays;
-  }
-
   async validateSprint(data: SprintDto): Promise<void> {
     this.logger.debug('Validating sprint.');
-    if (this.getDaysDelta(data.start, new Date()) < 1) {
+    if (dayjs(data.start).isAfter(dayjs())) {
       const message = `Sprint doesn't start in the future.`;
       this.logger.warn(message);
       throw new BadRequestException(message);
     }
-    if (this.getDaysDelta(data.end, data.start) < 0) {
+    if (dayjs(data.end).isBefore(dayjs())) {
       const message = `Sprint ends before it starts.`;
       this.logger.warn(message);
       throw new BadRequestException(message);
