@@ -39,6 +39,7 @@ export class AuthService {
       return this.generateTokens({
         userId: user.id,
         role: user.role,
+        firstLogin: true,
       });
     } catch (e) {
       if (
@@ -102,6 +103,7 @@ export class AuthService {
     return this.generateTokens({
       userId: user.id,
       role: user.role,
+      firstLogin: user.lastLogin == null,
     });
   }
 
@@ -116,13 +118,18 @@ export class AuthService {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
-  generateTokens(payload: { userId: number; role: string }): Token {
+  generateTokens(payload: {
+    userId: number;
+    role: string;
+    firstLogin: boolean;
+  }): Token {
     this.logger.log(`Generating tokens for user ${payload.userId}.`);
     return {
       userId: payload.userId,
       role: payload.role,
       accessToken: this.generateAccessToken(payload),
       refreshToken: this.generateRefreshToken(payload),
+      firstLogin: payload.firstLogin,
     };
   }
 
@@ -150,6 +157,7 @@ export class AuthService {
       return this.generateTokens({
         userId,
         role,
+        firstLogin: false,
       });
     } catch (e) {
       this.logger.error(
