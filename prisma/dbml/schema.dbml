@@ -139,14 +139,14 @@ Table Project {
   deletedAt DateTime
   title String
   documentation String
-  projectOwner User
-  scrumMaster User
+  projectOwner User [not null]
+  scrumMaster User [not null]
   developers ProjectDeveloper [not null]
   sprints Sprint [not null]
   posts Post [not null]
   UserStory UserStory [not null]
-  projectOwnerId Int
-  scrumMasterId Int
+  projectOwnerId Int [not null]
+  scrumMasterId Int [not null]
 }
 
 Enum Role {

@@ -167,12 +167,12 @@ model Project {
   deletedAt      DateTime?
   title          String?
   documentation  String?
-  projectOwner   User?              @relation(fields: [projectOwnerId], references: [id], name: "UserProjectOwner")
-  scrumMaster    User?              @relation(fields: [scrumMasterId], references: [id], name: "UserScrumMaster")
+  projectOwner   User               @relation(fields: [projectOwnerId], references: [id], name: "UserProjectOwner")
+  scrumMaster    User               @relation(fields: [scrumMasterId], references: [id], name: "UserScrumMaster")
   developers     ProjectDeveloper[]
   sprints        Sprint[]
   posts          Post[]
   UserStory      UserStory[]
-  projectOwnerId Int?
-  scrumMasterId  Int?
+  projectOwnerId Int
+  scrumMasterId  Int
 }
