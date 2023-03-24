@@ -1,18 +1,13 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { SprintDto } from './dto/sprint.dto';
-import { PrismaService } from 'nestjs-prisma';
-import { Sprint } from '@prisma/client';
+import { BadRequestException, ConflictException, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
+import { SprintDto } from "./dto/sprint.dto";
+import { PrismaService } from "nestjs-prisma";
+import { Role, Sprint } from "@prisma/client";
 
 @Injectable()
 export class SprintsService {
   private readonly logger = new Logger(SprintsService.name);
   constructor(private prisma: PrismaService) {}
+
   async create(data: SprintDto, userId: number) {
     const exists = await this.prisma.sprint.findFirst({
       where: {
@@ -143,27 +138,15 @@ export class SprintsService {
 
   async checkConflict(data: SprintDto): Promise<Sprint> {
     this.logger.debug('checking sprint conflict.');
-    const response = await this.prisma.sprint.findFirst({
+    return this.prisma.sprint.findFirst({
       where: {
         projectId: data.projectId,
         OR: [
-          {
-            start: {
-              gte: data.start,
-              lte: data.end,
-            },
-          },
-          {
-            end: {
-              gte: data.start,
-              lte: data.end,
-            },
-          },
+          { end: { gte: data.start }, start: { lte: data.end } },
+          { end: { gte: data.start }, start: { lte: data.end } },
         ],
       },
     });
-    console.log(response);
-    return response;
   }
 
   async checkPermission(data: SprintDto, userId: number): Promise<void> {
@@ -171,7 +154,10 @@ export class SprintsService {
     const project = await this.prisma.project.findFirst({
       where: { id: data.projectId },
     });
-    if (userId != project.scrumMasterId) {
+    const user = await this.prisma.user.findFirstOrThrow({
+      where: { id: userId },
+    });
+    if (userId !== project.scrumMasterId && user.role !== Role.ADMIN) {
       const message = `User isn't the scrum master.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
