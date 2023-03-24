@@ -19,6 +19,7 @@ export class UserStoriesService {
   async create(data: UserStoryDto, userId: number) {
     const exists = await this.prisma.userStory.findFirst({
       where: {
+        projectId: data.projectId,
         deletedAt: null,
         title: {
           equals: data.title,
@@ -131,6 +132,7 @@ export class UserStoriesService {
     if (data.title != null) {
       const exists = await this.prisma.userStory.findFirst({
         where: {
+          projectId: data.projectId,
           deletedAt: null,
           NOT: { id },
           title: {
