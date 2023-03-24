@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   UseGuards,
   Query,
+  Put,
 } from '@nestjs/common';
 import { UserStoriesService } from './user-stories.service';
 import { UserStoryDto } from './dto/user-story.dto';
@@ -61,7 +62,7 @@ export class UserStoriesController {
     return this.userStoriesService.findOne(id);
   }
 
-  @Post(':id')
+  @Put(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @UserEntity() user: User,

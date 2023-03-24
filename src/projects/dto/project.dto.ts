@@ -1,10 +1,4 @@
-import {
-  IsNotEmpty,
-  IsInt,
-  IsOptional,
-  IsString,
-  MinLength,
-} from 'class-validator';
+import { IsNotEmpty, IsInt, IsString, MinLength } from 'class-validator';
 
 export class ProjectDto {
   @IsNotEmpty()
@@ -12,8 +6,8 @@ export class ProjectDto {
   @IsString()
   title: string;
 
-  @IsOptional()
   @IsString()
+  @IsNotEmpty()
   documentation: string;
 
   @IsInt()

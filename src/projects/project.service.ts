@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { Prisma } from '@prisma/client';
+import { ProjectDto } from './dto/project.dto';
 
 @Injectable()
 export class ProjectService {
@@ -69,15 +70,29 @@ export class ProjectService {
     });
   }
 
-  async create(data: Prisma.ProjectCreateInput) {
+  async create(data: ProjectDto) {
     const exists = await this.prisma.project.findFirst({
-      where: { title: data.title },
+      where: {
+        deletedAt: null,
+        title: {
+          equals: data.title,
+          mode: 'insensitive',
+        },
+      },
     });
+
     if (exists) {
       const message = `Project already exists.`;
       this.logger.warn(message);
       throw new ConflictException(message);
     }
+
+    if (data.projectOwnerId == data.scrumMasterId) {
+      const message = `The same person can't be project owner and scrum master.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
+
     return this.prisma.project.create({
       data,
     });
@@ -85,13 +100,38 @@ export class ProjectService {
 
   async update(params: {
     where: Prisma.ProjectWhereUniqueInput;
-    data: Prisma.ProjectUpdateInput;
+    data: ProjectDto;
   }) {
     const { where, data } = params;
     const project = await this.findOne(where);
     if (!project) {
       throw new BadRequestException('Object is deleted');
     }
+    if (data.title != null) {
+      const exists = await this.prisma.project.findFirst({
+        where: {
+          deletedAt: null,
+          NOT: { id: where.id },
+          title: {
+            equals: data.title.toString(),
+            mode: 'insensitive',
+          },
+        },
+      });
+
+      if (exists) {
+        const message = `Project already exists.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
+      }
+
+      if (data.projectOwnerId === data.scrumMasterId) {
+        const message = `The same person can't be project owner and scrum master.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
+      }
+    }
+
     return this.prisma.project.update({
       data,
       where,

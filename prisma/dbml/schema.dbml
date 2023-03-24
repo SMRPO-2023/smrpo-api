@@ -35,6 +35,7 @@ Table Sprint {
   projectId Int
   UserStories UserStory [not null]
   name String
+  tasks Task [not null]
 }
 
 Table StoryComment {
@@ -55,14 +56,16 @@ Table Task {
   updatedAt DateTime [not null]
   deletedAt DateTime
   title String [not null]
-  description String
+  description String [not null]
   hours Int [not null]
   done Boolean [not null, default: false]
   status TaskStatus [not null, default: 'UNASSIGNED']
   assignedTo User
   userId Int
   timeLogs TimeLog [not null]
-  userStory UserStory
+  Sprint Sprint
+  sprintId Int
+  UserStory UserStory
   userStoryId Int
 }
 
@@ -134,16 +137,16 @@ Table Project {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   deletedAt DateTime
-  title String
-  documentation String
-  projectOwner User
-  scrumMaster User
+  title String [not null]
+  documentation String [not null]
+  projectOwner User [not null]
+  scrumMaster User [not null]
   developers ProjectDeveloper [not null]
   sprints Sprint [not null]
   posts Post [not null]
   UserStory UserStory [not null]
-  projectOwnerId Int
-  scrumMasterId Int
+  projectOwnerId Int [not null]
+  scrumMasterId Int [not null]
 }
 
 Enum Role {
@@ -172,6 +175,8 @@ Ref: StoryComment.userId > User.id
 Ref: StoryComment.userStoryId > UserStory.id
 
 Ref: Task.userId > User.id
+
+Ref: Task.sprintId > Sprint.id
 
 Ref: Task.userStoryId > UserStory.id
 

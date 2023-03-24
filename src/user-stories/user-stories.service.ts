@@ -18,8 +18,15 @@ export class UserStoriesService {
 
   async create(data: UserStoryDto, userId: number) {
     const exists = await this.prisma.userStory.findFirst({
-      where: { title: data.title },
+      where: {
+        deletedAt: null,
+        title: {
+          equals: data.title,
+          mode: 'insensitive',
+        },
+      },
     });
+
     if (exists) {
       const message = `User story already exists.`;
       this.logger.warn(message);
@@ -45,9 +52,18 @@ export class UserStoriesService {
     if (sprintId) {
       where['sprintId'] = sprintId;
     }
-    return this.prisma.userStory.findMany({
+    const data = await this.prisma.userStory.findMany({
       where,
     });
+
+    const returnStories = [];
+    for (const tempStory of data) {
+      returnStories.push({
+        ...tempStory,
+        ...(await this.canBeAccepted(tempStory.id)),
+      });
+    }
+    return returnStories;
   }
 
   async findRealized(projectId: number) {
@@ -72,7 +88,7 @@ export class UserStoriesService {
   }
 
   async findUnrealizedWithSprint(projectId: number) {
-    return this.prisma.userStory.findMany({
+    const data = await this.prisma.userStory.findMany({
       where: {
         projectId: projectId,
         deletedAt: null,
@@ -82,15 +98,25 @@ export class UserStoriesService {
         acceptanceTest: false,
       },
     });
+
+    const returnStories = [];
+    for (const tempStory of data) {
+      returnStories.push({
+        ...tempStory,
+        ...(await this.canBeAccepted(tempStory.id)),
+      });
+    }
+    return returnStories;
   }
 
   async findOne(id: number) {
-    return this.prisma.userStory.findFirst({
+    const data = await this.prisma.userStory.findFirst({
       where: {
         id,
         deletedAt: null,
       },
     });
+    return { ...data, ...(await this.canBeAccepted((id = id))) };
   }
 
   async update(id: number, data: UserStoryDto, userId: number) {
@@ -100,6 +126,25 @@ export class UserStoriesService {
       const message = 'User story not found.';
       this.logger.debug(message);
       throw new NotFoundException(message);
+    }
+
+    if (data.title != null) {
+      const exists = await this.prisma.userStory.findFirst({
+        where: {
+          deletedAt: null,
+          NOT: { id },
+          title: {
+            equals: data.title.toString(),
+            mode: 'insensitive',
+          },
+        },
+      });
+
+      if (exists) {
+        const message = `User story already exists.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
+      }
     }
 
     if (userStory.sprintId != null || userStory.acceptanceTest) {
@@ -156,6 +201,19 @@ export class UserStoriesService {
         acceptanceTest: acceptanceTest,
       },
     });
+  }
+
+  async canBeAccepted(id: number) {
+    let canBeAccepted = true;
+
+    const tasks = await this.prisma.task.findMany({
+      where: { userStoryId: id, done: false },
+    });
+
+    if (tasks.length > 0) {
+      canBeAccepted = false;
+    }
+    return { canBeAccepted };
   }
 
   async remove(id: number, userId: number) {
