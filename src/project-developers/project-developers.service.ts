@@ -43,6 +43,18 @@ export class ProjectDevelopersService {
         data: { deletedAt: null },
       });
     }
+    const project = await this.prisma.project.findFirst({
+      where: {
+        id: data.projectId,
+      },
+    });
+
+    if (project.projectOwnerId == data.userId) {
+      const message = `The project owner can't be a developer.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
+
     return this.prisma.projectDeveloper.create({ data }).catch((e) => {
       if (
         e instanceof Prisma.PrismaClientKnownRequestError &&
