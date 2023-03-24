@@ -31,21 +31,27 @@ export class UsersService {
   async createUser(payload: CreateUserDto): Promise<User | never> {
     this.logger.debug(`Creating user ${payload.email}.`);
 
-    const existingUser = await this.prisma.user.findFirst({
+    const exists = await this.prisma.user.findFirst({
       where: {
         deletedAt: null,
-        email: {
-          equals: payload.email,
-          mode: 'insensitive',
-        },
-        username: {
-          equals: payload.username,
-          mode: 'insensitive',
-        },
+        OR: [
+          {
+            email: {
+              equals: payload.email,
+              mode: 'insensitive',
+            },
+          },
+          {
+            username: {
+              equals: payload.username,
+              mode: 'insensitive',
+            },
+          },
+        ],
       },
     });
 
-    if (existingUser) {
+    if (exists) {
       const message = `User already exists.`;
       this.logger.warn(message);
       throw new ConflictException(message);
@@ -79,24 +85,30 @@ export class UsersService {
   async updateUser(userId: number, data: UpdateUserDto) {
     this.logger.debug(`Updating user ${userId}.`);
 
-    const existingUser = await this.prisma.user.findFirst({
+    const exists = await this.prisma.user.findFirst({
       where: {
         deletedAt: null,
-        email: {
-          equals: data.email,
-          mode: 'insensitive',
-        },
-        username: {
-          equals: data.username,
-          mode: 'insensitive',
-        },
+        OR: [
+          {
+            email: {
+              equals: data.email,
+              mode: 'insensitive',
+            },
+          },
+          {
+            username: {
+              equals: data.username,
+              mode: 'insensitive',
+            },
+          },
+        ],
         NOT: {
           id: userId,
         },
       },
     });
 
-    if (existingUser) {
+    if (exists) {
       const message = `User already exists.`;
       this.logger.warn(message);
       throw new ConflictException(message);
