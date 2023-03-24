@@ -3,6 +3,11 @@ import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
 
+// TODO:
+// TODO: Before seed run this in terminal
+// TODO:
+// npx prisma migrate reset
+
 function getPriority(i: number) {
   switch (i) {
     case 0:
@@ -159,8 +164,7 @@ async function main() {
             points: +faker.datatype.number({ min: 4, max: 15 }),
             businessValue: +faker.datatype.number({ min: 1, max: 7 }),
             project: { connect: { id: project.id } },
-            acceptanceTest:
-              +faker.datatype.number({ min: 1, max: 5 }) < 3 ? true : false,
+            acceptanceTest: +faker.datatype.number({ min: 1, max: 5 }) < 3,
           },
         });
 
