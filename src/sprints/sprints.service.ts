@@ -17,6 +17,7 @@ export class SprintsService {
     const exists = await this.prisma.sprint.findFirst({
       where: {
         deletedAt: null,
+        projectId: data.projectId,
         name: {
           equals: data.name,
           mode: 'insensitive',
@@ -73,6 +74,7 @@ export class SprintsService {
         where: {
           deletedAt: null,
           NOT: { id },
+          projectId: oldSprint.projectId,
           name: {
             equals: data.name.toString(),
             mode: 'insensitive',
