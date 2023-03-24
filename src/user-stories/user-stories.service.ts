@@ -18,8 +18,15 @@ export class UserStoriesService {
 
   async create(data: UserStoryDto, userId: number) {
     const exists = await this.prisma.userStory.findFirst({
-      where: { title: data.title },
+      where: {
+        deletedAt: null,
+        title: {
+          equals: data.title,
+          mode: 'insensitive',
+        },
+      },
     });
+
     if (exists) {
       const message = `User story already exists.`;
       this.logger.warn(message);
@@ -119,6 +126,25 @@ export class UserStoriesService {
       const message = 'User story not found.';
       this.logger.debug(message);
       throw new NotFoundException(message);
+    }
+
+    if (data.title != null) {
+      const exists = await this.prisma.userStory.findFirst({
+        where: {
+          deletedAt: null,
+          NOT: { id },
+          title: {
+            equals: data.title.toString(),
+            mode: 'insensitive',
+          },
+        },
+      });
+
+      if (exists) {
+        const message = `User story already exists.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
+      }
     }
 
     if (userStory.sprintId != null || userStory.acceptanceTest) {

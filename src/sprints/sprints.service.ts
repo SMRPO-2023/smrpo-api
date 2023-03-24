@@ -14,6 +14,21 @@ export class SprintsService {
   private readonly logger = new Logger(SprintsService.name);
   constructor(private prisma: PrismaService) {}
   async create(data: SprintDto, userId: number) {
+    const exists = await this.prisma.sprint.findFirst({
+      where: {
+        deletedAt: null,
+        name: {
+          equals: data.name,
+          mode: 'insensitive',
+        },
+      },
+    });
+
+    if (exists) {
+      const message = `Sprint already exists.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
     await this.checkPermission(data, userId);
     await this.validateSprint(data);
     return this.prisma.sprint.create({ data });
@@ -52,6 +67,26 @@ export class SprintsService {
   async update(id: number, data: SprintDto, userId: number) {
     await this.checkPermission(data, userId);
     const oldSprint = await this.findOne(id);
+
+    if (data.name != null) {
+      const exists = await this.prisma.sprint.findFirst({
+        where: {
+          deletedAt: null,
+          NOT: { id },
+          name: {
+            equals: data.name.toString(),
+            mode: 'insensitive',
+          },
+        },
+      });
+
+      if (exists) {
+        const message = `Sprint already exists.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
+      }
+    }
+
     if (
       oldSprint.start.getTime() != data.start.getTime() ||
       oldSprint.end.getTime() != data.end.getTime()

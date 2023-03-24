@@ -71,13 +71,21 @@ export class ProjectService {
 
   async create(data: Prisma.ProjectCreateInput) {
     const exists = await this.prisma.project.findFirst({
-      where: { title: data.title },
+      where: {
+        deletedAt: null,
+        title: {
+          equals: data.title,
+          mode: 'insensitive',
+        },
+      },
     });
+
     if (exists) {
       const message = `Project already exists.`;
       this.logger.warn(message);
       throw new ConflictException(message);
     }
+
     return this.prisma.project.create({
       data,
     });
@@ -92,6 +100,25 @@ export class ProjectService {
     if (!project) {
       throw new BadRequestException('Object is deleted');
     }
+    if (data.title != null) {
+      const exists = await this.prisma.project.findFirst({
+        where: {
+          deletedAt: null,
+          NOT: { id: where.id },
+          title: {
+            equals: data.title.toString(),
+            mode: 'insensitive',
+          },
+        },
+      });
+
+      if (exists) {
+        const message = `Project already exists.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
+      }
+    }
+
     return this.prisma.project.update({
       data,
       where,

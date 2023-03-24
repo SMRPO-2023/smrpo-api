@@ -30,6 +30,27 @@ export class UsersService {
 
   async createUser(payload: CreateUserDto): Promise<User | never> {
     this.logger.debug(`Creating user ${payload.email}.`);
+
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        deletedAt: null,
+        email: {
+          equals: payload.email,
+          mode: 'insensitive',
+        },
+        username: {
+          equals: payload.username,
+          mode: 'insensitive',
+        },
+      },
+    });
+
+    if (existingUser) {
+      const message = `User already exists.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
+
     const hashedPassword = await this.passwordService.hashPassword(
       payload.password
     );
@@ -55,8 +76,32 @@ export class UsersService {
     }
   }
 
-  updateUser(userId: number, data: UpdateUserDto) {
+  async updateUser(userId: number, data: UpdateUserDto) {
     this.logger.debug(`Updating user ${userId}.`);
+
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        deletedAt: null,
+        email: {
+          equals: data.email,
+          mode: 'insensitive',
+        },
+        username: {
+          equals: data.username,
+          mode: 'insensitive',
+        },
+        NOT: {
+          id: userId,
+        },
+      },
+    });
+
+    if (existingUser) {
+      const message = `User already exists.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
+
     try {
       return this.prisma.user.update({
         data,
@@ -80,6 +125,30 @@ export class UsersService {
 
   async updateUserAdmin(id: number, data: UpdateUserDto) {
     this.logger.debug(`Updating user ${id}.`);
+
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        deletedAt: null,
+        email: {
+          equals: data.email,
+          mode: 'insensitive',
+        },
+        username: {
+          equals: data.username,
+          mode: 'insensitive',
+        },
+        NOT: {
+          id,
+        },
+      },
+    });
+
+    if (existingUser) {
+      const message = `User already exists.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
+
     try {
       if (!data.password) {
         delete data.password;
