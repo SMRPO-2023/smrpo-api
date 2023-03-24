@@ -7,12 +7,14 @@ import {
 } from '@nestjs/common';
 import { SprintDto } from './dto/sprint.dto';
 import { PrismaService } from 'nestjs-prisma';
-import { Sprint } from '@prisma/client';
+import { Role, Sprint } from '@prisma/client';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class SprintsService {
   private readonly logger = new Logger(SprintsService.name);
   constructor(private prisma: PrismaService) {}
+
   async create(data: SprintDto, userId: number) {
     const exists = await this.prisma.sprint.findFirst({
       where: {
@@ -30,6 +32,8 @@ export class SprintsService {
       this.logger.warn(message);
       throw new ConflictException(message);
     }
+    data.start = dayjs(data.start).startOf('day').toDate();
+    data.end = dayjs(data.end).endOf('day').toDate();
     await this.checkPermission(data, userId);
     await this.validateSprint(data);
     return this.prisma.sprint.create({ data });
@@ -88,6 +92,8 @@ export class SprintsService {
         throw new ConflictException(message);
       }
     }
+    data.start = dayjs(data.start).startOf('day').toDate();
+    data.end = dayjs(data.end).endOf('day').toDate();
 
     if (
       oldSprint.start.getTime() != data.start.getTime() ||
@@ -116,20 +122,14 @@ export class SprintsService {
     });
   }
 
-  getDaysDelta(date_1: Date, date_2: Date): number {
-    const difference = date_1.getTime() - date_2.getTime();
-    const TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
-    return TotalDays;
-  }
-
   async validateSprint(data: SprintDto): Promise<void> {
     this.logger.debug('Validating sprint.');
-    if (this.getDaysDelta(data.start, new Date()) < 1) {
+    if (dayjs(data.start).isAfter(dayjs())) {
       const message = `Sprint doesn't start in the future.`;
       this.logger.warn(message);
       throw new BadRequestException(message);
     }
-    if (this.getDaysDelta(data.end, data.start) < 0) {
+    if (dayjs(data.end).isBefore(dayjs())) {
       const message = `Sprint ends before it starts.`;
       this.logger.warn(message);
       throw new BadRequestException(message);
@@ -139,31 +139,29 @@ export class SprintsService {
       this.logger.warn(message);
       throw new ConflictException(message);
     }
+    if ([0, 6].includes(dayjs(data.start).day())) {
+      const message = `Sprint starts on weekend.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
+    if ([0, 6].includes(dayjs(data.end).day())) {
+      const message = `Sprint ends on weekend.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
   }
 
   async checkConflict(data: SprintDto): Promise<Sprint> {
     this.logger.debug('checking sprint conflict.');
-    const response = await this.prisma.sprint.findFirst({
+    return this.prisma.sprint.findFirst({
       where: {
         projectId: data.projectId,
         OR: [
-          {
-            start: {
-              gte: data.start,
-              lte: data.end,
-            },
-          },
-          {
-            end: {
-              gte: data.start,
-              lte: data.end,
-            },
-          },
+          { end: { gte: data.start }, start: { lte: data.end } },
+          { end: { gte: data.start }, start: { lte: data.end } },
         ],
       },
     });
-    console.log(response);
-    return response;
   }
 
   async checkPermission(data: SprintDto, userId: number): Promise<void> {
@@ -171,7 +169,10 @@ export class SprintsService {
     const project = await this.prisma.project.findFirst({
       where: { id: data.projectId },
     });
-    if (userId != project.scrumMasterId) {
+    const user = await this.prisma.user.findFirstOrThrow({
+      where: { id: userId },
+    });
+    if (userId !== project.scrumMasterId && user.role !== Role.ADMIN) {
       const message = `User isn't the scrum master.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
