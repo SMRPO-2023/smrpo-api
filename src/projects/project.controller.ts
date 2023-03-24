@@ -14,6 +14,8 @@ import { JwtAuthGuard } from '../auth/jwt-auth-guard.service';
 import { ProjectDto } from './dto/project.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { User } from '@prisma/client';
+import { UserEntity } from 'src/common/decorators/user.decorator';
 @Controller('project')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
@@ -22,8 +24,8 @@ export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
   @Get()
-  getProjects() {
-    return this.projectService.findAll();
+  getProjects(@UserEntity() user: User) {
+    return this.projectService.findAll(user);
   }
 
   @Get(':id')

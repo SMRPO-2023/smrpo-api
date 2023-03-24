@@ -5,7 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
-import { Prisma } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { ProjectDto } from './dto/project.dto';
 
 @Injectable()
@@ -13,9 +13,22 @@ export class ProjectService {
   private readonly logger = new Logger(ProjectService.name);
   constructor(private prisma: PrismaService) {}
 
-  async findAll() {
+  async findAll(user: User) {
+    let where = {};
+    if (user.role != 'ADMIN') {
+      where = {
+        deletedAt: null,
+        OR: [
+          { scrumMasterId: user.id },
+          { projectOwnerId: user.id },
+          { developers: { some: { userId: user.id } } },
+        ],
+      };
+    } else {
+      where = { deletedAt: null };
+    }
     return this.prisma.project.findMany({
-      where: { deletedAt: null },
+      where: where,
       include: {
         developers: {
           select: {
