@@ -24,7 +24,7 @@ export class UserStoryDto {
   @IsOptional()
   @IsInt()
   @Min(0.1)
-  @Max(20)
+  @Max(50)
   points?: number;
 
   @IsOptional()
