@@ -71,7 +71,7 @@ export class UserStoriesController {
     return this.userStoriesService.update(+id, updateUserStoryDto, user.id);
   }
 
-  @Post('accept:id')
+  @Post('accept/:id')
   accept(
     @Param('id', ParseIntPipe) id: number,
     @UserEntity() user: User,
