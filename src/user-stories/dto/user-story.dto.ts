@@ -7,6 +7,7 @@ import {
   IsInt,
   Min,
   Max,
+  IsBoolean,
 } from 'class-validator';
 
 export class UserStoryDto {
@@ -28,6 +29,7 @@ export class UserStoryDto {
   points?: number;
 
   @IsOptional()
+  @IsBoolean()
   acceptanceTest: boolean;
 
   @IsInt()
