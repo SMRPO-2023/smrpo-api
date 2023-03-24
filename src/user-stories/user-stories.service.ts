@@ -45,9 +45,18 @@ export class UserStoriesService {
     if (sprintId) {
       where['sprintId'] = sprintId;
     }
-    return this.prisma.userStory.findMany({
+    const data = await this.prisma.userStory.findMany({
       where,
     });
+
+    const returnStories = [];
+    for (const tempStory of data) {
+      returnStories.push({
+        ...tempStory,
+        ...(await this.canBeAccepted(tempStory.id)),
+      });
+    }
+    return returnStories;
   }
 
   async findRealized(projectId: number) {
@@ -72,7 +81,7 @@ export class UserStoriesService {
   }
 
   async findUnrealizedWithSprint(projectId: number) {
-    return this.prisma.userStory.findMany({
+    const data = await this.prisma.userStory.findMany({
       where: {
         projectId: projectId,
         deletedAt: null,
@@ -82,15 +91,25 @@ export class UserStoriesService {
         acceptanceTest: false,
       },
     });
+
+    const returnStories = [];
+    for (const tempStory of data) {
+      returnStories.push({
+        ...tempStory,
+        ...(await this.canBeAccepted(tempStory.id)),
+      });
+    }
+    return returnStories;
   }
 
   async findOne(id: number) {
-    return this.prisma.userStory.findFirst({
+    const data = await this.prisma.userStory.findFirst({
       where: {
         id,
         deletedAt: null,
       },
     });
+    return { ...data, ...(await this.canBeAccepted((id = id))) };
   }
 
   async update(id: number, data: UserStoryDto, userId: number) {
@@ -156,6 +175,19 @@ export class UserStoriesService {
         acceptanceTest: acceptanceTest,
       },
     });
+  }
+
+  async canBeAccepted(id: number) {
+    let canBeAccepted = true;
+
+    const tasks = await this.prisma.task.findMany({
+      where: { userStoryId: id, done: false },
+    });
+
+    if (tasks.length > 0) {
+      canBeAccepted = false;
+    }
+    return { canBeAccepted };
   }
 
   async remove(id: number, userId: number) {
