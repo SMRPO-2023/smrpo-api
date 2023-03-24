@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { Prisma } from '@prisma/client';
+import { ProjectDto } from './dto/project.dto';
 
 @Injectable()
 export class ProjectService {
@@ -69,7 +70,7 @@ export class ProjectService {
     });
   }
 
-  async create(data: Prisma.ProjectCreateInput) {
+  async create(data: ProjectDto) {
     const exists = await this.prisma.project.findFirst({
       where: {
         deletedAt: null,
