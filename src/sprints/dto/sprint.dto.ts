@@ -23,7 +23,7 @@ export class SprintDto {
 
   @IsNotEmpty()
   @IsInt()
-  @Min(0)
+  @Min(0.1)
   @Max(100)
   velocity: number;
 
