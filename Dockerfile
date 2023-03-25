@@ -54,11 +54,12 @@ RUN npm run build
 RUN npm run prisma:generate
 
 # Set NODE_ENV environment variable
-ENV NODE_ENV production
+ENV NODE_ENV development
 
 # Running `npm ci` removes the existing node_modules directory.
 # Passing in --only=production ensures that only the production dependencies are installed.
 # This ensures that the node_modules directory is as optimized as possible.
+RUN npm ci
 RUN npm cache clean --force
 
 USER node
