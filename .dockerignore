@@ -8,6 +8,8 @@
 dist
 node_modules
 coverage
+npm-debug.log
+
 
 # Environment (contains sensitive data)
 .env
