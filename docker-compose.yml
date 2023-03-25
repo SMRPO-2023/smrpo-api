@@ -4,7 +4,6 @@ services:
   smrpo-api:
     image: lgaljo/smrpo-api:latest
     container_name: smrpo-api
-    command: npm run start:prod
     volumes:
       - .:/app
       - /app/node_modules
@@ -22,8 +21,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: ${NODE_ENV}
-    command: npm run start:prod
     volumes:
       - .:/app
       - /app/node_modules

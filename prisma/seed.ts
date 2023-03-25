@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
 
-function getPriority(i: number) {
+function getPriority(i: number): StoryPriority {
   switch (i) {
     case 0:
       return StoryPriority.MUST_HAVE;
