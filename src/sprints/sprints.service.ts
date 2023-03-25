@@ -124,12 +124,12 @@ export class SprintsService {
 
   async validateSprint(data: SprintDto): Promise<void> {
     this.logger.debug('Validating sprint.');
-    if (dayjs(data.start).isAfter(dayjs())) {
+    if (dayjs(data.start).isBefore(dayjs())) {
       const message = `Sprint doesn't start in the future.`;
       this.logger.warn(message);
       throw new BadRequestException(message);
     }
-    if (dayjs(data.end).isBefore(dayjs())) {
+    if (dayjs(data.end).isBefore(data.start)) {
       const message = `Sprint ends before it starts.`;
       this.logger.warn(message);
       throw new BadRequestException(message);

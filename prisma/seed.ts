@@ -264,7 +264,7 @@ async function main() {
 
     for (let j = 0; j < sprints.length; j++) {
       const sprint = sprints[j];
-      for (let z = 0; z < 10; z++) {
+      for (let z = 0; z < 5; z++) {
         await prisma.userStory.create({
           data: {
             priority: getPriority(+faker.random.numeric() % 4),
@@ -275,7 +275,22 @@ async function main() {
             projectId: sprint.projectId,
             sprintId: sprint.id,
             acceptanceCriteria: faker.random.words(10),
-            acceptanceTest: i % 2 == 0 ? true : false,
+            acceptanceTest: true,
+          },
+        });
+      }
+      for (let z = 0; z < 2; z++) {
+        await prisma.userStory.create({
+          data: {
+            priority: getPriority(+faker.random.numeric() % 4),
+            title: 'Story ' + i,
+            description: faker.random.words(20),
+            points: +faker.datatype.number({ min: 4, max: 15 }),
+            businessValue: +faker.datatype.number({ min: 1, max: 7 }),
+            projectId: sprint.projectId,
+            sprintId: sprint.id,
+            acceptanceCriteria: faker.random.words(10),
+            acceptanceTest: false,
           },
         });
       }
