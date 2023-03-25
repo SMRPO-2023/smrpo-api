@@ -5,4 +5,8 @@ export class AppService {
   getHello(): string {
     return 'Hello to SMRPO api ' + process.env.npm_package_version;
   }
+
+  getHelloName(name: string): string {
+    return `Hello ${name}!`;
+  }
 }
