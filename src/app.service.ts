@@ -3,10 +3,6 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class AppService {
   getHello(): string {
-    return 'Hello World!';
-  }
-
-  getHelloName(name: string): string {
-    return `Hello ${name}!`;
+    return 'Hello to SMRPO api ' + process.env.npm_package_version;
   }
 }
