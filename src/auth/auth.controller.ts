@@ -19,7 +19,7 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() { email, password }: LoginDto) {
-    return await this.auth.login(email.toLowerCase(), password);
+    return await this.auth.login(email, password);
   }
 
   @Post('refresh')

@@ -124,7 +124,7 @@ export class SprintsService {
 
   async validateSprint(data: SprintDto): Promise<void> {
     this.logger.debug('Validating sprint.');
-    if (dayjs(data.start).isBefore(dayjs())) {
+    if (dayjs(data.start).add(1, 'day').isBefore(dayjs())) {
       const message = `Sprint doesn't start in the future.`;
       this.logger.warn(message);
       throw new BadRequestException(message);
@@ -156,6 +156,7 @@ export class SprintsService {
     return this.prisma.sprint.findFirst({
       where: {
         projectId: data.projectId,
+        deletedAt: null,
         OR: [
           { end: { gte: data.start }, start: { lte: data.end } },
           { end: { gte: data.start }, start: { lte: data.end } },
