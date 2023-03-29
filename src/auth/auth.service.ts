@@ -39,7 +39,7 @@ export class AuthService {
       return this.generateTokens({
         userId: user.id,
         role: user.role,
-        firstLogin: true,
+        lastLogin: null,
       });
     } catch (e) {
       if (
@@ -83,6 +83,8 @@ export class AuthService {
 
     this.logger.log(`User ${user_identifier} login successful.`);
 
+    const previousLastLogin = user.lastLogin;
+
     try {
       await this.prisma.user.update({
         data: {
@@ -103,7 +105,7 @@ export class AuthService {
     return this.generateTokens({
       userId: user.id,
       role: user.role,
-      firstLogin: user.lastLogin == null,
+      lastLogin: previousLastLogin,
     });
   }
 
@@ -121,7 +123,7 @@ export class AuthService {
   generateTokens(payload: {
     userId: number;
     role: string;
-    firstLogin: boolean;
+    lastLogin?: Date;
   }): Token {
     this.logger.log(`Generating tokens for user ${payload.userId}.`);
     return {
@@ -129,7 +131,7 @@ export class AuthService {
       role: payload.role,
       accessToken: this.generateAccessToken(payload),
       refreshToken: this.generateRefreshToken(payload),
-      firstLogin: payload.firstLogin,
+      lastLogin: payload.lastLogin,
     };
   }
 
@@ -157,7 +159,6 @@ export class AuthService {
       return this.generateTokens({
         userId,
         role,
-        firstLogin: false,
       });
     } catch (e) {
       this.logger.error(
