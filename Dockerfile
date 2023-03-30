@@ -17,6 +17,12 @@ RUN npm run build
 
 FROM node:18
 
+RUN apt-get update && \
+    apt-get install -yq tzdata && \
+    ln -fs /usr/share/zoneinfo/Europe/Ljubljana /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata
+ENV TZ="Europe/Ljubljana"
+
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/tsconfig*.json ./
