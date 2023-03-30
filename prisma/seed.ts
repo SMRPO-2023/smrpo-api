@@ -262,13 +262,14 @@ async function main() {
       })
     );
 
+    let counter = 0;
     for (let j = 0; j < sprints.length; j++) {
       const sprint = sprints[j];
       for (let z = 0; z < 5; z++) {
         await prisma.userStory.create({
           data: {
             priority: getPriority(+faker.random.numeric() % 4),
-            title: 'Story ' + i,
+            title: 'Story ' + ++counter,
             description: faker.random.words(20),
             points: +faker.datatype.number({ min: 4, max: 15 }),
             businessValue: +faker.datatype.number({ min: 1, max: 7 }),
@@ -283,7 +284,7 @@ async function main() {
         await prisma.userStory.create({
           data: {
             priority: getPriority(+faker.random.numeric() % 4),
-            title: 'Story ' + i,
+            title: 'Story ' + ++counter,
             description: faker.random.words(20),
             points: +faker.datatype.number({ min: 4, max: 15 }),
             businessValue: +faker.datatype.number({ min: 1, max: 7 }),
@@ -298,7 +299,7 @@ async function main() {
         await prisma.userStory.create({
           data: {
             priority: getPriority(+faker.random.numeric() % 4),
-            title: 'Story ' + i,
+            title: 'Story ' + ++counter,
             description: faker.random.words(20),
             points: +faker.datatype.number({ min: 4, max: 15 }),
             businessValue: +faker.datatype.number({ min: 1, max: 7 }),
