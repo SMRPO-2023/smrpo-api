@@ -6,8 +6,8 @@ import {
   Param,
   Delete,
   ParseIntPipe,
-  Put,
-} from '@nestjs/common';
+  Put, Query
+} from "@nestjs/common";
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -27,8 +27,8 @@ export class TasksController {
   }
 
   @Get()
-  findAll() {
-    return this.tasksService.findAll();
+  findAll(@Query('usid') userStoryId: string) {
+    return this.tasksService.findAll(+userStoryId);
   }
 
   @Get(':id')

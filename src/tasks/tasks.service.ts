@@ -49,20 +49,10 @@ export class TasksService {
       where: {
         deletedAt: null,
         userStoryId: data.userStoryId,
-        OR: [
-          {
-            title: {
-              equals: data.title,
-              mode: 'insensitive',
-            },
-          },
-          {
-            description: {
-              equals: data.description,
-              mode: 'insensitive',
-            },
-          },
-        ],
+        title: {
+          equals: data.title,
+          mode: 'insensitive',
+        },
       },
     });
 
@@ -75,10 +65,12 @@ export class TasksService {
     return this.prisma.task.create({ data });
   }
 
-  async findAll() {
-    return this.prisma.task.findMany({
-      where: { deletedAt: null },
-    });
+  async findAll(userStoryId?: number) {
+    const where = { deletedAt: null };
+    if (userStoryId) {
+      where['userStoryId'] = userStoryId;
+    }
+    return this.prisma.task.findMany({ where });
   }
 
   async findOne(id: number) {
@@ -97,7 +89,7 @@ export class TasksService {
       throw new UnauthorizedException(message);
     }
 
-    return this.prisma.project.update({
+    return this.prisma.task.update({
       data,
       where: { id },
     });

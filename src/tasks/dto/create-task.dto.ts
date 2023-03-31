@@ -18,7 +18,5 @@ export class CreateTaskDto {
   @IsInt()
   userStoryId: number;
 
-  @IsNotEmpty()
-  @IsInt()
   userId?: number;
 }
