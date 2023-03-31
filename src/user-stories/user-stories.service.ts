@@ -80,6 +80,7 @@ export class UserStoriesService {
   }
 
   async findFutureReleases(projectId: number) {
+    // TODO: check whether the sprint is active.
     return this.prisma.userStory.findMany({
       where: {
         projectId: projectId,
