@@ -10,6 +10,7 @@ import { PrismaService } from 'nestjs-prisma';
 import { UserStoryDto } from './dto/user-story.dto';
 import { StoryListDto } from './dto/story-list.dto';
 import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
+import { StoryPriority } from '@prisma/client';
 
 @Injectable()
 export class UserStoriesService {
@@ -73,6 +74,17 @@ export class UserStoriesService {
         projectId: projectId,
         deletedAt: null,
         acceptanceTest: true,
+      },
+    });
+  }
+
+  async findFutureReleases(projectId: number) {
+    return this.prisma.userStory.findMany({
+      where: {
+        projectId: projectId,
+        deletedAt: null,
+        acceptanceTest: false,
+        priority: StoryPriority.WONT_HAVE,
       },
     });
   }

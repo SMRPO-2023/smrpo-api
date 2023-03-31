@@ -57,6 +57,12 @@ export class UserStoriesController {
     return this.userStoriesService.findUnrealizedWithSprint(projectId);
   }
 
+  @Get('future-releases')
+  @ApiQuery({ name: 'project-id', required: true, type: Number })
+  findFutureReleases(@Query('project-id') projectId: number) {
+    return this.userStoriesService.findFutureReleases(projectId);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userStoriesService.findOne(id);
