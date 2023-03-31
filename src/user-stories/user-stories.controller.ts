@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   ParseIntPipe,
@@ -91,8 +90,8 @@ export class UserStoriesController {
     return this.userStoriesService.remove(+id, user.id);
   }
 
-  @Post('attach')
+  @Post('add-to-sprint')
   addStories(@Body() data: StoryListDto) {
-    return this.userStoriesService.addStories(data);
+    return this.userStoriesService.addStoriesToSprint(data);
   }
 }

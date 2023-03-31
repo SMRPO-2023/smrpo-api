@@ -12,7 +12,7 @@ import { UserStoryDto } from './dto/user-story.dto';
 import { StoryListDto } from './dto/story-list.dto';
 import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
 import { StoryPriority } from '@prisma/client';
-import dayjs from 'dayjs';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class UserStoriesService {
@@ -284,7 +284,7 @@ export class UserStoriesService {
     });
   }
 
-  async addStories(data: StoryListDto) {
+  async addStoriesToSprint(data: StoryListDto) {
     const sprint = await this.prisma.sprint.findFirstOrThrow({
       where: {
         id: data.sprintId,
@@ -304,15 +304,19 @@ export class UserStoriesService {
       where: {
         id: { in: data.stories },
         deletedAt: null,
-        OR: [{ acceptanceTest: true }, { points: null }],
+        OR: [
+          { acceptanceTest: true },
+          { points: null },
+          { NOT: { projectId: sprint.projectId } },
+        ],
       },
     });
-    if (badStories) {
-      const message = `One of the stories can't be added to the sprint.`;
+    if (badStories.length != 0) {
+      const message = `Some stories can't be added to the sprint.`;
       this.logger.warn(message);
       throw new BadRequestException(message);
     }
-    return this.prisma.userStory.updateMany({
+    await this.prisma.userStory.updateMany({
       where: {
         id: { in: data.stories },
         deletedAt: null,
@@ -322,6 +326,10 @@ export class UserStoriesService {
       data: {
         sprintId: sprint.id,
       },
+    });
+
+    return this.prisma.userStory.findMany({
+      where: { sprintId: data.sprintId },
     });
   }
 }
