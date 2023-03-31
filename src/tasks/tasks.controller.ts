@@ -3,24 +3,27 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   ParseIntPipe,
+  Put,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { UserEntity } from '../common/decorators/user.decorator';
+import { User } from '../users/models/user.model';
 
 @Controller('tasks')
 @ApiTags('Tasks')
+@ApiBearerAuth()
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post()
-  create(@Body() createTaskDto: CreateTaskDto) {
-    return this.tasksService.create(createTaskDto);
+  create(@Body() createTaskDto: CreateTaskDto, @UserEntity() user: User) {
+    return this.tasksService.create(createTaskDto, user.id);
   }
 
   @Get()
@@ -33,16 +36,17 @@ export class TasksController {
     return this.tasksService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateTaskDto: UpdateTaskDto
+    @Body() updateTaskDto: UpdateTaskDto,
+    @UserEntity() user: User
   ) {
-    return this.tasksService.update(+id, updateTaskDto);
+    return this.tasksService.update(+id, updateTaskDto, user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.tasksService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number, @UserEntity() user: User) {
+    return this.tasksService.remove(+id, user.id);
   }
 }
