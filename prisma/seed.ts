@@ -69,6 +69,7 @@ async function main() {
     },
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const hernandezc = await prisma.user.create({
     data: {
       email: 'concetta.hernandez@gmail.com',
