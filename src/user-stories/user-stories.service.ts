@@ -12,6 +12,7 @@ import { UserStoryDto } from './dto/user-story.dto';
 import { StoryListDto } from './dto/story-list.dto';
 import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
 import { StoryPriority } from '@prisma/client';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class UserStoriesService {
@@ -80,13 +81,27 @@ export class UserStoriesService {
   }
 
   async findFutureReleases(projectId: number) {
-    // TODO: check whether the sprint is active.
+    const currentDate = dayjs();
     return this.prisma.userStory.findMany({
       where: {
         projectId: projectId,
         deletedAt: null,
         acceptanceTest: false,
         priority: StoryPriority.WONT_HAVE,
+        NOT: {
+          Sprint: {
+            AND: [
+              {
+                start: {
+                  lte: currentDate.toDate(),
+                },
+                end: {
+                  gte: currentDate.toDate(),
+                },
+              },
+            ],
+          },
+        },
       },
     });
   }
@@ -270,13 +285,21 @@ export class UserStoriesService {
   }
 
   async addStories(data: StoryListDto) {
-    // TODO: check whether the sprint is active.
     const sprint = await this.prisma.sprint.findFirstOrThrow({
       where: {
         id: data.sprintId,
         deletedAt: null,
       },
     });
+    const currentDate = dayjs();
+    if (
+      (currentDate.isBefore(sprint.end) || currentDate.isSame(sprint.end)) &&
+      (currentDate.isAfter(sprint.start) || currentDate.isSame(sprint.start))
+    ) {
+      const message = `The sprint is active.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
     const badStories = await this.prisma.userStory.findMany({
       where: {
         id: { in: data.stories },
