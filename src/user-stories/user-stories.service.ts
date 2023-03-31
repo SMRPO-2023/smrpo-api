@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -268,35 +269,35 @@ export class UserStoriesService {
   }
 
   async addStories(data: StoryListDto) {
+    // TODO: check whether the sprint is active.
     const sprint = await this.prisma.sprint.findFirstOrThrow({
       where: {
         id: data.sprintId,
         deletedAt: null,
       },
     });
-    await this.prisma.userStory.updateMany({
+    const badStories = await this.prisma.userStory.findMany({
+      where: {
+        id: { in: data.stories },
+        deletedAt: null,
+        OR: [{ acceptanceTest: true }, { points: null }],
+      },
+    });
+    if (badStories) {
+      const message = `One of the stories can't be added to the sprint.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+    return this.prisma.userStory.updateMany({
       where: {
         id: { in: data.stories },
         deletedAt: null,
         acceptanceTest: false,
-        sprintId: null,
         points: { not: null },
       },
       data: {
         sprintId: sprint.id,
       },
-    });
-    await this.prisma.userStory.updateMany({
-      where: {
-        id: { notIn: data.stories },
-      },
-      data: {
-        sprintId: null,
-      },
-    });
-
-    return this.prisma.userStory.findMany({
-      where: { sprintId: data.sprintId },
     });
   }
 }
