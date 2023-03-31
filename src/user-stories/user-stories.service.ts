@@ -10,6 +10,7 @@ import { PrismaService } from 'nestjs-prisma';
 import { UserStoryDto } from './dto/user-story.dto';
 import { StoryListDto } from './dto/story-list.dto';
 import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
+import { Role } from "@prisma/client";
 
 @Injectable()
 export class UserStoriesService {
@@ -36,7 +37,14 @@ export class UserStoriesService {
     const id = data.projectId;
     const project = await this.prisma.project.findUnique({ where: { id } });
 
-    if (userId != project.projectOwnerId && userId != project.scrumMasterId) {
+    const user = await this.prisma.user.findFirstOrThrow({
+      where: { id: userId },
+    });
+    if (
+      userId !== project.projectOwnerId &&
+      userId !== project.scrumMasterId &&
+      user.role !== Role.ADMIN
+    ) {
       const message = `User doesn't have access to the project.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
@@ -159,7 +167,14 @@ export class UserStoriesService {
       where: { id: userStory.projectId },
     });
 
-    if (userId != project.projectOwnerId && userId != project.scrumMasterId) {
+    const user = await this.prisma.user.findFirstOrThrow({
+      where: { id: userId },
+    });
+    if (
+      userId !== project.projectOwnerId &&
+      userId !== project.scrumMasterId &&
+      user.role !== Role.ADMIN
+    ) {
       const message = `Missing access right.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
@@ -180,8 +195,11 @@ export class UserStoriesService {
     const project = await this.prisma.project.findUnique({
       where: { id: userStory.projectId },
     });
+    const user = await this.prisma.user.findFirstOrThrow({
+      where: { id: userId },
+    });
 
-    if (userId != project.projectOwnerId) {
+    if (userId != project.projectOwnerId && user.role !== Role.ADMIN) {
       const message = `User is not the project owner.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
@@ -236,8 +254,15 @@ export class UserStoriesService {
     const project = await this.prisma.project.findUnique({
       where: { id: userStory.projectId },
     });
+    const user = await this.prisma.user.findFirstOrThrow({
+      where: { id: userId },
+    });
 
-    if (userId != project.projectOwnerId && userId != project.scrumMasterId) {
+    if (
+      userId !== project.projectOwnerId &&
+      userId !== project.scrumMasterId &&
+      user.role !== Role.ADMIN
+    ) {
       const message = `User doesn't have access to the project.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
