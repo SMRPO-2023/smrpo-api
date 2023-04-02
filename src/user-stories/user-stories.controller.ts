@@ -9,6 +9,7 @@ import {
   UseGuards,
   Query,
   Put,
+  Patch,
 } from '@nestjs/common';
 import { UserStoriesService } from './user-stories.service';
 import { UserStoryDto } from './dto/user-story.dto';
@@ -18,6 +19,7 @@ import { User } from 'src/users/models/user.model';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
 import { StoryListDto } from './dto/story-list.dto';
 import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
+import { UpdateStoryPointsDto } from './dto/update-story-points.dto';
 
 @Controller('user-stories')
 @ApiTags('User stories')
@@ -87,5 +89,18 @@ export class UserStoriesController {
   @Post('attach')
   addStories(@Body() data: StoryListDto) {
     return this.userStoriesService.addStories(data);
+  }
+
+  @Patch('update-story-points/:id')
+  updateStoryPoints(
+    @Param('id', ParseIntPipe) id: number,
+    @UserEntity() user: User,
+    @Body() updateStoryPointsDto: UpdateStoryPointsDto
+  ) {
+    return this.userStoriesService.updateStoryPoints(
+      +id,
+      updateStoryPointsDto,
+      user.id
+    );
   }
 }
