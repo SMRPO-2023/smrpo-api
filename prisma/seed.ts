@@ -69,6 +69,18 @@ async function main() {
     },
   });
 
+  await prisma.user.create({
+    data: {
+      email: 'concetta.hernandez@gmail.com',
+      firstname: 'Concetta',
+      lastname: 'Hernandez',
+      role: 'USER',
+      // cspell:disable-next-line -- disables checking till the end of the next line.
+      password: '$2b$10$DRzCId0X0guJa7wtynJ0FOrAijm7IY9l2Ora9KygCK4lwH1lSvV12', // secret12345678
+      username: 'hernandezc',
+    },
+  });
+
   const jacksonm = await prisma.user.create({
     data: {
       email: 'micahel.jackson@gmail.com',
