@@ -146,6 +146,23 @@ export class ProjectService {
         this.logger.warn(message);
         throw new ConflictException(message);
       }
+
+      // TODO(mevljas): this check probably doesn't work.
+      if (
+        data.projectOwnerId in
+        (await this.prisma.projectDeveloper.findMany({
+          select: {
+            userId: true,
+          },
+          where: {
+            projectId: project.id,
+          },
+        }))
+      ) {
+        const message = `The project owner can't be a developer.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
+      }
     }
 
     return this.prisma.project.update({
