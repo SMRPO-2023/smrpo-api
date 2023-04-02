@@ -3,9 +3,10 @@ import {
   ConflictException,
   Injectable,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, Role, User } from '@prisma/client';
 import { ProjectDto } from './dto/project.dto';
 
 @Injectable()
@@ -111,14 +112,16 @@ export class ProjectService {
     });
   }
 
-  async update(params: {
-    where: Prisma.ProjectWhereUniqueInput;
-    data: ProjectDto;
-  }) {
-    const { where, data } = params;
+  async update(data: ProjectDto, projectId: number, user: User) {
+    const where = { id: projectId };
     const project = await this.findOne(where);
     if (!project) {
       throw new BadRequestException('Object is deleted');
+    }
+    if (user.id !== project.scrumMasterId && user.role !== Role.ADMIN) {
+      const message = `Missing access rights.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
     }
     if (data.title != null) {
       const exists = await this.prisma.project.findFirst({
