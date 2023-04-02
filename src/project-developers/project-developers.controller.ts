@@ -14,7 +14,8 @@ import { ProjectDeveloperDto } from './dto/project-developer.dto';
 import { ProjectDevelopersDto } from './dto/project-developers.dto';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
-import { Roles } from 'src/common/decorators/roles.decorator';
+import { UserEntity } from 'src/common/decorators/user.decorator';
+import { User } from '@prisma/client';
 
 @Controller('project-developers')
 @ApiTags('Projects')
@@ -26,26 +27,29 @@ export class ProjectDevelopersController {
   ) {}
 
   @Get()
-  @ApiQuery({ name: 'project-id', required: false, type: Number })
-  async findAll(@Query('project-id') pid?: number) {
-    return this.projectMembersService.findAll(Number(pid));
+  @ApiQuery({ name: 'project-id', type: Number })
+  async findAll(@Query('project-id') pid: number, @UserEntity() user: User) {
+    return this.projectMembersService.findAll(Number(pid), user);
   }
 
   @Post()
-  @Roles('ADMIN')
-  async create(@Body() data: ProjectDeveloperDto) {
-    return this.projectMembersService.create(data);
+  async create(@Body() data: ProjectDeveloperDto, @UserEntity() user: User) {
+    return this.projectMembersService.create(data, user);
   }
 
   @Post('multi')
-  @Roles('ADMIN')
-  async createMulti(@Body() data: ProjectDevelopersDto) {
-    return this.projectMembersService.createMulti(data);
+  async createMulti(
+    @Body() data: ProjectDevelopersDto,
+    @UserEntity() user: User
+  ) {
+    return this.projectMembersService.createMulti(data, user);
   }
 
-  @Roles('ADMIN')
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    return this.projectMembersService.remove({ id });
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @UserEntity() user: User
+  ) {
+    return this.projectMembersService.remove(id, user);
   }
 }
