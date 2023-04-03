@@ -342,7 +342,7 @@ export class UserStoriesService {
       this.logger.warn(message);
       throw new UnauthorizedException(message);
     }
-    await this.prisma.userStory.updateMany({
+    return this.prisma.userStory.updateMany({
       where: {
         id: { in: data.stories },
         deletedAt: null,
@@ -353,9 +353,38 @@ export class UserStoriesService {
         sprintId: sprint.id,
       },
     });
+  }
 
-    return this.prisma.userStory.findMany({
-      where: { sprintId: data.sprintId },
+  async removeStoryFromSprint(id: number, user: User) {
+    const story = await this.prisma.userStory.findFirstOrThrow({
+      where: {
+        id,
+        deletedAt: null,
+      },
+    });
+    if (story.acceptanceTest) {
+      const message = `User story can not be removed from the sprint.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+    const project = await this.prisma.project.findFirstOrThrow({
+      where: {
+        id: story.projectId,
+      },
+    });
+    if (user.id !== project.scrumMasterId && user.role !== Role.ADMIN) {
+      const message = `Missing access rights.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
+    return this.prisma.userStory.updateMany({
+      where: {
+        id,
+        deletedAt: null,
+      },
+      data: {
+        sprintId: null,
+      },
     });
   }
 }

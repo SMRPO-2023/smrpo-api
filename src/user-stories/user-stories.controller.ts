@@ -100,4 +100,12 @@ export class UserStoriesController {
   addStories(@Body() data: StoryListDto, @UserEntity() user: User) {
     return this.userStoriesService.addStoriesToSprint(data, user);
   }
+
+  @Post('remove-from-sprint/:id')
+  removeStoryFromSprint(
+    @Param('id', ParseIntPipe) id: number,
+    @UserEntity() user: User
+  ) {
+    return this.userStoriesService.removeStoryFromSprint(id, user);
+  }
 }
