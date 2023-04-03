@@ -11,7 +11,7 @@ import { PrismaService } from 'nestjs-prisma';
 import { UserStoryDto } from './dto/user-story.dto';
 import { StoryListDto } from './dto/story-list.dto';
 import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
-import { StoryPriority } from '@prisma/client';
+import { Role, StoryPriority, User } from '@prisma/client';
 import * as dayjs from 'dayjs';
 
 @Injectable()
@@ -298,7 +298,7 @@ export class UserStoriesService {
     });
   }
 
-  async addStoriesToSprint(data: StoryListDto) {
+  async addStoriesToSprint(data: StoryListDto, user: User) {
     const sprint = await this.prisma.sprint.findFirstOrThrow({
       where: {
         id: data.sprintId,
@@ -331,6 +331,16 @@ export class UserStoriesService {
       const message = `Some stories can't be added to the sprint.`;
       this.logger.warn(message);
       throw new BadRequestException(message);
+    }
+    const project = await this.prisma.project.findFirstOrThrow({
+      where: {
+        id: sprint.projectId,
+      },
+    });
+    if (user.id !== project.scrumMasterId && user.role !== Role.ADMIN) {
+      const message = `Missing access rights.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
     }
     await this.prisma.userStory.updateMany({
       where: {

@@ -14,10 +14,10 @@ import { UserStoriesService } from './user-stories.service';
 import { UserStoryDto } from './dto/user-story.dto';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UserEntity } from 'src/common/decorators/user.decorator';
-import { User } from 'src/users/models/user.model';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
 import { StoryListDto } from './dto/story-list.dto';
 import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
+import { User } from '@prisma/client';
 
 @Controller('user-stories')
 @ApiTags('User stories')
@@ -97,7 +97,7 @@ export class UserStoriesController {
   }
 
   @Post('add-to-sprint')
-  addStories(@Body() data: StoryListDto) {
-    return this.userStoriesService.addStoriesToSprint(data);
+  addStories(@Body() data: StoryListDto, @UserEntity() user: User) {
+    return this.userStoriesService.addStoriesToSprint(data, user);
   }
 }
