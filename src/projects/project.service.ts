@@ -140,25 +140,26 @@ export class ProjectService {
         this.logger.warn(message);
         throw new ConflictException(message);
       }
+    }
 
+    if (data.projectOwnerId != null && data.scrumMasterId != null) {
       if (data.projectOwnerId === data.scrumMasterId) {
         const message = `The same person can't be project owner and scrum master.`;
         this.logger.warn(message);
         throw new ConflictException(message);
       }
+    }
 
-      // TODO(mevljas): this check probably doesn't work.
-      if (
-        data.projectOwnerId in
-        (await this.prisma.projectDeveloper.findMany({
-          select: {
-            userId: true,
-          },
-          where: {
-            projectId: project.id,
-          },
-        }))
-      ) {
+    if (data.projectOwnerId != null) {
+      const developerExists = await this.prisma.projectDeveloper.findMany({
+        where: {
+          projectId: project.id,
+          userId: data.projectOwnerId,
+          deletedAt: null,
+        },
+      });
+      console.log(developerExists);
+      if (developerExists.length > 0) {
         const message = `The project owner can't be a developer.`;
         this.logger.warn(message);
         throw new ConflictException(message);
