@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -10,7 +11,8 @@ import { PrismaService } from 'nestjs-prisma';
 import { UserStoryDto } from './dto/user-story.dto';
 import { StoryListDto } from './dto/story-list.dto';
 import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
-import { Role } from '@prisma/client';
+import { Role, StoryPriority, User } from '@prisma/client';
+import * as dayjs from 'dayjs';
 import { UpdateStoryPointsDto } from './dto/update-story-points.dto';
 
 @Injectable()
@@ -82,6 +84,32 @@ export class UserStoriesService {
         projectId: projectId,
         deletedAt: null,
         acceptanceTest: true,
+      },
+    });
+  }
+
+  async findFutureReleases(projectId: number) {
+    const currentDate = dayjs();
+    return this.prisma.userStory.findMany({
+      where: {
+        projectId: projectId,
+        deletedAt: null,
+        acceptanceTest: false,
+        priority: StoryPriority.WONT_HAVE,
+        NOT: {
+          Sprint: {
+            AND: [
+              {
+                start: {
+                  lte: currentDate.toDate(),
+                },
+                end: {
+                  gte: currentDate.toDate(),
+                },
+              },
+            ],
+          },
+        },
       },
     });
   }
@@ -315,36 +343,107 @@ export class UserStoriesService {
     });
   }
 
-  async addStories(data: StoryListDto) {
+  async getAddable(projectId: number) {
+    return this.prisma.userStory.findMany({
+      where: {
+        projectId,
+        deletedAt: null,
+        acceptanceTest: false,
+        sprintId: null,
+        NOT: {
+          points: null,
+        },
+      },
+    });
+  }
+
+  async addStoriesToSprint(data: StoryListDto, user: User) {
     const sprint = await this.prisma.sprint.findFirstOrThrow({
       where: {
         id: data.sprintId,
         deletedAt: null,
       },
     });
-    await this.prisma.userStory.updateMany({
+    const currentDate = dayjs();
+    if (
+      (currentDate.isBefore(sprint.end) || currentDate.isSame(sprint.end)) &&
+      (currentDate.isAfter(sprint.start) || currentDate.isSame(sprint.start))
+    ) {
+      const message = `The sprint is active.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+    const badStories = await this.prisma.userStory.findMany({
+      where: {
+        id: { in: data.stories },
+        deletedAt: null,
+        OR: [
+          { acceptanceTest: true },
+          { points: null },
+          {
+            NOT: { AND: [{ projectId: sprint.projectId }, { sprintId: null }] },
+          },
+        ],
+      },
+    });
+    if (badStories.length != 0) {
+      const message = `Some stories can't be added to the sprint.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+    const project = await this.prisma.project.findFirstOrThrow({
+      where: {
+        id: sprint.projectId,
+      },
+    });
+    if (user.id !== project.scrumMasterId && user.role !== Role.ADMIN) {
+      const message = `Missing access rights.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
+    return this.prisma.userStory.updateMany({
       where: {
         id: { in: data.stories },
         deletedAt: null,
         acceptanceTest: false,
-        sprintId: null,
         points: { not: null },
       },
       data: {
         sprintId: sprint.id,
       },
     });
-    await this.prisma.userStory.updateMany({
+  }
+
+  async removeStoryFromSprint(id: number, user: User) {
+    const story = await this.prisma.userStory.findFirstOrThrow({
       where: {
-        id: { notIn: data.stories },
+        id,
+        deletedAt: null,
+      },
+    });
+    if (story.acceptanceTest) {
+      const message = `User story can not be removed from the sprint.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+    const project = await this.prisma.project.findFirstOrThrow({
+      where: {
+        id: story.projectId,
+      },
+    });
+    if (user.id !== project.scrumMasterId && user.role !== Role.ADMIN) {
+      const message = `Missing access rights.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
+    return this.prisma.userStory.updateMany({
+      where: {
+        id,
+        deletedAt: null,
       },
       data: {
         sprintId: null,
       },
-    });
-
-    return this.prisma.userStory.findMany({
-      where: { sprintId: data.sprintId },
     });
   }
 }
