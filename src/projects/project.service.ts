@@ -127,7 +127,7 @@ export class ProjectService {
       const exists = await this.prisma.project.findFirst({
         where: {
           deletedAt: null,
-          NOT: { id: where.id },
+          NOT: where,
           title: {
             equals: data.title.toString(),
             mode: 'insensitive',
