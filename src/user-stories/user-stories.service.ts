@@ -284,6 +284,20 @@ export class UserStoriesService {
     });
   }
 
+  async getAddable(projectId: number) {
+    return this.prisma.userStory.findMany({
+      where: {
+        projectId,
+        deletedAt: null,
+        acceptanceTest: false,
+        sprintId: null,
+        NOT: {
+          points: null,
+        },
+      },
+    });
+  }
+
   async addStoriesToSprint(data: StoryListDto) {
     const sprint = await this.prisma.sprint.findFirstOrThrow({
       where: {
@@ -307,7 +321,9 @@ export class UserStoriesService {
         OR: [
           { acceptanceTest: true },
           { points: null },
-          { NOT: { projectId: sprint.projectId } },
+          {
+            NOT: { AND: [{ projectId: sprint.projectId }, { sprintId: null }] },
+          },
         ],
       },
     });

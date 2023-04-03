@@ -38,6 +38,12 @@ export class UserStoriesController {
     return this.userStoriesService.findAll(+pid, +sid);
   }
 
+  @Get('get-addable')
+  @ApiQuery({ name: 'project-id', required: true, type: Number })
+  getAddable(@Query('project-id') projectId: number) {
+    return this.userStoriesService.getAddable(projectId);
+  }
+
   @Get('realized')
   @ApiQuery({ name: 'project-id', required: true, type: Number })
   findRealized(@Query('project-id') projectId: number) {
