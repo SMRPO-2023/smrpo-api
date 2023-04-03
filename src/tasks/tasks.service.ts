@@ -34,8 +34,14 @@ export class TasksService {
     }
 
     const sprint = await this.prisma.sprint.findFirstOrThrow({
-      where: { id: userStory.sprintId },
+      where: { id: userStory?.sprintId },
     });
+    if (!sprint) {
+      const message = `Sprint is not assigned to the user story.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+
     if (
       dayjs(sprint.start).isBefore(dayjs()) &&
       dayjs(sprint.end).isAfter(dayjs())
