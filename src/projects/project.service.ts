@@ -3,9 +3,10 @@ import {
   ConflictException,
   Injectable,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, Role, User } from '@prisma/client';
 import { ProjectDto } from './dto/project.dto';
 
 @Injectable()
@@ -111,20 +112,22 @@ export class ProjectService {
     });
   }
 
-  async update(params: {
-    where: Prisma.ProjectWhereUniqueInput;
-    data: ProjectDto;
-  }) {
-    const { where, data } = params;
+  async update(data: ProjectDto, projectId: number, user: User) {
+    const where = { id: projectId };
     const project = await this.findOne(where);
     if (!project) {
       throw new BadRequestException('Object is deleted');
+    }
+    if (user.id !== project.scrumMasterId && user.role !== Role.ADMIN) {
+      const message = `Missing access rights.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
     }
     if (data.title != null) {
       const exists = await this.prisma.project.findFirst({
         where: {
           deletedAt: null,
-          NOT: { id: where.id },
+          NOT: where,
           title: {
             equals: data.title.toString(),
             mode: 'insensitive',
@@ -137,9 +140,26 @@ export class ProjectService {
         this.logger.warn(message);
         throw new ConflictException(message);
       }
+    }
 
+    if (data.projectOwnerId != null && data.scrumMasterId != null) {
       if (data.projectOwnerId === data.scrumMasterId) {
         const message = `The same person can't be project owner and scrum master.`;
+        this.logger.warn(message);
+        throw new ConflictException(message);
+      }
+    }
+
+    if (data.projectOwnerId != null) {
+      const developerExists = await this.prisma.projectDeveloper.findMany({
+        where: {
+          projectId: project.id,
+          userId: data.projectOwnerId,
+          deletedAt: null,
+        },
+      });
+      if (developerExists.length > 0) {
+        const message = `The project owner can't be a developer.`;
         this.logger.warn(message);
         throw new ConflictException(message);
       }

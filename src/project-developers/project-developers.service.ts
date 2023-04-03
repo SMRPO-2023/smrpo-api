@@ -1,6 +1,12 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
-import { Prisma } from '@prisma/client';
+import { Prisma, Role, User } from '@prisma/client';
 import { ProjectDeveloperDto } from './dto/project-developer.dto';
 import { ProjectDevelopersDto } from './dto/project-developers.dto';
 
@@ -9,31 +15,51 @@ export class ProjectDevelopersService {
   private readonly logger = new Logger(ProjectDevelopersService.name);
   constructor(private prisma: PrismaService) {}
 
-  async findAll(pid?: number) {
-    const where = {
-      deletedAt: null,
-    };
-    if (pid) {
-      where['projectId'] = pid;
-    }
-    return this.prisma.projectDeveloper.findMany({ where });
-  }
-
-  async findOne(where: Prisma.ProjectDeveloperWhereUniqueInput) {
-    return this.prisma.projectDeveloper.findFirstOrThrow({
+  async findAll(projectId: number, user: User) {
+    const project = await this.prisma.project.findFirstOrThrow({
       where: {
-        ...where,
+        id: projectId,
+        deletedAt: null,
+      },
+    });
+    if (
+      user.id !== project.scrumMasterId &&
+      user.id !== project.projectOwnerId &&
+      user.role !== Role.ADMIN
+    ) {
+      const message = `Missing access rights.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
+    return this.prisma.projectDeveloper.findMany({
+      where: {
+        projectId: projectId,
         deletedAt: null,
       },
     });
   }
 
-  async create(data: ProjectDeveloperDto) {
-    this.prisma.project.findFirstOrThrow({
+  async create(data: ProjectDeveloperDto, user: User) {
+    const project = await this.prisma.project.findFirstOrThrow({
       where: {
-        id: data?.projectId,
+        id: data.projectId,
+        deletedAt: null,
       },
     });
+    if (
+      user.id !== project.scrumMasterId &&
+      user.id !== project.projectOwnerId &&
+      user.role !== Role.ADMIN
+    ) {
+      const message = `Missing access rights.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
+    if (project.projectOwnerId == data.userId) {
+      const message = `The project owner can't be a developer.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
     const deletedUser = await this.checkDeletedUser(data);
     if (deletedUser) {
       return this.prisma.projectDeveloper.update({
@@ -42,17 +68,6 @@ export class ProjectDevelopersService {
         },
         data: { deletedAt: null },
       });
-    }
-    const project = await this.prisma.project.findFirst({
-      where: {
-        id: data.projectId,
-      },
-    });
-
-    if (project.projectOwnerId == data.userId) {
-      const message = `The project owner can't be a developer.`;
-      this.logger.warn(message);
-      throw new ConflictException(message);
     }
 
     return this.prisma.projectDeveloper.create({ data }).catch((e) => {
@@ -64,37 +79,46 @@ export class ProjectDevelopersService {
         this.logger.warn(message);
         throw new ConflictException(message);
       }
+      throw new BadRequestException(e);
     });
   }
 
-  async createMulti(data: ProjectDevelopersDto) {
+  async createMulti(data: ProjectDevelopersDto, user: User) {
     try {
       for (const member of data.developers) {
-        await this.create(member);
+        await this.create(member, user);
       }
     } catch (e) {
-      if (
-        e instanceof Prisma.PrismaClientKnownRequestError &&
-        e.code === 'P2002'
-      ) {
-        const message = `User is already on the project.`;
-        this.logger.warn(message);
-        throw new ConflictException(message);
-      }
+      return e;
     }
   }
 
-  async remove(where: Prisma.ProjectDeveloperWhereUniqueInput) {
-    const data = await this.prisma.projectDeveloper.findFirstOrThrow({
+  async remove(id: number, user: User) {
+    const projectDeveloper =
+      await this.prisma.projectDeveloper.findFirstOrThrow({
+        where: { id, deletedAt: null },
+      });
+    const project = await this.prisma.project.findFirstOrThrow({
       where: {
-        ...where,
+        id: projectDeveloper.projectId,
         deletedAt: null,
       },
     });
-    data.deletedAt = new Date();
+    if (
+      user.id !== project.scrumMasterId &&
+      user.id !== project.projectOwnerId &&
+      user.role !== Role.ADMIN
+    ) {
+      const message = `Missing access rights.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
+    projectDeveloper.deletedAt = new Date();
     return this.prisma.projectDeveloper.update({
-      data,
-      where,
+      data: projectDeveloper,
+      where: {
+        id,
+      },
     });
   }
 

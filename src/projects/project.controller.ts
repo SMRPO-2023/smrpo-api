@@ -39,16 +39,13 @@ export class ProjectController {
     return this.projectService.create(data);
   }
 
-  @Roles('ADMIN')
   @Put(':id')
   updateProject(
     @Body() data: ProjectDto,
-    @Param('id', ParseIntPipe) project_id: number
+    @UserEntity() user: User,
+    @Param('id', ParseIntPipe) projectId: number
   ) {
-    return this.projectService.update({
-      data,
-      where: { id: project_id },
-    });
+    return this.projectService.update(data, projectId, user);
   }
 
   @Roles('ADMIN')
