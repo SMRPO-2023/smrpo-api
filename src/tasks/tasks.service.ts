@@ -43,8 +43,8 @@ export class TasksService {
     }
 
     if (
-      dayjs(sprint.start).isBefore(dayjs()) &&
-      dayjs(sprint.end).isAfter(dayjs())
+      dayjs(sprint.start).isAfter(dayjs()) ||
+      dayjs(sprint.end).isBefore(dayjs())
     ) {
       const message = `UserStory is not in active sprint.`;
       this.logger.warn(message);
