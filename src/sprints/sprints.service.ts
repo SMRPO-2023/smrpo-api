@@ -99,7 +99,7 @@ export class SprintsService {
       oldSprint.start.getTime() != data.start.getTime() ||
       oldSprint.end.getTime() != data.end.getTime()
     ) {
-      await this.validateSprint(data);
+      await this.validateSprint(data, id);
     }
 
     return this.prisma.sprint.update({ data: { ...data }, where: { id } });
@@ -122,7 +122,7 @@ export class SprintsService {
     });
   }
 
-  async validateSprint(data: SprintDto): Promise<void> {
+  async validateSprint(data: SprintDto, id?: number): Promise<void> {
     this.logger.debug('Validating sprint.');
     if (dayjs(data.start).add(1, 'day').isBefore(dayjs())) {
       const message = `Sprint doesn't start in the future.`;
@@ -134,7 +134,7 @@ export class SprintsService {
       this.logger.warn(message);
       throw new BadRequestException(message);
     }
-    if (await this.checkConflict(data)) {
+    if (await this.checkConflict(data, id)) {
       const message = `Sprint overlaps with another sprint.`;
       this.logger.warn(message);
       throw new ConflictException(message);
@@ -151,17 +151,19 @@ export class SprintsService {
     }
   }
 
-  async checkConflict(data: SprintDto): Promise<Sprint> {
+  async checkConflict(data: SprintDto, id?: number): Promise<Sprint> {
     this.logger.debug('checking sprint conflict.');
+    const where = {
+      projectId: data.projectId,
+      deletedAt: null,
+      end: { gte: data.start },
+      start: { lte: data.end },
+    };
+    if (id) {
+      where['NOT'] = { id };
+    }
     return this.prisma.sprint.findFirst({
-      where: {
-        projectId: data.projectId,
-        deletedAt: null,
-        OR: [
-          { end: { gte: data.start }, start: { lte: data.end } },
-          { end: { gte: data.start }, start: { lte: data.end } },
-        ],
-      },
+      where,
     });
   }
 

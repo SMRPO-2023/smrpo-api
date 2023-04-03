@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
@@ -11,6 +10,10 @@ import {
 } from 'class-validator';
 
 export class SprintDto {
+  @IsOptional()
+  @IsInt()
+  id: number;
+
   @IsNotEmpty()
   @Type(() => Date)
   @IsDate()

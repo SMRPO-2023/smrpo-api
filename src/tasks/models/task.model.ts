@@ -17,8 +17,8 @@ export class Task {
   @ApiProperty({ type: String })
   title: string;
 
-  @ApiPropertyOptional({ type: String })
-  description?: string;
+  @ApiProperty({ type: String })
+  description: string;
 
   @ApiProperty({ type: Number })
   hours: number;
