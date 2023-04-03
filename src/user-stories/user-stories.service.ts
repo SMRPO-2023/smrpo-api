@@ -10,7 +10,8 @@ import { PrismaService } from 'nestjs-prisma';
 import { UserStoryDto } from './dto/user-story.dto';
 import { StoryListDto } from './dto/story-list.dto';
 import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
-import { Role } from "@prisma/client";
+import { Role } from '@prisma/client';
+import { UpdateStoryPointsDto } from './dto/update-story-points.dto';
 
 @Injectable()
 export class UserStoriesService {
@@ -175,7 +176,41 @@ export class UserStoriesService {
       userId !== project.scrumMasterId &&
       user.role !== Role.ADMIN
     ) {
-      const message = `Missing access right.`;
+      const message = `Missing access rights.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
+    return this.prisma.userStory.update({ where: { id }, data });
+  }
+
+  async updateStoryPoints(
+    id: number,
+    data: UpdateStoryPointsDto,
+    userId: number
+  ) {
+    const userStory = await this.findOne(id);
+
+    if (!userStory) {
+      const message = 'User story not found.';
+      this.logger.debug(message);
+      throw new NotFoundException(message);
+    }
+
+    if (userStory.sprintId != null || userStory.acceptanceTest) {
+      const message = `User story can't be changed.`;
+      this.logger.warn(message);
+      throw new ForbiddenException(message);
+    }
+
+    const project = await this.prisma.project.findUnique({
+      where: { id: userStory.projectId },
+    });
+
+    const user = await this.prisma.user.findFirstOrThrow({
+      where: { id: userId },
+    });
+    if (userId !== project.scrumMasterId && user.role !== Role.ADMIN) {
+      const message = `Missing access rights.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
     }
