@@ -8,7 +8,7 @@ import {
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { PrismaService } from 'nestjs-prisma';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { ProjectDeveloper } from '@prisma/client';
+import { ProjectDeveloper, Role, TaskStatus } from '@prisma/client';
 import * as dayjs from 'dayjs';
 
 @Injectable()
@@ -93,6 +93,30 @@ export class TasksService {
       data,
       where: { id },
     });
+  }
+
+  async userAction(id: number, action: string, userId: number) {
+    const task = await this.findOne(id);
+    const user = await this.prisma.user.findFirstOrThrow({
+      where: { id: userId },
+    });
+    if (userId === task.userId || user.role === Role.ADMIN) {
+      const message = `Cannot change other's task assignment.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
+
+    if (action === 'assign') {
+      task.status = TaskStatus.ASSIGNED;
+      task.userId = userId;
+    } else if (action === 'accept') {
+      task.status = TaskStatus.ACTIVE;
+    } else if (action === 'reject') {
+      task.status = TaskStatus.UNASSIGNED;
+      task.userId = null;
+    }
+
+    return this.prisma.task.update({ where: { id }, data: task });
   }
 
   async remove(id: number, userId: number) {

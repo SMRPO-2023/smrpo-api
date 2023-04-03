@@ -15,10 +15,10 @@ import { UserStoriesService } from './user-stories.service';
 import { UserStoryDto } from './dto/user-story.dto';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UserEntity } from 'src/common/decorators/user.decorator';
-import { User } from 'src/users/models/user.model';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
 import { StoryListDto } from './dto/story-list.dto';
 import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
+import { User } from '@prisma/client';
 import { UpdateStoryPointsDto } from './dto/update-story-points.dto';
 
 @Controller('user-stories')
@@ -40,6 +40,12 @@ export class UserStoriesController {
     return this.userStoriesService.findAll(+pid, +sid);
   }
 
+  @Get('get-addable')
+  @ApiQuery({ name: 'project-id', required: true, type: Number })
+  getAddable(@Query('project-id') projectId: number) {
+    return this.userStoriesService.getAddable(projectId);
+  }
+
   @Get('realized')
   @ApiQuery({ name: 'project-id', required: true, type: Number })
   findRealized(@Query('project-id') projectId: number) {
@@ -56,6 +62,12 @@ export class UserStoriesController {
   @ApiQuery({ name: 'project-id', required: true, type: Number })
   findUnrealizedWithSprint(@Query('project-id') projectId: number) {
     return this.userStoriesService.findUnrealizedWithSprint(projectId);
+  }
+
+  @Get('future-releases')
+  @ApiQuery({ name: 'project-id', required: true, type: Number })
+  findFutureReleases(@Query('project-id') projectId: number) {
+    return this.userStoriesService.findFutureReleases(projectId);
   }
 
   @Get(':id')
@@ -86,9 +98,17 @@ export class UserStoriesController {
     return this.userStoriesService.remove(+id, user.id);
   }
 
-  @Post('attach')
-  addStories(@Body() data: StoryListDto) {
-    return this.userStoriesService.addStories(data);
+  @Post('add-to-sprint')
+  addStories(@Body() data: StoryListDto, @UserEntity() user: User) {
+    return this.userStoriesService.addStoriesToSprint(data, user);
+  }
+
+  @Post('remove-from-sprint/:id')
+  removeStoryFromSprint(
+    @Param('id', ParseIntPipe) id: number,
+    @UserEntity() user: User
+  ) {
+    return this.userStoriesService.removeStoryFromSprint(id, user);
   }
 
   @Patch('update-story-points/:id')

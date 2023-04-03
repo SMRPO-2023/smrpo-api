@@ -6,8 +6,9 @@ import {
   Param,
   Delete,
   ParseIntPipe,
-  Put, Query
-} from "@nestjs/common";
+  Put,
+  Query,
+} from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -43,6 +44,15 @@ export class TasksController {
     @UserEntity() user: User
   ) {
     return this.tasksService.update(+id, updateTaskDto, user.id);
+  }
+
+  @Post(':id/:action')
+  accept_reject(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('action') action: string,
+    @UserEntity() user: User
+  ) {
+    return this.tasksService.userAction(+id, action, user.id);
   }
 
   @Delete(':id')
