@@ -158,7 +158,6 @@ export class ProjectService {
           deletedAt: null,
         },
       });
-      console.log(developerExists);
       if (developerExists.length > 0) {
         const message = `The project owner can't be a developer.`;
         this.logger.warn(message);
