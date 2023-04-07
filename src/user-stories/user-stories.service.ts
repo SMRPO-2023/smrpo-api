@@ -365,11 +365,8 @@ export class UserStoriesService {
       },
     });
     const currentDate = dayjs();
-    if (
-      (currentDate.isBefore(sprint.end) || currentDate.isSame(sprint.end)) &&
-      (currentDate.isAfter(sprint.start) || currentDate.isSame(sprint.start))
-    ) {
-      const message = `The sprint is active.`;
+    if (currentDate.isBefore(sprint.start) || currentDate.isAfter(sprint.end)) {
+      const message = `The sprint is not active.`;
       this.logger.warn(message);
       throw new BadRequestException(message);
     }
