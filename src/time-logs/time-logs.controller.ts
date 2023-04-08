@@ -9,9 +9,8 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { TimeLogsService } from './time-logs.service';
-import { CreateTimeLogDto } from './dto/create-time-log.dto';
-import { UpdateTimeLogDto } from './dto/update-time-log.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { TimeLogDto } from './dto/time-log.dto';
 
 @Controller('time-logs')
 @ApiTags('Time logs')
@@ -19,8 +18,8 @@ export class TimeLogsController {
   constructor(private readonly timeLogsService: TimeLogsService) {}
 
   @Post()
-  create(@Body() createTimeLogDto: CreateTimeLogDto) {
-    return this.timeLogsService.create(createTimeLogDto);
+  create(@Body() timeLogDto: TimeLogDto) {
+    return this.timeLogsService.create(timeLogDto);
   }
 
   @Get()
@@ -36,9 +35,9 @@ export class TimeLogsController {
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateTimeLogDto: UpdateTimeLogDto
+    @Body() timeLogDto: TimeLogDto
   ) {
-    return this.timeLogsService.update(+id, updateTimeLogDto);
+    return this.timeLogsService.update(+id, timeLogDto);
   }
 
   @Delete(':id')

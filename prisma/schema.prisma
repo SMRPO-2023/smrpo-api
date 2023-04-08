@@ -126,10 +126,10 @@ model TimeLog {
   deletedAt DateTime?
   day       DateTime
   hours     Int
-  User      User?     @relation(fields: [userId], references: [id])
-  userId    Int?
-  Task      Task?     @relation(fields: [taskId], references: [id])
-  taskId    Int?
+  User      User      @relation(fields: [userId], references: [id])
+  userId    Int
+  Task      Task      @relation(fields: [taskId], references: [id])
+  taskId    Int
 }
 
 model Post {

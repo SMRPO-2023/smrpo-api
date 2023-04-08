@@ -10,10 +10,6 @@ import {
 } from 'class-validator';
 
 export class SprintDto {
-  @IsOptional()
-  @IsInt()
-  id: number;
-
   @IsNotEmpty()
   @Type(() => Date)
   @IsDate()

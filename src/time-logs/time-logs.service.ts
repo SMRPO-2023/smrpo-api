@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTimeLogDto } from './dto/create-time-log.dto';
-import { UpdateTimeLogDto } from './dto/update-time-log.dto';
+import { TimeLogDto } from './dto/time-log.dto';
 
 @Injectable()
 export class TimeLogsService {
-  create(createTimeLogDto: CreateTimeLogDto) {
+  create(timeLogDto: TimeLogDto) {
     return 'This action adds a new timeLog';
   }
 
@@ -16,7 +15,7 @@ export class TimeLogsService {
     return `This action returns a #${id} timeLog`;
   }
 
-  update(id: number, updateTimeLogDto: UpdateTimeLogDto) {
+  update(id: number, timeLogDto: TimeLogDto) {
     return `This action updates a #${id} timeLog`;
   }
 

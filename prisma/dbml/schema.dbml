@@ -96,10 +96,10 @@ Table TimeLog {
   deletedAt DateTime
   day DateTime [not null]
   hours Int [not null]
-  User User
-  userId Int
-  Task Task
-  taskId Int
+  User User [not null]
+  userId Int [not null]
+  Task Task [not null]
+  taskId Int [not null]
 }
 
 Table Post {
