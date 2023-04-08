@@ -353,7 +353,7 @@ export class UserStoriesService {
         acceptanceTest: false,
         sprintId: null,
         NOT: {
-          points: null,
+          OR: [{ points: null }, { priority: StoryPriority.WONT_HAVE }],
         },
       },
     });
@@ -389,6 +389,7 @@ export class UserStoriesService {
         OR: [
           { acceptanceTest: true },
           { points: null },
+          { priority: StoryPriority.WONT_HAVE },
           {
             NOT: { AND: [{ projectId: sprint.projectId }, { sprintId: null }] },
           },
