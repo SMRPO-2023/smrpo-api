@@ -69,13 +69,15 @@ export class UserStoriesService {
     });
 
     const returnStories = [];
+    let pointsSum = 0;
     for (const tempStory of data) {
+      pointsSum += tempStory.points;
       returnStories.push({
         ...tempStory,
         ...(await this.canBeAccepted(tempStory.id)),
       });
     }
-    return returnStories;
+    return { stories: returnStories, pointsSum };
   }
 
   async findRealized(projectId: number) {
