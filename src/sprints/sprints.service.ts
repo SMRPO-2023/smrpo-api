@@ -127,6 +127,25 @@ export class SprintsService {
     });
   }
 
+  async getActiveSprint(projectId: number) {
+    const currentDate = dayjs();
+    return this.prisma.sprint.findFirst({
+      where: {
+        projectId,
+        deletedAt: null,
+        end: { gte: currentDate.toDate() },
+        start: { lte: currentDate.toDate() },
+      },
+      include: {
+        UserStories: {
+          where: {
+            deletedAt: null,
+          },
+        },
+      },
+    });
+  }
+
   async validateSprint(data: SprintDto, id?: number): Promise<void> {
     this.logger.debug('Validating sprint.');
     if (dayjs(data.start).add(1, 'day').isBefore(dayjs())) {
