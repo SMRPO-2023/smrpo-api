@@ -53,8 +53,8 @@ export class SprintsService {
     });
   }
 
-  findOne(id: number) {
-    return this.prisma.sprint.findFirst({
+  async findOne(id: number) {
+    const data = await this.prisma.sprint.findFirst({
       where: {
         id,
         deletedAt: null,
@@ -67,11 +67,17 @@ export class SprintsService {
         },
       },
     });
+
+    let currentLoad = 0;
+    for (const story of data.UserStories) {
+      currentLoad += story.points;
+    }
+    return { sprint: data, currentLoad: currentLoad };
   }
 
   async update(id: number, data: SprintDto, userId: number) {
     await this.checkPermission(data, userId);
-    const oldSprint = await this.findOne(id);
+    const oldSprint = (await this.findOne(id)).sprint;
 
     const exists = await this.prisma.sprint.findFirst({
       where: {

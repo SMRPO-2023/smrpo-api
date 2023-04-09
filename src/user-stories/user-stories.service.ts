@@ -77,7 +77,7 @@ export class UserStoriesService {
         ...(await this.canBeAccepted(tempStory.id)),
       });
     }
-    return { stories: returnStories, pointsSum: currentLoad };
+    return { stories: returnStories, currentLoad: currentLoad };
   }
 
   async findRealized(projectId: number) {
