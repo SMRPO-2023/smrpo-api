@@ -61,8 +61,8 @@ export class SprintsService {
     });
   }
 
-  findOne(id: number) {
-    return this.prisma.sprint.findFirst({
+  async findOne(id: number) {
+    const data = await this.prisma.sprint.findFirst({
       where: {
         id,
         deletedAt: null,
@@ -75,29 +75,45 @@ export class SprintsService {
         },
       },
     });
+
+    let currentLoad = 0;
+    for (const story of data.UserStories) {
+      currentLoad += story.points;
+    }
+    return { sprint: data, currentLoad: currentLoad };
   }
 
   async update(id: number, data: SprintDto, userId: number) {
     await this.checkPermission(data, userId);
-    const oldSprint = await this.findOne(id);
+    const oldSprint = (await this.findOne(id)).sprint;
 
-    if (data.name != null) {
-      const exists = await this.prisma.sprint.findFirst({
-        where: {
-          deletedAt: null,
-          NOT: { id },
-          projectId: oldSprint.projectId,
-          name: {
-            equals: data.name.toString(),
-            mode: 'insensitive',
-          },
+    const exists = await this.prisma.sprint.findFirst({
+      where: {
+        deletedAt: null,
+        NOT: { id },
+        projectId: oldSprint.projectId,
+        name: {
+          equals: data.name.toString(),
+          mode: 'insensitive',
         },
-      });
+      },
+    });
 
-      if (exists) {
-        const message = `Sprint already exists.`;
-        this.logger.warn(message);
-        throw new ConflictException(message);
+    if (exists) {
+      const message = `Sprint already exists.`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
+
+    if (data.start !== oldSprint.start || data.end !== oldSprint.end) {
+      data.start = dayjs(data.start).startOf('day').toDate();
+      data.end = dayjs(data.end).endOf('day').toDate();
+
+      if (
+        oldSprint.start.getTime() != data.start.getTime() ||
+        oldSprint.end.getTime() != data.end.getTime()
+      ) {
+        await this.validateSprint(data, id);
       }
     }
 
@@ -117,11 +133,8 @@ export class SprintsService {
     data.start = dayjs(data.start).startOf('day').toDate();
     data.end = dayjs(data.end).endOf('day').toDate();
 
-    if (
-      oldSprint.start.getTime() != data.start.getTime() ||
-      oldSprint.end.getTime() != data.end.getTime()
-    ) {
-      await this.validateSprint(data, id);
+    if (data.velocity !== oldSprint.velocity) {
+      await this.checkVelocity(data, id);
     }
 
     return this.prisma.sprint.update({ data: { ...data }, where: { id } });
@@ -140,6 +153,25 @@ export class SprintsService {
       data: sprint,
       where: {
         id,
+      },
+    });
+  }
+
+  async getActiveSprint(projectId: number) {
+    const currentDate = dayjs();
+    return this.prisma.sprint.findFirst({
+      where: {
+        projectId,
+        deletedAt: null,
+        end: { gte: currentDate.toDate() },
+        start: { lte: currentDate.toDate() },
+      },
+      include: {
+        UserStories: {
+          where: {
+            deletedAt: null,
+          },
+        },
       },
     });
   }
@@ -187,6 +219,22 @@ export class SprintsService {
     return this.prisma.sprint.findFirst({
       where,
     });
+  }
+
+  async checkVelocity(data: SprintDto, sprintId: number) {
+    this.logger.debug('checking sprint velocity.');
+    const storiesSum = await this.prisma.userStory.aggregate({
+      _sum: { points: true },
+      where: {
+        deletedAt: null,
+        sprintId: sprintId,
+      },
+    });
+    if (storiesSum._sum.points > data.velocity) {
+      const message = `Number of story points exceeds sprint velocity.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
   }
 
   async checkPermission(data: SprintDto, userId: number): Promise<void> {

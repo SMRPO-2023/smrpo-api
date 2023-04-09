@@ -69,13 +69,15 @@ export class UserStoriesService {
     });
 
     const returnStories = [];
+    let currentLoad = 0;
     for (const tempStory of data) {
+      currentLoad += tempStory.points;
       returnStories.push({
         ...tempStory,
         ...(await this.canBeAccepted(tempStory.id)),
       });
     }
-    return returnStories;
+    return { stories: returnStories, currentLoad: currentLoad };
   }
 
   async findRealized(projectId: number) {
@@ -351,7 +353,7 @@ export class UserStoriesService {
         acceptanceTest: false,
         sprintId: null,
         NOT: {
-          points: null,
+          OR: [{ points: null }, { priority: StoryPriority.WONT_HAVE }],
         },
       },
     });
@@ -370,6 +372,16 @@ export class UserStoriesService {
       this.logger.warn(message);
       throw new BadRequestException(message);
     }
+    const project = await this.prisma.project.findFirstOrThrow({
+      where: {
+        id: sprint.projectId,
+      },
+    });
+    if (user.id !== project.scrumMasterId && user.role !== Role.ADMIN) {
+      const message = `Missing access rights.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
     const badStories = await this.prisma.userStory.findMany({
       where: {
         id: { in: data.stories },
@@ -377,6 +389,7 @@ export class UserStoriesService {
         OR: [
           { acceptanceTest: true },
           { points: null },
+          { priority: StoryPriority.WONT_HAVE },
           {
             NOT: { AND: [{ projectId: sprint.projectId }, { sprintId: null }] },
           },
@@ -388,16 +401,29 @@ export class UserStoriesService {
       this.logger.warn(message);
       throw new BadRequestException(message);
     }
-    const project = await this.prisma.project.findFirstOrThrow({
+    const oldStoriesSum = await this.prisma.userStory.aggregate({
+      _sum: { points: true },
       where: {
-        id: sprint.projectId,
+        deletedAt: null,
+        sprintId: sprint.id,
       },
     });
-    if (user.id !== project.scrumMasterId && user.role !== Role.ADMIN) {
-      const message = `Missing access rights.`;
+    const newStoriesSum = await this.prisma.userStory.aggregate({
+      _sum: { points: true },
+      where: {
+        id: { in: data.stories },
+        deletedAt: null,
+      },
+    });
+    if (
+      oldStoriesSum._sum.points + newStoriesSum._sum.points >
+      sprint.velocity
+    ) {
+      const message = `Number of story points exceeds sprint velocity.`;
       this.logger.warn(message);
-      throw new UnauthorizedException(message);
+      throw new BadRequestException(message);
     }
+
     return this.prisma.userStory.updateMany({
       where: {
         id: { in: data.stories },
