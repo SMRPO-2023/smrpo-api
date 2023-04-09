@@ -10,6 +10,9 @@ export class TimeLog extends BaseModel {
   @ApiProperty({ type: Number })
   hours: number;
 
+  @ApiProperty({ type: Number })
+  remainingHours: number;
+
   @ApiProperty({ type: () => User })
   User: User;
 

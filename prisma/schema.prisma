@@ -120,16 +120,17 @@ enum StoryPriority {
 }
 
 model TimeLog {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  day       DateTime
-  hours     Float
-  User      User      @relation(fields: [userId], references: [id])
-  userId    Int
-  Task      Task      @relation(fields: [taskId], references: [id])
-  taskId    Int
+  id             Int       @id @default(autoincrement())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  day            DateTime
+  hours          Float
+  User           User      @relation(fields: [userId], references: [id])
+  userId         Int
+  Task           Task      @relation(fields: [taskId], references: [id])
+  taskId         Int
+  remainingHours Float
 }
 
 model Post {

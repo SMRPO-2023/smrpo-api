@@ -13,6 +13,12 @@ export class TimeLogDto {
   @Max(15)
   hours: number;
 
+  @IsNotEmpty()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @Min(0)
+  @Max(30)
+  remainingHours: number;
+
   @IsInt()
   userId: number;
 
