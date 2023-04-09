@@ -15,8 +15,20 @@ export class Post {
   @ApiProperty({ type: Date })
   updatedAt: Date;
 
+  @ApiPropertyOptional({ type: Date })
+  deletedAt?: Date;
+
+  @ApiProperty({ type: Boolean })
+  published: boolean;
+
+  @ApiProperty({ type: String })
+  title: string;
+
+  @ApiPropertyOptional({ type: String })
+  content?: string;
+
   @ApiPropertyOptional({ type: () => User })
-  User?: User;
+  User: User;
 
   @ApiPropertyOptional({ type: Number })
   userId?: number;
