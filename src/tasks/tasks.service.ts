@@ -33,22 +33,24 @@ export class TasksService {
       throw new BadRequestException(message);
     }
 
-    const sprint = await this.prisma.sprint.findFirstOrThrow({
-      where: { id: userStory?.sprintId },
-    });
-    if (!sprint) {
-      const message = `Sprint is not assigned to the user story.`;
-      this.logger.warn(message);
-      throw new BadRequestException(message);
-    }
+    if (userStory?.sprintId) {
+      const sprint = await this.prisma.sprint.findFirstOrThrow({
+        where: { id: userStory?.sprintId },
+      });
+      if (!sprint) {
+        const message = `Sprint is not assigned to the user story.`;
+        this.logger.warn(message);
+        throw new BadRequestException(message);
+      }
 
-    if (
-      dayjs(sprint.start).isAfter(dayjs()) ||
-      dayjs(sprint.end).isBefore(dayjs())
-    ) {
-      const message = `UserStory is not in active sprint.`;
-      this.logger.warn(message);
-      throw new BadRequestException(message);
+      if (
+        dayjs(sprint.start).isAfter(dayjs()) ||
+        dayjs(sprint.end).isBefore(dayjs())
+      ) {
+        const message = `UserStory is not in active sprint.`;
+        this.logger.warn(message);
+        throw new BadRequestException(message);
+      }
     }
 
     const exists = await this.prisma.task.findFirst({
@@ -71,10 +73,13 @@ export class TasksService {
     return this.prisma.task.create({ data });
   }
 
-  async findAll(userStoryId?: number) {
+  async findAll(userStoryId?: number, userId?: number) {
     const where = { deletedAt: null };
     if (userStoryId) {
       where['userStoryId'] = userStoryId;
+    }
+    if (userId) {
+      where['userId'] = userId;
     }
     return this.prisma.task.findMany({ where });
   }
@@ -103,14 +108,14 @@ export class TasksService {
 
   async userAction(id: number, action: string, userId: number) {
     const task = await this.findOne(id);
-    const user = await this.prisma.user.findFirstOrThrow({
-      where: { id: userId },
-    });
-    if (userId === task.userId || user.role === Role.ADMIN) {
-      const message = `Cannot change other's task assignment.`;
-      this.logger.warn(message);
-      throw new UnauthorizedException(message);
-    }
+    // const user = await this.prisma.user.findFirstOrThrow({
+    //   where: { id: userId },
+    // });
+    // if (userId !== task.userId && user.role !== Role.ADMIN) {
+    //   const message = `Cannot change other's task assignment.`;
+    //   this.logger.warn(message);
+    //   throw new UnauthorizedException(message);
+    // }
 
     if (action === 'assign') {
       task.status = TaskStatus.ASSIGNED;

@@ -1,4 +1,5 @@
 import { IsInt, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
+import { TaskStatus } from '@prisma/client';
 
 export class CreateTaskDto {
   @IsString()
@@ -19,4 +20,6 @@ export class CreateTaskDto {
   userStoryId: number;
 
   userId?: number;
+
+  status?: TaskStatus;
 }
