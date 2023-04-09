@@ -7,6 +7,7 @@ import {
   Max,
   IsDate,
   IsInt,
+  IsNumber,
 } from 'class-validator';
 
 export class SprintDto {
@@ -25,7 +26,7 @@ export class SprintDto {
   end: Date;
 
   @IsNotEmpty()
-  @IsInt()
+  @IsNumber({ maxDecimalPlaces: 4 })
   @Min(0.1)
   @Max(100)
   velocity: number;

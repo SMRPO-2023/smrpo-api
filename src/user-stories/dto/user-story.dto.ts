@@ -8,6 +8,7 @@ import {
   Min,
   Max,
   IsBoolean,
+  IsNumber,
 } from 'class-validator';
 
 export class UserStoryDto {
@@ -23,7 +24,7 @@ export class UserStoryDto {
   priority: StoryPriority;
 
   @IsOptional()
-  @IsInt()
+  @IsNumber({ maxDecimalPlaces: 4 })
   @Min(0.1)
   @Max(50)
   points?: number;

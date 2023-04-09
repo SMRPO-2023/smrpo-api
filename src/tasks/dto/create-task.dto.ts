@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
 
 export class CreateTaskDto {
   @IsString()
@@ -10,7 +10,7 @@ export class CreateTaskDto {
   description: string;
 
   @IsNotEmpty()
-  @IsInt()
+  @IsNumber({ maxDecimalPlaces: 4 })
   @Min(0.1)
   hours: number;
 

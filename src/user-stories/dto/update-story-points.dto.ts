@@ -1,7 +1,7 @@
-import { IsInt, Max, Min } from 'class-validator';
+import { IsNumber, Max, Min } from 'class-validator';
 
 export class UpdateStoryPointsDto {
-  @IsInt()
+  @IsNumber({ maxDecimalPlaces: 4 })
   @Min(0.1)
   @Max(50)
   points: number;

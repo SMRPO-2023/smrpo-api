@@ -46,7 +46,7 @@ model Sprint {
   deletedAt   DateTime?
   start       DateTime
   end         DateTime
-  velocity    Int
+  velocity    Float
   Project     Project?    @relation(fields: [projectId], references: [id])
   projectId   Int?
   UserStories UserStory[]
@@ -73,7 +73,7 @@ model Task {
   deletedAt   DateTime?
   title       String
   description String
-  hours       Int
+  hours       Float
   done        Boolean    @default(false)
   status      TaskStatus @default(UNASSIGNED)
   assignedTo  User?      @relation(fields: [userId], references: [id])
@@ -100,7 +100,7 @@ model UserStory {
   title              String
   description        String
   priority           StoryPriority
-  points             Int?
+  points             Float?
   acceptanceTest     Boolean        @default(false)
   projectId          Int
   project            Project        @relation(fields: [projectId], references: [id])
