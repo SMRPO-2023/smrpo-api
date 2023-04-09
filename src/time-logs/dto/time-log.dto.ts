@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsNotEmpty, Min, Max, IsDate, IsInt } from 'class-validator';
+import { IsNotEmpty, Min, Max, IsDate, IsInt, IsNumber } from 'class-validator';
 
 export class TimeLogDto {
   @IsNotEmpty()
@@ -8,7 +8,7 @@ export class TimeLogDto {
   day: Date;
 
   @IsNotEmpty()
-  @IsInt()
+  @IsNumber({ maxDecimalPlaces: 4 })
   @Min(0.01)
   @Max(15)
   hours: number;

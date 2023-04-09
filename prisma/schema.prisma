@@ -124,7 +124,7 @@ model TimeLog {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-  day       DateTime
+  day       Float
   hours     Int
   User      User      @relation(fields: [userId], references: [id])
   userId    Int
