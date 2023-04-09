@@ -39,9 +39,9 @@ export class SprintsService {
     return this.prisma.sprint.create({ data });
   }
 
-  findAll() {
+  async findAll() {
     const where = { deletedAt: null };
-    return this.prisma.sprint.findMany({
+    const sprints = await this.prisma.sprint.findMany({
       where,
       include: {
         UserStories: {
@@ -50,6 +50,14 @@ export class SprintsService {
           },
         },
       },
+      orderBy: { start: 'asc' },
+    });
+    return sprints.map((s) => {
+      // s['finished'] =
+      //   s.UserStories.filter((us) => us.acceptanceTest).length ===
+      //   s.UserStories.length;
+      s['finished'] = dayjs(s.end).isBefore(dayjs());
+      return s;
     });
   }
 
@@ -108,6 +116,22 @@ export class SprintsService {
         await this.validateSprint(data, id);
       }
     }
+
+    // On active sprint allow only change to points
+    if (
+      dayjs(data.start).isBefore(dayjs()) &&
+      dayjs(data.end).isAfter(dayjs())
+    ) {
+      return this.prisma.sprint.update({
+        data: {
+          velocity: data.velocity,
+        },
+        where: { id },
+      });
+    }
+
+    data.start = dayjs(data.start).startOf('day').toDate();
+    data.end = dayjs(data.end).endOf('day').toDate();
 
     if (data.velocity !== oldSprint.velocity) {
       await this.checkVelocity(data, id);

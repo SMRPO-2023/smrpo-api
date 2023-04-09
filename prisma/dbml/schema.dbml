@@ -30,7 +30,7 @@ Table Sprint {
   deletedAt DateTime
   start DateTime [not null]
   end DateTime [not null]
-  velocity Int [not null]
+  velocity Float [not null]
   Project Project
   projectId Int
   UserStories UserStory [not null]
@@ -57,7 +57,7 @@ Table Task {
   deletedAt DateTime
   title String [not null]
   description String [not null]
-  hours Int [not null]
+  hours Float [not null]
   done Boolean [not null, default: false]
   status TaskStatus [not null, default: 'UNASSIGNED']
   assignedTo User
@@ -77,7 +77,7 @@ Table UserStory {
   title String [not null]
   description String [not null]
   priority StoryPriority [not null]
-  points Int
+  points Float
   acceptanceTest Boolean [not null, default: false]
   projectId Int [not null]
   project Project [not null]
@@ -95,11 +95,12 @@ Table TimeLog {
   updatedAt DateTime [not null]
   deletedAt DateTime
   day DateTime [not null]
-  hours Int [not null]
-  User User
-  userId Int
-  Task Task
-  taskId Int
+  hours Float [not null]
+  User User [not null]
+  userId Int [not null]
+  Task Task [not null]
+  taskId Int [not null]
+  remainingHours Float [not null]
 }
 
 Table Post {

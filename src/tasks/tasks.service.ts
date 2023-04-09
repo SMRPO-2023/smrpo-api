@@ -8,7 +8,7 @@ import {
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { PrismaService } from 'nestjs-prisma';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { ProjectDeveloper, Role, TaskStatus } from '@prisma/client';
+import { ProjectDeveloper, Role, Task, TaskStatus } from "@prisma/client";
 import * as dayjs from 'dayjs';
 
 @Injectable()
@@ -33,22 +33,24 @@ export class TasksService {
       throw new BadRequestException(message);
     }
 
-    const sprint = await this.prisma.sprint.findFirstOrThrow({
-      where: { id: userStory?.sprintId },
-    });
-    if (!sprint) {
-      const message = `Sprint is not assigned to the user story.`;
-      this.logger.warn(message);
-      throw new BadRequestException(message);
-    }
+    if (userStory?.sprintId) {
+      const sprint = await this.prisma.sprint.findFirstOrThrow({
+        where: { id: userStory?.sprintId },
+      });
+      if (!sprint) {
+        const message = `Sprint is not assigned to the user story.`;
+        this.logger.warn(message);
+        throw new BadRequestException(message);
+      }
 
-    if (
-      dayjs(sprint.start).isAfter(dayjs()) ||
-      dayjs(sprint.end).isBefore(dayjs())
-    ) {
-      const message = `UserStory is not in active sprint.`;
-      this.logger.warn(message);
-      throw new BadRequestException(message);
+      if (
+        dayjs(sprint.start).isAfter(dayjs()) ||
+        dayjs(sprint.end).isBefore(dayjs())
+      ) {
+        const message = `UserStory is not in active sprint.`;
+        this.logger.warn(message);
+        throw new BadRequestException(message);
+      }
     }
 
     const exists = await this.prisma.task.findFirst({
@@ -71,19 +73,114 @@ export class TasksService {
     return this.prisma.task.create({ data });
   }
 
-  async findAll(userStoryId?: number) {
+  async findAll(userStoryId?: number, userId?: number) {
     const where = { deletedAt: null };
     if (userStoryId) {
       where['userStoryId'] = userStoryId;
     }
-    return this.prisma.task.findMany({ where });
+    if (userId) {
+      where['userId'] = userId;
+    }
+    return this.prisma.task.findMany({
+      where,
+      include: {
+        UserStory: {
+          select: {
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            title: true,
+            description: true,
+            priority: true,
+            points: true,
+            acceptanceTest: true,
+            projectId: true,
+            sprintId: true,
+            acceptanceCriteria: true,
+            businessValue: true,
+          },
+        },
+        timeLogs: {
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            day: true,
+            hours: true,
+            userId: true,
+            taskId: true,
+          },
+          where: { deletedAt: null },
+        },
+        assignedTo: {
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            lastLogin: true,
+            username: true,
+            email: true,
+            firstname: true,
+            lastname: true,
+            role: true,
+          },
+        },
+      },
+    });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Task> {
     return this.prisma.task.findFirstOrThrow({
       where: {
         id,
         deletedAt: null,
+      },
+      include: {
+        UserStory: {
+          select: {
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            title: true,
+            description: true,
+            priority: true,
+            points: true,
+            acceptanceTest: true,
+            projectId: true,
+            sprintId: true,
+            acceptanceCriteria: true,
+            businessValue: true,
+          },
+        },
+        timeLogs: {
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            day: true,
+            hours: true,
+            userId: true,
+            taskId: true,
+          },
+          where: { deletedAt: null },
+        },
+        assignedTo: {
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            lastLogin: true,
+            username: true,
+            email: true,
+            firstname: true,
+            lastname: true,
+            role: true,
+          },
+        },
       },
     });
   }
@@ -103,14 +200,14 @@ export class TasksService {
 
   async userAction(id: number, action: string, userId: number) {
     const task = await this.findOne(id);
-    const user = await this.prisma.user.findFirstOrThrow({
-      where: { id: userId },
-    });
-    if (userId === task.userId || user.role === Role.ADMIN) {
-      const message = `Cannot change other's task assignment.`;
-      this.logger.warn(message);
-      throw new UnauthorizedException(message);
-    }
+    // const user = await this.prisma.user.findFirstOrThrow({
+    //   where: { id: userId },
+    // });
+    // if (userId !== task.userId && user.role !== Role.ADMIN) {
+    //   const message = `Cannot change other's task assignment.`;
+    //   this.logger.warn(message);
+    //   throw new UnauthorizedException(message);
+    // }
 
     if (action === 'assign') {
       task.status = TaskStatus.ASSIGNED;
