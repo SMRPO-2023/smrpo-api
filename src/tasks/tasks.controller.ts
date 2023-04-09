@@ -24,7 +24,7 @@ export class TasksController {
 
   @Post()
   create(@Body() createTaskDto: CreateTaskDto, @UserEntity() user: User) {
-    return this.tasksService.create(createTaskDto, user.id);
+    return this.tasksService.create(createTaskDto, user?.id);
   }
 
   @Get()
@@ -43,7 +43,7 @@ export class TasksController {
     @Body() updateTaskDto: UpdateTaskDto,
     @UserEntity() user: User
   ) {
-    return this.tasksService.update(+id, updateTaskDto, user.id);
+    return this.tasksService.update(+id, updateTaskDto, user?.id);
   }
 
   @Post(':id/:action')
@@ -52,11 +52,11 @@ export class TasksController {
     @Param('action') action: string,
     @UserEntity() user: User
   ) {
-    return this.tasksService.userAction(+id, action, user.id);
+    return this.tasksService.userAction(+id, action, user?.id);
   }
 
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number, @UserEntity() user: User) {
-    return this.tasksService.remove(+id, user.id);
+    return this.tasksService.remove(+id, user?.id);
   }
 }

@@ -8,7 +8,7 @@ import {
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { PrismaService } from 'nestjs-prisma';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { ProjectDeveloper, Role, TaskStatus } from '@prisma/client';
+import { ProjectDeveloper, Role, Task, TaskStatus } from "@prisma/client";
 import * as dayjs from 'dayjs';
 
 @Injectable()
@@ -81,14 +81,106 @@ export class TasksService {
     if (userId) {
       where['userId'] = userId;
     }
-    return this.prisma.task.findMany({ where });
+    return this.prisma.task.findMany({
+      where,
+      include: {
+        UserStory: {
+          select: {
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            title: true,
+            description: true,
+            priority: true,
+            points: true,
+            acceptanceTest: true,
+            projectId: true,
+            sprintId: true,
+            acceptanceCriteria: true,
+            businessValue: true,
+          },
+        },
+        timeLogs: {
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            day: true,
+            hours: true,
+            userId: true,
+            taskId: true,
+          },
+          where: { deletedAt: null },
+        },
+        assignedTo: {
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            lastLogin: true,
+            username: true,
+            email: true,
+            firstname: true,
+            lastname: true,
+            role: true,
+          },
+        },
+      },
+    });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Task> {
     return this.prisma.task.findFirstOrThrow({
       where: {
         id,
         deletedAt: null,
+      },
+      include: {
+        UserStory: {
+          select: {
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            title: true,
+            description: true,
+            priority: true,
+            points: true,
+            acceptanceTest: true,
+            projectId: true,
+            sprintId: true,
+            acceptanceCriteria: true,
+            businessValue: true,
+          },
+        },
+        timeLogs: {
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            day: true,
+            hours: true,
+            userId: true,
+            taskId: true,
+          },
+          where: { deletedAt: null },
+        },
+        assignedTo: {
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            lastLogin: true,
+            username: true,
+            email: true,
+            firstname: true,
+            lastname: true,
+            role: true,
+          },
+        },
       },
     });
   }
