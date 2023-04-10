@@ -1,4 +1,4 @@
-import { PrismaClient, StoryPriority } from '@prisma/client';
+import { PrismaClient, StoryPriority, TaskStatus } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
@@ -264,10 +264,9 @@ async function main() {
     );
 
     let counter = 0;
-    for (let j = 0; j < sprints.length; j++) {
-      const sprint = sprints[j];
+    for (const sprint of sprints) {
       for (let z = 0; z < 5; z++) {
-        await prisma.userStory.create({
+        const userStory = await prisma.userStory.create({
           data: {
             priority: getPriority(+faker.random.numeric() % 4),
             title: 'Story ' + ++counter,
@@ -280,9 +279,10 @@ async function main() {
             acceptanceTest: true,
           },
         });
+        await createTask(userStory, sprint);
       }
       for (let z = 0; z < 2; z++) {
-        await prisma.userStory.create({
+        const userStory = await prisma.userStory.create({
           data: {
             priority: getPriority(+faker.random.numeric() % 4),
             title: 'Story ' + ++counter,
@@ -295,9 +295,10 @@ async function main() {
             acceptanceTest: false,
           },
         });
+        await createTask(userStory, sprint);
       }
       for (let z = 0; z < 2; z++) {
-        await prisma.userStory.create({
+        const userStory = await prisma.userStory.create({
           data: {
             priority: getPriority(+faker.random.numeric() % 4),
             title: 'Story ' + ++counter,
@@ -309,11 +310,49 @@ async function main() {
             acceptanceTest: false,
           },
         });
+        await createTask(userStory, sprint);
       }
     }
   }
 
   console.log('Seeding finished.');
+}
+
+async function createTask(userStory: any, sprint: any) {
+  const project = await prisma.project.findFirst({
+    where: { id: sprint.projectId },
+    include: {
+      developers: {
+        include: { user: { select: { id: true } } },
+      },
+    },
+  });
+  const userId = (
+    await project.developers[
+      faker.datatype.number({ min: 0, max: (await project.developers).length })
+    ]
+  )?.user?.id;
+  console.log(project.developers);
+  await prisma.task.create({
+    data: {
+      userId,
+      userStoryId: userStory.id,
+      title: faker.random.words(5),
+      description: faker.random.words(25),
+      sprintId: sprint.id,
+      done: boolRand(0.2),
+      hours: faker.datatype.float({ min: 4, max: 15, precision: 0.1 }),
+      status: !userId
+        ? TaskStatus.UNASSIGNED
+        : boolRand(0.33)
+        ? TaskStatus.ACCEPTED
+        : TaskStatus.ASSIGNED,
+    },
+  });
+}
+
+function boolRand(prob: number) {
+  return faker.datatype.float({ min: 0.0, max: 1.0, precision: 0.01 }) <= prob;
 }
 
 main()
