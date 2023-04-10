@@ -8,7 +8,7 @@ import {
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { PrismaService } from 'nestjs-prisma';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { ProjectDeveloper, Role, Task, TaskStatus } from "@prisma/client";
+import { ProjectDeveloper, Role, Task, TaskStatus } from '@prisma/client';
 import * as dayjs from 'dayjs';
 
 @Injectable()
@@ -213,7 +213,7 @@ export class TasksService {
       task.status = TaskStatus.ASSIGNED;
       task.userId = userId;
     } else if (action === 'accept') {
-      task.status = TaskStatus.ACTIVE;
+      task.status = TaskStatus.ACCEPTED;
     } else if (action === 'reject') {
       task.status = TaskStatus.UNASSIGNED;
       task.userId = null;

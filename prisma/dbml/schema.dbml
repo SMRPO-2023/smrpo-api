@@ -159,7 +159,7 @@ Enum TaskStatus {
   UNASSIGNED
   ASSIGNED
   FINISHED
-  ACTIVE
+  ACCEPTED
 }
 
 Enum StoryPriority {

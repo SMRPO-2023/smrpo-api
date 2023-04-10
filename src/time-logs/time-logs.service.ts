@@ -101,14 +101,38 @@ export class TimeLogsService {
     return this.prisma.timeLog.delete({ where: { id } });
   }
 
-  validate(data: TimeLogDto, user: User) {
+  async validate(data: TimeLogDto, user: User) {
     if (data.userId !== user.id) {
       const message = `User can't log hours for other users.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
     }
-    // TODO(mevljas): Check whether the task is accepted.
-    // TODO(mevljas): Check whether the task is assigned to the user.
-    // TODO(mevljas): check for finished stories.
+    const task = await this.prisma.task.findFirstOrThrow({
+      where: {
+        deletedAt: null,
+        id: data.taskId,
+      },
+    });
+    if (task.status !== 'ACCEPTED') {
+      const message = `The task is not accepted.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+    if (task.userId !== user.id) {
+      const message = `Task is not assigned to the user.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
+    const userStory = await this.prisma.userStory.findFirstOrThrow({
+      where: {
+        deletedAt: null,
+        id: task.userStoryId,
+      },
+    });
+    if (userStory.acceptanceTest) {
+      const message = `User story is already marked as accepted.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
   }
 }

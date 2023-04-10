@@ -89,7 +89,7 @@ enum TaskStatus {
   UNASSIGNED
   ASSIGNED
   FINISHED
-  ACTIVE
+  ACCEPTED
 }
 
 model UserStory {
