@@ -1,4 +1,10 @@
-import { PrismaClient, StoryPriority, TaskStatus } from '@prisma/client';
+import {
+  PrismaClient,
+  Sprint,
+  StoryPriority,
+  Task,
+  TaskStatus,
+} from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
@@ -22,12 +28,12 @@ async function main() {
   await prisma.userStory.deleteMany();
   await prisma.sprint.deleteMany();
   await prisma.projectDeveloper.deleteMany();
-  await prisma.project.deleteMany();
-  await prisma.user.deleteMany();
   await prisma.post.deleteMany();
   await prisma.storyComment.deleteMany();
-  await prisma.task.deleteMany();
   await prisma.timeLog.deleteMany();
+  await prisma.task.deleteMany();
+  await prisma.project.deleteMany();
+  await prisma.user.deleteMany();
 
   console.log('Seeding...');
 
@@ -332,8 +338,7 @@ async function createTask(userStory: any, sprint: any) {
       faker.datatype.number({ min: 0, max: (await project.developers).length })
     ]
   )?.user?.id;
-  console.log(project.developers);
-  await prisma.task.create({
+  const task = await prisma.task.create({
     data: {
       userId,
       userStoryId: userStory.id,
@@ -349,6 +354,38 @@ async function createTask(userStory: any, sprint: any) {
         : TaskStatus.ASSIGNED,
     },
   });
+  if (task.status === TaskStatus.ASSIGNED) {
+    await createTimeLog(sprint, userId, task);
+  }
+}
+
+async function createTimeLog(sprint: Sprint, userId: number, task: Task) {
+  for (let i = 0; i < faker.datatype.number({ min: 2, max: 5 }); i++) {
+    await prisma.timeLog.create({
+      data: {
+        day: sprint.start,
+        hours: faker.datatype.float({ min: 1, max: 4, precision: 0.1 }),
+        userId,
+        remainingHours: faker.datatype.float({
+          min: 1,
+          max: 8,
+          precision: 0.5,
+        }),
+        taskId: task.id,
+      },
+    });
+  }
+  if (task.done) {
+    await prisma.timeLog.create({
+      data: {
+        day: sprint.end,
+        hours: faker.datatype.float({ min: 1, max: 4, precision: 0.1 }),
+        userId,
+        remainingHours: 0,
+        taskId: task.id,
+      },
+    });
+  }
 }
 
 function boolRand(prob: number) {
