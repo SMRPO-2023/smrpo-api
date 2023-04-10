@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { TimeLogDto } from './dto/time-log.dto';
-import { TaskStatus, User } from '@prisma/client';
+import { Role, TaskStatus, User } from '@prisma/client';
 import { PrismaService } from 'nestjs-prisma';
 import dayjs from 'dayjs';
 
@@ -46,8 +46,8 @@ export class TimeLogsService {
       where['taskId'] = taskId;
     }
     if (
-      (userId && user.id !== userId && user.role !== 'ADMIN') ||
-      user.role !== 'ADMIN'
+      (userId && user.id !== userId && user.role !== Role.ADMIN) ||
+      user.role !== Role.ADMIN
     ) {
       const message = `Missing access rights.`;
       this.logger.warn(message);
@@ -70,7 +70,7 @@ export class TimeLogsService {
         id,
       },
     });
-    if (user.id !== existingLog.userId && user.role !== 'ADMIN') {
+    if (user.id !== existingLog.userId && user.role !== Role.ADMIN) {
       const message = `Missing access rights.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
@@ -93,7 +93,7 @@ export class TimeLogsService {
         id,
       },
     });
-    if (user.id !== timeLog.userId && user.role !== 'ADMIN') {
+    if (user.id !== timeLog.userId && user.role !== Role.ADMIN) {
       const message = `Missing access rights.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
@@ -102,7 +102,7 @@ export class TimeLogsService {
   }
 
   async validate(data: TimeLogDto, user: User) {
-    if (data.userId !== user.id) {
+    if (data.userId !== user.id && user.role !== Role.ADMIN) {
       const message = `User can't log hours for other users.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
@@ -118,7 +118,7 @@ export class TimeLogsService {
       this.logger.warn(message);
       throw new BadRequestException(message);
     }
-    if (task.userId !== user.id) {
+    if (task.userId !== data.userId) {
       const message = `Task is not assigned to the user.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
