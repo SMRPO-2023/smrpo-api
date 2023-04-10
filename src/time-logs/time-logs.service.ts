@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { TimeLogDto } from './dto/time-log.dto';
-import { User } from '@prisma/client';
+import { TaskStatus, User } from '@prisma/client';
 import { PrismaService } from 'nestjs-prisma';
 import dayjs from 'dayjs';
 
@@ -113,7 +113,7 @@ export class TimeLogsService {
         id: data.taskId,
       },
     });
-    if (task.status !== 'ACCEPTED') {
+    if (task.status !== TaskStatus.ACCEPTED) {
       const message = `The task is not accepted.`;
       this.logger.warn(message);
       throw new BadRequestException(message);

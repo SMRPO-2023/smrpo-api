@@ -8,7 +8,7 @@ import {
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { PrismaService } from 'nestjs-prisma';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { ProjectDeveloper, Role, Task, TaskStatus } from '@prisma/client';
+import { ProjectDeveloper, Task, TaskStatus } from '@prisma/client';
 import * as dayjs from 'dayjs';
 
 @Injectable()
