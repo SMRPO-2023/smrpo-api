@@ -7,7 +7,7 @@ import {
 import { TimeLogDto } from './dto/time-log.dto';
 import { Role, TaskStatus, User } from '@prisma/client';
 import { PrismaService } from 'nestjs-prisma';
-import dayjs from 'dayjs';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class TimeLogsService {
@@ -34,7 +34,7 @@ export class TimeLogsService {
       }
       return this.prisma.timeLog.update({
         data: { hours: hoursSum },
-        where: existingLog,
+        where: { id: existingLog.id },
       });
     }
     return this.prisma.timeLog.create({ data });
@@ -45,16 +45,19 @@ export class TimeLogsService {
     if (taskId) {
       where['taskId'] = taskId;
     }
-    if (
-      (userId && user.id !== userId && user.role !== Role.ADMIN) ||
-      user.role !== Role.ADMIN
-    ) {
-      const message = `Missing access rights.`;
-      this.logger.warn(message);
-      throw new UnauthorizedException(message);
-    }
     if (userId) {
+      if (user.id !== userId && user.role !== Role.ADMIN) {
+        const message = `User doesn't have access to the logs.`;
+        this.logger.warn(message);
+        throw new UnauthorizedException(message);
+      }
       where['userId'] = userId;
+    } else {
+      if (user.role !== Role.ADMIN) {
+        const message = `Only admin can view all logs.`;
+        this.logger.warn(message);
+        throw new UnauthorizedException(message);
+      }
     }
     return this.prisma.timeLog.findMany({
       where,
@@ -83,7 +86,7 @@ export class TimeLogsService {
     }
     return this.prisma.timeLog.update({
       data: { ...data },
-      where: existingLog,
+      where: { id: existingLog.id },
     });
   }
 
