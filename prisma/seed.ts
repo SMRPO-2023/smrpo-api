@@ -260,11 +260,22 @@ async function main() {
     sprints.push(
       await prisma.sprint.create({
         data: {
+          start: new Date('2023-04-11T21:43:28.434Z'),
+          end: new Date('2023-04-15T21:43:28.434Z'),
+          velocity: 30,
+          projectId: project.id,
+          name: 'sprint 6',
+        },
+      })
+    );
+    sprints.push(
+      await prisma.sprint.create({
+        data: {
           start: new Date('2023-04-20T21:43:28.434Z'),
           end: new Date('2023-05-01T21:43:28.434Z'),
           velocity: 20,
           projectId: project.id,
-          name: 'sprint 6',
+          name: 'sprint 7',
         },
       })
     );
