@@ -10,7 +10,6 @@ import { PrismaService } from 'nestjs-prisma';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { ProjectDeveloper, Role, Task, TaskStatus } from '@prisma/client';
 import * as dayjs from 'dayjs';
-import { log } from 'console';
 
 @Injectable()
 export class TasksService {
@@ -82,58 +81,67 @@ export class TasksService {
     if (userId) {
       where['userId'] = userId;
     }
-    return this.prisma.task.findMany({
-      where,
-      include: {
-        UserStory: {
-          select: {
-            createdAt: true,
-            updatedAt: true,
-            deletedAt: true,
-            title: true,
-            description: true,
-            priority: true,
-            points: true,
-            acceptanceTest: true,
-            projectId: true,
-            sprintId: true,
-            acceptanceCriteria: true,
-            businessValue: true,
+    return (
+      await this.prisma.task.findMany({
+        where,
+        include: {
+          UserStory: {
+            select: {
+              createdAt: true,
+              updatedAt: true,
+              deletedAt: true,
+              title: true,
+              description: true,
+              priority: true,
+              points: true,
+              acceptanceTest: true,
+              projectId: true,
+              sprintId: true,
+              acceptanceCriteria: true,
+              businessValue: true,
+            },
+          },
+          timeLogs: {
+            select: {
+              id: true,
+              createdAt: true,
+              updatedAt: true,
+              deletedAt: true,
+              day: true,
+              hours: true,
+              userId: true,
+              taskId: true,
+            },
+            where: { deletedAt: null },
+          },
+          assignedTo: {
+            select: {
+              id: true,
+              createdAt: true,
+              updatedAt: true,
+              deletedAt: true,
+              lastLogin: true,
+              username: true,
+              email: true,
+              firstname: true,
+              lastname: true,
+              role: true,
+            },
           },
         },
-        timeLogs: {
-          select: {
-            id: true,
-            createdAt: true,
-            updatedAt: true,
-            deletedAt: true,
-            day: true,
-            hours: true,
-            userId: true,
-            taskId: true,
-          },
-          where: { deletedAt: null },
-        },
-        assignedTo: {
-          select: {
-            id: true,
-            createdAt: true,
-            updatedAt: true,
-            deletedAt: true,
-            lastLogin: true,
-            username: true,
-            email: true,
-            firstname: true,
-            lastname: true,
-            role: true,
-          },
-        },
-      },
+      })
+    ).map((task) => {
+      const total = task.timeLogs.reduce((a, b) => a + b?.hours, 0);
+      return {
+        ...task,
+        total,
+        remaining: task.UserStory.points * 6 - total,
+      };
     });
   }
 
   async findOne(id: number): Promise<Task> {
-    return this.prisma.task.findFirstOrThrow({
+    const task = await this.prisma.task.findFirstOrThrow({
       where: {
         id,
         deletedAt: null,
@@ -184,6 +192,10 @@ export class TasksService {
         },
       },
     });
+
+    task['total'] = task.timeLogs.reduce((a, b) => a + b?.hours, 0);
+
+    return task;
   }
 
   async update(id: number, data: UpdateTaskDto, userId: number) {
@@ -206,7 +218,11 @@ export class TasksService {
     const user = await this.prisma.user.findFirstOrThrow({
       where: { id: userId },
     });
-    if (user.role !== Role.ADMIN && task.userId !== null && userId !== task.userId) {
+    if (
+      user.role !== Role.ADMIN &&
+      task.userId !== null &&
+      userId !== task.userId
+    ) {
       const message = `Cannot change other's task assignment.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
