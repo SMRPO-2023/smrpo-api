@@ -184,11 +184,11 @@ export class SprintsService {
                     firstname: true,
                     lastname: true,
                     role: true,
-                  }
-                }
-              }
-            }
-          }
+                  },
+                },
+              },
+            },
+          },
         },
       },
     });

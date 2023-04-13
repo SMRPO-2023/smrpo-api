@@ -38,10 +38,6 @@ export class UserStoryDto {
 
   @IsOptional()
   @IsInt()
-  sprintId?: number;
-
-  @IsOptional()
-  @IsInt()
   @Min(1)
   @Max(10)
   businessValue: number;
