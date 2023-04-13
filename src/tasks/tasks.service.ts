@@ -73,7 +73,7 @@ export class TasksService {
     return this.prisma.task.create({ data });
   }
 
-  async findAll(userStoryId?: number, userId?: number) {
+  async findAll(userStoryId?: number, userId?: number, status?: string) {
     const where = { deletedAt: null };
     if (userStoryId) {
       where['userStoryId'] = userStoryId;
@@ -81,67 +81,66 @@ export class TasksService {
     if (userId) {
       where['userId'] = userId;
     }
-    return (
-      await this.prisma.task.findMany({
-        where,
-        include: {
-          UserStory: {
-            select: {
-              createdAt: true,
-              updatedAt: true,
-              deletedAt: true,
-              title: true,
-              description: true,
-              priority: true,
-              points: true,
-              acceptanceTest: true,
-              projectId: true,
-              sprintId: true,
-              acceptanceCriteria: true,
-              businessValue: true,
-            },
-          },
-          timeLogs: {
-            select: {
-              id: true,
-              createdAt: true,
-              updatedAt: true,
-              deletedAt: true,
-              day: true,
-              hours: true,
-              userId: true,
-              taskId: true,
-            },
-            where: { deletedAt: null },
-          },
-          assignedTo: {
-            select: {
-              id: true,
-              createdAt: true,
-              updatedAt: true,
-              deletedAt: true,
-              lastLogin: true,
-              username: true,
-              email: true,
-              firstname: true,
-              lastname: true,
-              role: true,
-            },
+    if (status) {
+      if (status === 'FINISHED') {
+        where['done'] = true;
+      } else if (status === 'ALL') {
+      } else {
+        where['status'] = TaskStatus[status];
+      }
+    }
+    return this.prisma.task.findMany({
+      where,
+      include: {
+        UserStory: {
+          select: {
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            title: true,
+            description: true,
+            priority: true,
+            points: true,
+            acceptanceTest: true,
+            projectId: true,
+            sprintId: true,
+            acceptanceCriteria: true,
+            businessValue: true,
           },
         },
-      })
-    ).map((task) => {
-      const total = task.timeLogs.reduce((a, b) => a + b?.hours, 0);
-      return {
-        ...task,
-        total,
-        remaining: task.UserStory.points * 6 - total,
-      };
+        timeLogs: {
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            day: true,
+            hours: true,
+            userId: true,
+            taskId: true,
+          },
+          where: { deletedAt: null },
+        },
+        assignedTo: {
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            lastLogin: true,
+            username: true,
+            email: true,
+            firstname: true,
+            lastname: true,
+            role: true,
+          },
+        },
+      },
     });
   }
 
   async findOne(id: number): Promise<Task> {
-    const task = await this.prisma.task.findFirstOrThrow({
+    return this.prisma.task.findFirstOrThrow({
       where: {
         id,
         deletedAt: null,
@@ -192,10 +191,6 @@ export class TasksService {
         },
       },
     });
-
-    task['total'] = task.timeLogs.reduce((a, b) => a + b?.hours, 0);
-
-    return task;
   }
 
   async update(id: number, data: UpdateTaskDto, userId: number) {

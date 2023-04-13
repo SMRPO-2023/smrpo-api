@@ -28,8 +28,12 @@ export class TasksController {
   }
 
   @Get()
-  findAll(@Query('usid') userStoryId: string, @Query('uid') userId: string) {
-    return this.tasksService.findAll(+userStoryId, +userId);
+  findAll(
+    @Query('usid') userStoryId: string,
+    @Query('uid') userId: string,
+    @Query('ts') taskStatus: string
+  ) {
+    return this.tasksService.findAll(+userStoryId, +userId, taskStatus);
   }
 
   @Get(':id')
