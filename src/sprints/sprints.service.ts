@@ -108,8 +108,8 @@ export class SprintsService {
 
     // On active sprint allow only change to points
     if (
-      dayjs(data.start).isBefore(dayjs()) &&
-      dayjs(data.end).isAfter(dayjs())
+      dayjs(oldSprint.start).isBefore(dayjs()) &&
+      dayjs(oldSprint.end).isAfter(dayjs())
     ) {
       return this.prisma.sprint.update({
         data: {
