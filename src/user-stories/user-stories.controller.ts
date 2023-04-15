@@ -20,6 +20,7 @@ import { StoryListDto } from './dto/story-list.dto';
 import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
 import { User } from '@prisma/client';
 import { UpdateStoryPointsDto } from './dto/update-story-points.dto';
+import { RejectUserStoryDto } from './dto/reject-user-story.dto';
 
 @Controller('user-stories')
 @ApiTags('User stories')
@@ -103,12 +104,13 @@ export class UserStoriesController {
     return this.userStoriesService.addStoriesToSprint(data, user);
   }
 
-  @Post('remove-from-sprint/:id')
-  removeStoryFromSprint(
+  @Post('reject/:id')
+  reject(
     @Param('id', ParseIntPipe) id: number,
-    @UserEntity() user: User
+    @UserEntity() user: User,
+    @Body() data: RejectUserStoryDto
   ) {
-    return this.userStoriesService.removeStoryFromSprint(id, user);
+    return this.userStoriesService.reject(id, user, data);
   }
 
   @Patch('update-story-points/:id')

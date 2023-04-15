@@ -14,6 +14,7 @@ import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
 import { Role, StoryPriority, User } from '@prisma/client';
 import * as dayjs from 'dayjs';
 import { UpdateStoryPointsDto } from './dto/update-story-points.dto';
+import { RejectUserStoryDto } from './dto/reject-user-story.dto';
 
 @Injectable()
 export class UserStoriesService {
@@ -66,6 +67,9 @@ export class UserStoriesService {
     }
     const data = await this.prisma.userStory.findMany({
       where,
+      include: {
+        comments: true,
+      },
     });
 
     const returnStories = [];
@@ -86,6 +90,9 @@ export class UserStoriesService {
         projectId: projectId,
         deletedAt: null,
         acceptanceTest: true,
+      },
+      include: {
+        comments: true,
       },
     });
   }
@@ -113,6 +120,9 @@ export class UserStoriesService {
           },
         },
       },
+      include: {
+        comments: true,
+      },
     });
   }
 
@@ -123,6 +133,9 @@ export class UserStoriesService {
         deletedAt: null,
         sprintId: null,
         acceptanceTest: false,
+      },
+      include: {
+        comments: true,
       },
     });
   }
@@ -136,6 +149,9 @@ export class UserStoriesService {
           sprintId: null,
         },
         acceptanceTest: false,
+      },
+      include: {
+        comments: true,
       },
     });
 
@@ -154,6 +170,9 @@ export class UserStoriesService {
       where: {
         id,
         deletedAt: null,
+      },
+      include: {
+        comments: true,
       },
     });
     return { ...data, ...(await this.canBeAccepted((id = id))) };
@@ -437,7 +456,7 @@ export class UserStoriesService {
     });
   }
 
-  async removeStoryFromSprint(id: number, user: User) {
+  async reject(id: number, user: User, data: RejectUserStoryDto) {
     const story = await this.prisma.userStory.findFirstOrThrow({
       where: {
         id,
@@ -459,6 +478,9 @@ export class UserStoriesService {
       this.logger.warn(message);
       throw new UnauthorizedException(message);
     }
+    await this.prisma.storyComment.create({
+      data: { message: data.message, userId: user.id, userStoryId: id },
+    });
     return this.prisma.userStory.updateMany({
       where: {
         id,
