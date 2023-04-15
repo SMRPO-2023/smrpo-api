@@ -497,28 +497,43 @@ export class UserStoriesService {
         deletedAt: null,
       },
     });
-    if (story.acceptanceTest) {
-      const message = `User story can not be removed from the sprint.`;
-      this.logger.warn(message);
-      throw new BadRequestException(message);
-    }
     const project = await this.prisma.project.findFirstOrThrow({
       where: {
         id: story.projectId,
       },
     });
-    if (user.id !== project.scrumMasterId && user.role !== Role.ADMIN) {
+    if (user.id !== project.projectOwnerId && user.role !== Role.ADMIN) {
       const message = `Missing access rights.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
     }
-    await this.prisma.storyComment.create({
-      data: { message: data.message, userId: user.id, userStoryId: id },
+    if (story.acceptanceTest) {
+      const message = `User story can not be removed from the sprint.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+    const sprint = await this.prisma.sprint.findFirstOrThrow({
+      where: {
+        id: story.sprintId,
+        deletedAt: null,
+      },
     });
-    return this.prisma.userStory.updateMany({
+    const currentDate = dayjs();
+    if (currentDate.isBefore(sprint.start) || currentDate.isAfter(sprint.end)) {
+      const message = `The sprint is not active.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+
+    if (data.message) {
+      await this.prisma.storyComment.create({
+        data: { message: data.message, userId: user.id, userStoryId: id },
+      });
+    }
+
+    return this.prisma.userStory.update({
       where: {
         id,
-        deletedAt: null,
       },
       data: {
         sprintId: null,
