@@ -35,9 +35,9 @@ export class UserStoriesController {
   }
 
   @Get()
-  @ApiQuery({ name: 'sprintId', required: false, type: Number })
+  @ApiQuery({ name: 'sprint-id', required: false, type: Number })
   @ApiQuery({ name: 'project-id', required: false, type: Number })
-  findAll(@Query('sprintId') sid?: string, @Query('project-id') pid?: string) {
+  findAll(@Query('sprint-id') sid?: string, @Query('project-id') pid?: string) {
     return this.userStoriesService.findAll(+pid, +sid);
   }
 
@@ -48,9 +48,13 @@ export class UserStoriesController {
   }
 
   @Get('realized')
-  @ApiQuery({ name: 'project-id', required: true, type: Number })
-  findRealized(@Query('project-id') projectId: number) {
-    return this.userStoriesService.findRealized(projectId);
+  @ApiQuery({ name: 'project-id', required: false, type: Number })
+  @ApiQuery({ name: 'sprint-id', required: false, type: Number })
+  findRealized(
+    @Query('project-id') projectId: number,
+    @Query('sprint-id') sprintId: number
+  ) {
+    return this.userStoriesService.findRealized(projectId, sprintId);
   }
 
   @Get('unrealized-without-sprint')
@@ -60,9 +64,16 @@ export class UserStoriesController {
   }
 
   @Get('unrealized-with-sprint')
-  @ApiQuery({ name: 'project-id', required: true, type: Number })
-  findUnrealizedWithSprint(@Query('project-id') projectId: number) {
-    return this.userStoriesService.findUnrealizedWithSprint(projectId);
+  @ApiQuery({ name: 'project-id', required: false, type: Number })
+  @ApiQuery({ name: 'sprint-id', required: false, type: Number })
+  findUnrealizedWithSprint(
+    @Query('project-id') projectId: number,
+    @Query('sprint-id') sprintId: number
+  ) {
+    return this.userStoriesService.findUnrealizedWithSprint(
+      projectId,
+      sprintId
+    );
   }
 
   @Get('future-releases')

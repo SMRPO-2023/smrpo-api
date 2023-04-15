@@ -84,13 +84,19 @@ export class UserStoriesService {
     return { stories: returnStories, currentLoad: currentLoad };
   }
 
-  async findRealized(projectId: number) {
+  async findRealized(projectId: number, sprintId: number) {
+    const where = {
+      deletedAt: null,
+      acceptanceTest: true,
+    };
+    if (projectId) {
+      where['projectId'] = projectId;
+    }
+    if (sprintId) {
+      where['sprintId'] = sprintId;
+    }
     return this.prisma.userStory.findMany({
-      where: {
-        projectId: projectId,
-        deletedAt: null,
-        acceptanceTest: true,
-      },
+      where,
       include: {
         comments: true,
       },
@@ -140,16 +146,22 @@ export class UserStoriesService {
     });
   }
 
-  async findUnrealizedWithSprint(projectId: number) {
-    const data = await this.prisma.userStory.findMany({
-      where: {
-        projectId: projectId,
-        deletedAt: null,
-        NOT: {
-          sprintId: null,
-        },
-        acceptanceTest: false,
+  async findUnrealizedWithSprint(projectId: number, sprintId: number) {
+    const where = {
+      deletedAt: null,
+      NOT: {
+        sprintId: null,
       },
+      acceptanceTest: false,
+    };
+    if (projectId) {
+      where['projectId'] = projectId;
+    }
+    if (sprintId) {
+      where['sprintId'] = sprintId;
+    }
+    const data = await this.prisma.userStory.findMany({
+      where,
       include: {
         comments: true,
       },
