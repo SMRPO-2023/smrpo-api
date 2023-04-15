@@ -367,7 +367,9 @@ export class UserStoriesService {
 
   async canBeAccepted(id: number) {
     let canBeAccepted = true;
-    const userStory = await this.findOne(id);
+    const userStory = await this.prisma.userStory.findFirstOrThrow({
+      where: { id },
+    });
 
     const tasks = await this.prisma.task.findMany({
       where: { userStoryId: id, done: false },
@@ -376,16 +378,24 @@ export class UserStoriesService {
     if (tasks.length > 0) {
       canBeAccepted = false;
     }
-    const sprint = await this.prisma.sprint.findFirstOrThrow({
-      where: {
-        id: userStory.sprintId,
-        deletedAt: null,
-      },
-    });
-    const currentDate = dayjs();
-    if (currentDate.isBefore(sprint.start) || currentDate.isAfter(sprint.end)) {
+    if (userStory.sprintId) {
+      const sprint = await this.prisma.sprint.findFirstOrThrow({
+        where: {
+          id: userStory.sprintId,
+          deletedAt: null,
+        },
+      });
+      const currentDate = dayjs();
+      if (
+        currentDate.isBefore(sprint.start) ||
+        currentDate.isAfter(sprint.end)
+      ) {
+        canBeAccepted = false;
+      }
+    } else {
       canBeAccepted = false;
     }
+
     return { canBeAccepted };
   }
 
