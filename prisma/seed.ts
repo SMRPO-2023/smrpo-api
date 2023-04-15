@@ -112,8 +112,78 @@ async function main() {
     },
   });
 
-  // Generate projects
+  const devs = [
+    {
+      project: 0,
+      firstName: 'Barack',
+      lastName: 'Obama',
+    },
+    {
+      project: 0,
+      firstName: 'Elon',
+      lastName: 'Musk',
+    },
+    {
+      project: 0,
+      firstName: 'Beyonce',
+      lastName: 'Baby',
+    },
+    {
+      project: 0,
+      firstName: 'Christiano',
+      lastName: 'Ronaldo',
+    },
+    {
+      project: 1,
+      firstName: 'Oprah',
+      lastName: 'Winfrey',
+    },
+    {
+      project: 1,
+      firstName: 'Daddy',
+      lastName: 'Jeff',
+    },
+    {
+      project: 1,
+      firstName: 'Taylor',
+      lastName: 'Swiftie',
+    },
+    {
+      project: 1,
+      firstName: 'Serena',
+      lastName: 'Williams',
+    },
+    {
+      project: 2,
+      firstName: 'Albert',
+      lastName: 'Einstein',
+    },
+    {
+      project: 2,
+      firstName: 'Bill',
+      lastName: 'Gates',
+    },
+    {
+      project: 2,
+      firstName: 'Emma',
+      lastName: 'Watson',
+    },
+    {
+      project: 2,
+      firstName: 'Dwayne',
+      lastName: 'Johnson',
+    },
+  ];
 
+  for (let i = 0; i < 15; i++) {
+    devs.push({
+      project: i % 3,
+      firstName: faker.name.firstName(),
+      lastName: faker.name.lastName(),
+    });
+  }
+
+  // Generate projects
   const project1 = await prisma.project.create({
     data: {
       title: 'Project 1',
@@ -140,6 +210,29 @@ async function main() {
       scrumMasterId: jacksonm.id,
     },
   });
+
+  const projects = [project1, project2, project3];
+
+  for (const dev of devs) {
+    const user = await prisma.user.create({
+      data: {
+        email: faker.internet.userName(dev.firstName, dev.lastName),
+        firstname: dev.firstName,
+        lastname: dev.lastName,
+        role: 'USER',
+        // cspell:disable-next-line -- disables checking till the end of the next line.
+        password:
+          '$2b$10$DRzCId0X0guJa7wtynJ0FOrAijm7IY9l2Ora9KygCK4lwH1lSvV12', // secret12345678
+        username: dev.firstName.toLowerCase() + dev.lastName.toLowerCase()[0],
+      },
+    });
+    await prisma.projectDeveloper.create({
+      data: {
+        projectId: projects[dev.project].id,
+        userId: user.id,
+      },
+    });
+  }
 
   await prisma.projectDeveloper.create({
     data: {
@@ -178,6 +271,13 @@ async function main() {
 
   await prisma.projectDeveloper.create({
     data: {
+      projectId: project2.id,
+      userId: hernandezc.id,
+    },
+  });
+
+  await prisma.projectDeveloper.create({
+    data: {
       projectId: project3.id,
       userId: jacksonm.id,
     },
@@ -196,8 +296,6 @@ async function main() {
       userId: simpsonl.id,
     },
   });
-
-  const projects = [project1, project2, project3];
 
   for (let i = 0; i < projects.length; i++) {
     const project = projects[i];
@@ -282,51 +380,53 @@ async function main() {
 
     let counter = 0;
     for (const sprint of sprints) {
-      for (let z = 0; z < 5; z++) {
+      // Create user stories with sprint assigned
+      let total_points = 0;
+      for (let z = 0; z < 10; z++) {
+        if (total_points >= sprint.velocity - 8) {
+          break;
+        }
         const userStory = await prisma.userStory.create({
           data: {
-            priority: getPriority(+faker.random.numeric() % 4),
+            priority: getPriority(+faker.datatype.number({ min: 0, max: 2 })),
             title: 'Story ' + ++counter,
             description: faker.random.words(20),
-            points: +faker.datatype.number({ min: 4, max: 15 }),
+            points: +faker.datatype.number({
+              min: 4,
+              max: Math.min(sprint.velocity - total_points),
+            }),
             businessValue: +faker.datatype.number({ min: 1, max: 7 }),
             projectId: sprint.projectId,
             sprintId: sprint.id,
             acceptanceCriteria: faker.random.words(10),
-            acceptanceTest: true,
+            acceptanceTest: boolRand(0.6),
           },
         });
+        total_points += userStory.points;
         await createTask(userStory, sprint);
       }
+
+      // Create user stories with no sprint assigned and WON'T HAVE TIME priority
       for (let z = 0; z < 2; z++) {
+        if (total_points >= sprint.velocity - 2) {
+          break;
+        }
         const userStory = await prisma.userStory.create({
           data: {
-            priority: getPriority(+faker.random.numeric() % 4),
+            priority: getPriority(3),
             title: 'Story ' + ++counter,
             description: faker.random.words(20),
-            points: +faker.datatype.number({ min: 4, max: 15 }),
-            businessValue: +faker.datatype.number({ min: 1, max: 7 }),
-            projectId: sprint.projectId,
-            sprintId: sprint.id,
-            acceptanceCriteria: faker.random.words(10),
-            acceptanceTest: false,
-          },
-        });
-        await createTask(userStory, sprint);
-      }
-      for (let z = 0; z < 2; z++) {
-        const userStory = await prisma.userStory.create({
-          data: {
-            priority: getPriority(+faker.random.numeric() % 4),
-            title: 'Story ' + ++counter,
-            description: faker.random.words(20),
-            points: +faker.datatype.number({ min: 4, max: 15 }),
+            points: +faker.datatype.number({
+              min: 2,
+              max: Math.min(4, sprint.velocity - total_points),
+            }),
             businessValue: +faker.datatype.number({ min: 1, max: 7 }),
             projectId: sprint.projectId,
             acceptanceCriteria: faker.random.words(10),
             acceptanceTest: false,
           },
         });
+        total_points += userStory.points;
         await createTask(userStory, sprint);
       }
     }
@@ -358,11 +458,12 @@ async function createTask(userStory: any, sprint: any) {
       sprintId: sprint.id,
       done: boolRand(0.2),
       hours: faker.datatype.float({ min: 4, max: 15, precision: 0.1 }),
-      status: !userId
-        ? TaskStatus.UNASSIGNED
-        : boolRand(0.33)
-        ? TaskStatus.ACCEPTED
-        : TaskStatus.ASSIGNED,
+      status:
+        !userId || !userStory.sprintId
+          ? TaskStatus.UNASSIGNED
+          : boolRand(0.33)
+          ? TaskStatus.ACCEPTED
+          : TaskStatus.ASSIGNED,
     },
   });
   if (task.status === TaskStatus.ASSIGNED) {

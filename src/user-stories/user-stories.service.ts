@@ -68,6 +68,20 @@ export class UserStoriesService {
       where,
       include: {
         comments: true,
+        Task: {
+          where: { deletedAt: null },
+          include: {
+            timeLogs: {
+              select: {
+                id: true,
+                hours: true,
+                remainingHours: true,
+                createdAt: true,
+              },
+              where: { deletedAt: null },
+            },
+          },
+        },
       },
     });
 
@@ -76,10 +90,31 @@ export class UserStoriesService {
     for (const tempStory of data) {
       currentLoad += tempStory.points;
       returnStories.push({
-        ...tempStory,
+        ...{
+          ...tempStory,
+          hoursTotal: tempStory.Task.reduce(
+            (a, b) => a + b?.timeLogs.reduce((c, d) => c + d?.hours, 0),
+            0
+          ),
+          // hoursRemaining: tempStory.Task.reduce(
+          //   (a, b) =>
+          //     a + b?.timeLogs.reduce((c, d) => c + d?.remainingHours, 0),
+          //   0
+          // ),
+          hoursRemaining: tempStory.Task.reduce(
+            (a, b) =>
+              a +
+                b?.timeLogs?.sort(
+                  (d, c) => d.createdAt.getTime() - c.createdAt.getTime()
+                )[0]?.remainingHours || +0,
+            0
+          ),
+          initialEstimate: tempStory.Task.reduce((a, b) => a + b?.hours, 0),
+        },
         ...(await this.canBeAccepted(tempStory.id)),
       });
     }
+
     return { stories: returnStories, currentLoad: currentLoad };
   }
 

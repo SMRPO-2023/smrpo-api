@@ -87,6 +87,7 @@ export class SprintsService {
     await this.checkPermission(data, userId);
     const oldSprint = (await this.findOne(id)).sprint;
 
+    // Check if sprint with same name exists on that project
     const exists = await this.prisma.sprint.findFirst({
       where: {
         deletedAt: null,
@@ -105,6 +106,19 @@ export class SprintsService {
       throw new ConflictException(message);
     }
 
+    // On active sprint allow only change to points
+    if (
+      dayjs(oldSprint.start).isBefore(dayjs()) &&
+      dayjs(oldSprint.end).isAfter(dayjs())
+    ) {
+      return this.prisma.sprint.update({
+        data: {
+          velocity: data.velocity,
+        },
+        where: { id },
+      });
+    }
+
     if (data.start !== oldSprint.start || data.end !== oldSprint.end) {
       data.start = dayjs(data.start).startOf('day').toDate();
       data.end = dayjs(data.end).endOf('day').toDate();
@@ -115,19 +129,6 @@ export class SprintsService {
       ) {
         await this.validateSprint(data, id);
       }
-    }
-
-    // On active sprint allow only change to points
-    if (
-      dayjs(data.start).isBefore(dayjs()) &&
-      dayjs(data.end).isAfter(dayjs())
-    ) {
-      return this.prisma.sprint.update({
-        data: {
-          velocity: data.velocity,
-        },
-        where: { id },
-      });
     }
 
     data.start = dayjs(data.start).startOf('day').toDate();

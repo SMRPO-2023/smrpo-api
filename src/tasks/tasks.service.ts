@@ -10,7 +10,6 @@ import { PrismaService } from 'nestjs-prisma';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { ProjectDeveloper, Role, Task, TaskStatus } from '@prisma/client';
 import * as dayjs from 'dayjs';
-import { log } from 'console';
 
 @Injectable()
 export class TasksService {
@@ -74,13 +73,21 @@ export class TasksService {
     return this.prisma.task.create({ data });
   }
 
-  async findAll(userStoryId?: number, userId?: number) {
+  async findAll(userStoryId?: number, userId?: number, status?: string) {
     const where = { deletedAt: null };
     if (userStoryId) {
       where['userStoryId'] = userStoryId;
     }
     if (userId) {
       where['userId'] = userId;
+    }
+    if (status) {
+      if (status === 'FINISHED') {
+        where['done'] = true;
+      } else if (status === 'ALL') {
+      } else {
+        where['status'] = TaskStatus[status];
+      }
     }
     return this.prisma.task.findMany({
       where,
@@ -206,7 +213,11 @@ export class TasksService {
     const user = await this.prisma.user.findFirstOrThrow({
       where: { id: userId },
     });
-    if (user.role !== Role.ADMIN && task.userId !== null && userId !== task.userId) {
+    if (
+      user.role !== Role.ADMIN &&
+      task.userId !== null &&
+      userId !== task.userId
+    ) {
       const message = `Cannot change other's task assignment.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
