@@ -10,7 +10,7 @@ import {
 import { PrismaService } from 'nestjs-prisma';
 import { UserStoryDto } from './dto/user-story.dto';
 import { StoryListDto } from './dto/story-list.dto';
-import { Role, StoryPriority, User } from '@prisma/client';
+import { Role, StoryPriority, User, UserStory } from '@prisma/client';
 import * as dayjs from 'dayjs';
 import { UpdateStoryPointsDto } from './dto/update-story-points.dto';
 import { RejectUserStoryDto } from './dto/reject-user-story.dto';
@@ -111,7 +111,7 @@ export class UserStoriesService {
           ),
           initialEstimate: tempStory.Task.reduce((a, b) => a + b?.hours, 0),
         },
-        ...(await this.canBeAccepted(tempStory.id)),
+        ...(await this.canBeAccepted(tempStory)),
       });
     }
 
@@ -205,7 +205,7 @@ export class UserStoriesService {
     for (const tempStory of data) {
       returnStories.push({
         ...tempStory,
-        ...(await this.canBeAccepted(tempStory.id)),
+        ...(await this.canBeAccepted(tempStory)),
       });
     }
     return returnStories;
@@ -221,7 +221,7 @@ export class UserStoriesService {
         comments: true,
       },
     });
-    return { ...data, ...(await this.canBeAccepted((id = id))) };
+    return { ...data, ...(await this.canBeAccepted(data)) };
   }
 
   async update(id: number, data: UserStoryDto, userId: number) {
@@ -365,18 +365,15 @@ export class UserStoriesService {
     });
   }
 
-  async canBeAccepted(id: number) {
-    let canBeAccepted = true;
-    const userStory = await this.prisma.userStory.findFirstOrThrow({
-      where: { id },
-    });
+  async canBeAccepted(userStory: UserStory) {
+    const returnFalse = { canBeAccepted: false };
 
     const tasks = await this.prisma.task.findMany({
-      where: { userStoryId: id, done: false },
+      where: { userStoryId: userStory.id, done: false },
     });
 
     if (tasks.length > 0) {
-      canBeAccepted = false;
+      return returnFalse;
     }
     if (userStory.sprintId) {
       const sprint = await this.prisma.sprint.findFirstOrThrow({
@@ -390,13 +387,13 @@ export class UserStoriesService {
         currentDate.isBefore(sprint.start) ||
         currentDate.isAfter(sprint.end)
       ) {
-        canBeAccepted = false;
+        return returnFalse;
       }
     } else {
-      canBeAccepted = false;
+      return returnFalse;
     }
 
-    return { canBeAccepted };
+    return { canBeAccepted: true };
   }
 
   async remove(id: number, userId: number) {
