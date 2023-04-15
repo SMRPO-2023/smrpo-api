@@ -10,7 +10,6 @@ import {
 import { PrismaService } from 'nestjs-prisma';
 import { UserStoryDto } from './dto/user-story.dto';
 import { StoryListDto } from './dto/story-list.dto';
-import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
 import { Role, StoryPriority, User } from '@prisma/client';
 import * as dayjs from 'dayjs';
 import { UpdateStoryPointsDto } from './dto/update-story-points.dto';
@@ -278,9 +277,8 @@ export class UserStoriesService {
     return this.prisma.userStory.update({ where: { id }, data });
   }
 
-  async accept(id: number, data: AcceptUserStoryDto, userId: number) {
+  async accept(id: number, userId: number) {
     const userStory = await this.findOne(id);
-    const acceptanceTest = data.acceptanceTest;
 
     if (!userStory) {
       const message = 'User story not found.';
@@ -305,28 +303,52 @@ export class UserStoriesService {
       where: { userStoryId: id, done: false },
     });
 
-    if (acceptanceTest && tasks.length > 0) {
+    if (tasks.length > 0) {
       const message = 'User story has unfinished tasks.';
       this.logger.warn(message);
       throw new ForbiddenException(message);
     }
 
+    const sprint = await this.prisma.sprint.findFirstOrThrow({
+      where: {
+        id: userStory.sprintId,
+        deletedAt: null,
+      },
+    });
+    const currentDate = dayjs();
+    if (currentDate.isBefore(sprint.start) || currentDate.isAfter(sprint.end)) {
+      const message = `The sprint is not active.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+
     return this.prisma.userStory.update({
       where: { id },
       data: {
-        acceptanceTest: acceptanceTest,
+        acceptanceTest: true,
       },
     });
   }
 
   async canBeAccepted(id: number) {
     let canBeAccepted = true;
+    const userStory = await this.findOne(id);
 
     const tasks = await this.prisma.task.findMany({
       where: { userStoryId: id, done: false },
     });
 
     if (tasks.length > 0) {
+      canBeAccepted = false;
+    }
+    const sprint = await this.prisma.sprint.findFirstOrThrow({
+      where: {
+        id: userStory.sprintId,
+        deletedAt: null,
+      },
+    });
+    const currentDate = dayjs();
+    if (currentDate.isBefore(sprint.start) || currentDate.isAfter(sprint.end)) {
       canBeAccepted = false;
     }
     return { canBeAccepted };

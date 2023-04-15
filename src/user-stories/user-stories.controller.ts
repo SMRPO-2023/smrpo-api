@@ -17,7 +17,6 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UserEntity } from 'src/common/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
 import { StoryListDto } from './dto/story-list.dto';
-import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
 import { User } from '@prisma/client';
 import { UpdateStoryPointsDto } from './dto/update-story-points.dto';
 import { RejectUserStoryDto } from './dto/reject-user-story.dto';
@@ -97,12 +96,8 @@ export class UserStoriesController {
   }
 
   @Post('accept/:id')
-  accept(
-    @Param('id', ParseIntPipe) id: number,
-    @UserEntity() user: User,
-    @Body() updateUserStoryDto: AcceptUserStoryDto
-  ) {
-    return this.userStoriesService.accept(+id, updateUserStoryDto, user.id);
+  accept(@Param('id', ParseIntPipe) id: number, @UserEntity() user: User) {
+    return this.userStoriesService.accept(+id, user.id);
   }
 
   @Delete(':id')
