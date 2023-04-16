@@ -79,6 +79,15 @@ export class UserStoriesService {
               },
               where: { deletedAt: null },
             },
+            assignedTo: {
+              select: {
+                id: true,
+                username: true,
+                firstname: true,
+                lastname: true,
+                role: true,
+              }
+            }
           },
         },
       },
@@ -109,6 +118,9 @@ export class UserStoriesService {
             0
           ),
           initialEstimate: tempStory.Task.reduce((a, b) => a + b?.hours, 0),
+          numUnfinishedTasks: tempStory.Task.filter((t) => !t.done).length,
+          numFinishedTasks: tempStory.Task.filter((t) => t.done).length,
+          numTotalTasks: tempStory.Task.length,
         },
         ...(await this.canBeAccepted(tempStory)),
       });
