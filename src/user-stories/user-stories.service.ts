@@ -218,7 +218,18 @@ export class UserStoriesService {
         deletedAt: null,
       },
       include: {
-        comments: true,
+        comments: {
+          include: {
+            User: {
+              select: {
+                firstname: true,
+                email: true,
+                lastname: true,
+                username: true,
+              },
+            },
+          },
+        },
       },
     });
     return { ...data, ...(await this.canBeAccepted(data)) };
