@@ -382,6 +382,29 @@ async function main() {
     for (const sprint of sprints) {
       // Create user stories with sprint assigned
       let total_points = 0;
+      // Only with finished tasks, but not yet accepted
+      for (let z = 0; z < 2; z++) {
+        const userStory = await prisma.userStory.create({
+          data: {
+            priority: getPriority(+faker.datatype.number({ min: 0, max: 2 })),
+            title: 'Story ' + ++counter,
+            description: faker.random.words(20),
+            points: faker.datatype.float({
+              min: 0.1,
+              max: Math.min(sprint.velocity - total_points),
+              precision: 0.5,
+            }),
+            businessValue: +faker.datatype.number({ min: 1, max: 10 }),
+            projectId: sprint.projectId,
+            sprintId: sprint.id,
+            acceptanceCriteria: faker.random.words(10),
+            acceptanceTest: false,
+          },
+        });
+        total_points += userStory.points;
+        await createTask(userStory, sprint, true);
+      }
+      // Random
       for (let z = 0; z < 20; z++) {
         if (total_points >= sprint.velocity - 8) {
           break;
@@ -404,7 +427,7 @@ async function main() {
           },
         });
         total_points += userStory.points;
-        await createTask(userStory, sprint);
+        await createTask(userStory, sprint, boolRand(0.2));
       }
     }
     // Create user stories with no sprint assigned
@@ -427,7 +450,7 @@ async function main() {
   console.log('Seeding finished.');
 }
 
-async function createTask(userStory: any, sprint: any) {
+async function createTask(userStory: any, sprint: any, done: boolean) {
   const project = await prisma.project.findFirst({
     where: { id: sprint.projectId },
     include: {
@@ -448,7 +471,7 @@ async function createTask(userStory: any, sprint: any) {
       title: faker.random.words(5),
       description: faker.random.words(25),
       sprintId: sprint.id,
-      done: boolRand(0.2),
+      done,
       hours: faker.datatype.float({ min: 4, max: 15, precision: 0.1 }),
       status:
         !userId || !userStory.sprintId
