@@ -9,7 +9,6 @@ import {
   UseGuards,
   Query,
   Put,
-  Patch,
 } from '@nestjs/common';
 import { UserStoriesService } from './user-stories.service';
 import { UserStoryDto } from './dto/user-story.dto';
@@ -17,9 +16,8 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UserEntity } from 'src/common/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
 import { StoryListDto } from './dto/story-list.dto';
-import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
 import { User } from '@prisma/client';
-import { UpdateStoryPointsDto } from './dto/update-story-points.dto';
+import { RejectUserStoryDto } from './dto/reject-user-story.dto';
 
 @Controller('user-stories')
 @ApiTags('User stories')
@@ -34,9 +32,9 @@ export class UserStoriesController {
   }
 
   @Get()
-  @ApiQuery({ name: 'sprintId', required: false, type: Number })
+  @ApiQuery({ name: 'sprint-id', required: false, type: Number })
   @ApiQuery({ name: 'project-id', required: false, type: Number })
-  findAll(@Query('sprintId') sid?: string, @Query('project-id') pid?: string) {
+  findAll(@Query('sprint-id') sid?: string, @Query('project-id') pid?: string) {
     return this.userStoriesService.findAll(+pid, +sid);
   }
 
@@ -47,9 +45,13 @@ export class UserStoriesController {
   }
 
   @Get('realized')
-  @ApiQuery({ name: 'project-id', required: true, type: Number })
-  findRealized(@Query('project-id') projectId: number) {
-    return this.userStoriesService.findRealized(projectId);
+  @ApiQuery({ name: 'project-id', required: false, type: Number })
+  @ApiQuery({ name: 'sprint-id', required: false, type: Number })
+  findRealized(
+    @Query('project-id') projectId: number,
+    @Query('sprint-id') sprintId: number
+  ) {
+    return this.userStoriesService.findRealized(projectId, sprintId);
   }
 
   @Get('unrealized-without-sprint')
@@ -59,9 +61,16 @@ export class UserStoriesController {
   }
 
   @Get('unrealized-with-sprint')
-  @ApiQuery({ name: 'project-id', required: true, type: Number })
-  findUnrealizedWithSprint(@Query('project-id') projectId: number) {
-    return this.userStoriesService.findUnrealizedWithSprint(projectId);
+  @ApiQuery({ name: 'project-id', required: false, type: Number })
+  @ApiQuery({ name: 'sprint-id', required: false, type: Number })
+  findUnrealizedWithSprint(
+    @Query('project-id') projectId: number,
+    @Query('sprint-id') sprintId: number
+  ) {
+    return this.userStoriesService.findUnrealizedWithSprint(
+      projectId,
+      sprintId
+    );
   }
 
   @Get('future-releases')
@@ -85,12 +94,8 @@ export class UserStoriesController {
   }
 
   @Post('accept/:id')
-  accept(
-    @Param('id', ParseIntPipe) id: number,
-    @UserEntity() user: User,
-    @Body() updateUserStoryDto: AcceptUserStoryDto
-  ) {
-    return this.userStoriesService.accept(+id, updateUserStoryDto, user.id);
+  accept(@Param('id', ParseIntPipe) id: number, @UserEntity() user: User) {
+    return this.userStoriesService.accept(+id, user.id);
   }
 
   @Delete(':id')
@@ -103,24 +108,12 @@ export class UserStoriesController {
     return this.userStoriesService.addStoriesToSprint(data, user);
   }
 
-  @Post('remove-from-sprint/:id')
-  removeStoryFromSprint(
-    @Param('id', ParseIntPipe) id: number,
-    @UserEntity() user: User
-  ) {
-    return this.userStoriesService.removeStoryFromSprint(id, user);
-  }
-
-  @Patch('update-story-points/:id')
-  updateStoryPoints(
+  @Post('reject/:id')
+  reject(
     @Param('id', ParseIntPipe) id: number,
     @UserEntity() user: User,
-    @Body() updateStoryPointsDto: UpdateStoryPointsDto
+    @Body() data: RejectUserStoryDto
   ) {
-    return this.userStoriesService.updateStoryPoints(
-      +id,
-      updateStoryPointsDto,
-      user.id
-    );
+    return this.userStoriesService.reject(id, user, data);
   }
 }

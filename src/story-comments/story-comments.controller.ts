@@ -3,29 +3,38 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   ParseIntPipe,
+  Query,
+  UseGuards,
+  Put,
 } from '@nestjs/common';
 import { StoryCommentsService } from './story-comments.service';
-import { CreateStoryCommentDto } from './dto/create-story-comment.dto';
-import { UpdateStoryCommentDto } from './dto/update-story-comment.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth-guard.service';
+import { StoryCommentDto } from './dto/story-comment.dto';
 
 @Controller('story-comments')
-@ApiTags('User stories')
+@ApiTags('User story comments')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class StoryCommentsController {
   constructor(private readonly storyCommentsService: StoryCommentsService) {}
 
   @Post()
-  create(@Body() createStoryCommentDto: CreateStoryCommentDto) {
-    return this.storyCommentsService.create(createStoryCommentDto);
+  create(@Body() storyCommentDto: StoryCommentDto) {
+    return this.storyCommentsService.create(storyCommentDto);
   }
 
   @Get()
-  findAll() {
-    return this.storyCommentsService.findAll();
+  @ApiQuery({ name: 'userId', required: false, type: Number })
+  @ApiQuery({ name: 'userStoryId', required: false, type: Number })
+  findAll(
+    @Query('userId') userId?: number,
+    @Query('userStoryId') storyId?: number
+  ) {
+    return this.storyCommentsService.findAll(userId, storyId);
   }
 
   @Get(':id')
@@ -33,12 +42,12 @@ export class StoryCommentsController {
     return this.storyCommentsService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateStoryCommentDto: UpdateStoryCommentDto
+    @Body() storyCommentDto: StoryCommentDto
   ) {
-    return this.storyCommentsService.update(+id, updateStoryCommentDto);
+    return this.storyCommentsService.update(+id, storyCommentDto);
   }
 
   @Delete(':id')

@@ -220,8 +220,8 @@ async function main() {
         firstname: dev.firstName,
         lastname: dev.lastName,
         role: 'USER',
-        // cspell:disable-next-line -- disables checking till the end of the next line.
         password:
+          // cspell:disable-next-line -- disables checking till the end of the next line.
           '$2b$10$DRzCId0X0guJa7wtynJ0FOrAijm7IY9l2Ora9KygCK4lwH1lSvV12', // secret12345678
         username: dev.firstName.toLowerCase() + dev.lastName.toLowerCase()[0],
       },
@@ -305,7 +305,7 @@ async function main() {
         data: {
           start: new Date('2023-02-01T21:43:28.434Z'),
           end: new Date('2023-02-10T21:43:28.434Z'),
-          velocity: 5,
+          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
           projectId: project.id,
           name: 'Sprint 1',
         },
@@ -316,7 +316,7 @@ async function main() {
         data: {
           start: new Date('2023-02-10T21:43:28.434Z'),
           end: new Date('2023-02-20T21:43:28.434Z'),
-          velocity: 10,
+          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
           projectId: project.id,
           name: 'sprint 2',
         },
@@ -327,7 +327,7 @@ async function main() {
         data: {
           start: new Date('2023-02-20T21:43:28.434Z'),
           end: new Date('2023-03-01T21:43:28.434Z'),
-          velocity: 15,
+          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
           projectId: project.id,
           name: 'sprint 3',
         },
@@ -338,7 +338,7 @@ async function main() {
         data: {
           start: new Date('2023-03-10T21:43:28.434Z'),
           end: new Date('2023-03-20T21:43:28.434Z'),
-          velocity: 9,
+          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
           projectId: project.id,
           name: 'sprint 4',
         },
@@ -349,7 +349,7 @@ async function main() {
         data: {
           start: new Date('2023-04-01T21:43:28.434Z'),
           end: new Date('2023-04-10T21:43:28.434Z'),
-          velocity: 23,
+          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
           projectId: project.id,
           name: 'sprint 5',
         },
@@ -359,8 +359,8 @@ async function main() {
       await prisma.sprint.create({
         data: {
           start: new Date('2023-04-10T21:43:28.434Z'),
-          end: new Date('2023-04-15T21:43:28.434Z'),
-          velocity: 30,
+          end: new Date('2023-04-19T21:43:28.434Z'),
+          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
           projectId: project.id,
           name: 'sprint 6',
         },
@@ -371,7 +371,7 @@ async function main() {
         data: {
           start: new Date('2023-04-20T21:43:28.434Z'),
           end: new Date('2023-05-01T21:43:28.434Z'),
-          velocity: 20,
+          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
           projectId: project.id,
           name: 'sprint 7',
         },
@@ -382,7 +382,7 @@ async function main() {
     for (const sprint of sprints) {
       // Create user stories with sprint assigned
       let total_points = 0;
-      for (let z = 0; z < 10; z++) {
+      for (let z = 0; z < 20; z++) {
         if (total_points >= sprint.velocity - 8) {
           break;
         }
@@ -391,11 +391,12 @@ async function main() {
             priority: getPriority(+faker.datatype.number({ min: 0, max: 2 })),
             title: 'Story ' + ++counter,
             description: faker.random.words(20),
-            points: +faker.datatype.number({
-              min: 4,
+            points: faker.datatype.float({
+              min: 0.1,
               max: Math.min(sprint.velocity - total_points),
+              precision: 0.5,
             }),
-            businessValue: +faker.datatype.number({ min: 1, max: 7 }),
+            businessValue: +faker.datatype.number({ min: 1, max: 10 }),
             projectId: sprint.projectId,
             sprintId: sprint.id,
             acceptanceCriteria: faker.random.words(10),
@@ -405,30 +406,21 @@ async function main() {
         total_points += userStory.points;
         await createTask(userStory, sprint);
       }
-
-      // Create user stories with no sprint assigned and WON'T HAVE TIME priority
-      for (let z = 0; z < 2; z++) {
-        if (total_points >= sprint.velocity - 2) {
-          break;
-        }
-        const userStory = await prisma.userStory.create({
-          data: {
-            priority: getPriority(3),
-            title: 'Story ' + ++counter,
-            description: faker.random.words(20),
-            points: +faker.datatype.number({
-              min: 2,
-              max: Math.min(4, sprint.velocity - total_points),
-            }),
-            businessValue: +faker.datatype.number({ min: 1, max: 7 }),
-            projectId: sprint.projectId,
-            acceptanceCriteria: faker.random.words(10),
-            acceptanceTest: false,
-          },
-        });
-        total_points += userStory.points;
-        await createTask(userStory, sprint);
-      }
+    }
+    // Create user stories with no sprint assigned
+    for (let z = 0; z < 10; z++) {
+      await prisma.userStory.create({
+        data: {
+          priority: getPriority(+faker.datatype.number({ min: 0, max: 3 })),
+          title: 'Story ' + ++counter,
+          description: faker.random.words(20),
+          points: faker.datatype.float({ min: 0.5, max: 20, precision: 0.5 }),
+          businessValue: +faker.datatype.number({ min: 1, max: 10 }),
+          projectId: project.id,
+          acceptanceCriteria: faker.random.words(10),
+          acceptanceTest: false,
+        },
+      });
     }
   }
 

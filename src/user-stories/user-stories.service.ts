@@ -10,10 +10,9 @@ import {
 import { PrismaService } from 'nestjs-prisma';
 import { UserStoryDto } from './dto/user-story.dto';
 import { StoryListDto } from './dto/story-list.dto';
-import { AcceptUserStoryDto } from './dto/accept-user-story.dto';
-import { Role, StoryPriority, User } from '@prisma/client';
+import { Role, StoryPriority, User, UserStory } from '@prisma/client';
 import * as dayjs from 'dayjs';
-import { UpdateStoryPointsDto } from './dto/update-story-points.dto';
+import { RejectUserStoryDto } from './dto/reject-user-story.dto';
 
 @Injectable()
 export class UserStoriesService {
@@ -67,6 +66,7 @@ export class UserStoriesService {
     const data = await this.prisma.userStory.findMany({
       where,
       include: {
+        comments: true,
         Task: {
           where: { deletedAt: null },
           include: {
@@ -110,19 +110,28 @@ export class UserStoriesService {
           ),
           initialEstimate: tempStory.Task.reduce((a, b) => a + b?.hours, 0),
         },
-        ...(await this.canBeAccepted(tempStory.id)),
+        ...(await this.canBeAccepted(tempStory)),
       });
     }
 
     return { stories: returnStories, currentLoad: currentLoad };
   }
 
-  async findRealized(projectId: number) {
+  async findRealized(projectId: number, sprintId: number) {
+    const where = {
+      deletedAt: null,
+      acceptanceTest: true,
+    };
+    if (projectId) {
+      where['projectId'] = projectId;
+    }
+    if (sprintId) {
+      where['sprintId'] = sprintId;
+    }
     return this.prisma.userStory.findMany({
-      where: {
-        projectId: projectId,
-        deletedAt: null,
-        acceptanceTest: true,
+      where,
+      include: {
+        comments: true,
       },
     });
   }
@@ -150,6 +159,9 @@ export class UserStoriesService {
           },
         },
       },
+      include: {
+        comments: true,
+      },
     });
   }
 
@@ -161,18 +173,30 @@ export class UserStoriesService {
         sprintId: null,
         acceptanceTest: false,
       },
+      include: {
+        comments: true,
+      },
     });
   }
 
-  async findUnrealizedWithSprint(projectId: number) {
+  async findUnrealizedWithSprint(projectId: number, sprintId: number) {
+    const where = {
+      deletedAt: null,
+      NOT: {
+        sprintId: null,
+      },
+      acceptanceTest: false,
+    };
+    if (projectId) {
+      where['projectId'] = projectId;
+    }
+    if (sprintId) {
+      where['sprintId'] = sprintId;
+    }
     const data = await this.prisma.userStory.findMany({
-      where: {
-        projectId: projectId,
-        deletedAt: null,
-        NOT: {
-          sprintId: null,
-        },
-        acceptanceTest: false,
+      where,
+      include: {
+        comments: true,
       },
     });
 
@@ -180,7 +204,7 @@ export class UserStoriesService {
     for (const tempStory of data) {
       returnStories.push({
         ...tempStory,
-        ...(await this.canBeAccepted(tempStory.id)),
+        ...(await this.canBeAccepted(tempStory)),
       });
     }
     return returnStories;
@@ -192,8 +216,22 @@ export class UserStoriesService {
         id,
         deletedAt: null,
       },
+      include: {
+        comments: {
+          include: {
+            User: {
+              select: {
+                firstname: true,
+                email: true,
+                lastname: true,
+                username: true,
+              },
+            },
+          },
+        },
+      },
     });
-    return { ...data, ...(await this.canBeAccepted((id = id))) };
+    return { ...data, ...(await this.canBeAccepted(data)) };
   }
 
   async update(id: number, data: UserStoryDto, userId: number) {
@@ -238,44 +276,6 @@ export class UserStoriesService {
     const user = await this.prisma.user.findFirstOrThrow({
       where: { id: userId },
     });
-    if (
-      userId !== project.projectOwnerId &&
-      userId !== project.scrumMasterId &&
-      user.role !== Role.ADMIN
-    ) {
-      const message = `Missing access rights.`;
-      this.logger.warn(message);
-      throw new UnauthorizedException(message);
-    }
-    return this.prisma.userStory.update({ where: { id }, data });
-  }
-
-  async updateStoryPoints(
-    id: number,
-    data: UpdateStoryPointsDto,
-    userId: number
-  ) {
-    const userStory = await this.findOne(id);
-
-    if (!userStory) {
-      const message = 'User story not found.';
-      this.logger.debug(message);
-      throw new NotFoundException(message);
-    }
-
-    if (userStory.sprintId != null || userStory.acceptanceTest) {
-      const message = `User story can't be changed.`;
-      this.logger.warn(message);
-      throw new ForbiddenException(message);
-    }
-
-    const project = await this.prisma.project.findUnique({
-      where: { id: userStory.projectId },
-    });
-
-    const user = await this.prisma.user.findFirstOrThrow({
-      where: { id: userId },
-    });
     if (userId !== project.scrumMasterId && user.role !== Role.ADMIN) {
       const message = `Missing access rights.`;
       this.logger.warn(message);
@@ -284,9 +284,8 @@ export class UserStoriesService {
     return this.prisma.userStory.update({ where: { id }, data });
   }
 
-  async accept(id: number, data: AcceptUserStoryDto, userId: number) {
+  async accept(id: number, userId: number) {
     const userStory = await this.findOne(id);
-    const acceptanceTest = data.acceptanceTest;
 
     if (!userStory) {
       const message = 'User story not found.';
@@ -311,31 +310,62 @@ export class UserStoriesService {
       where: { userStoryId: id, done: false },
     });
 
-    if (acceptanceTest && tasks.length > 0) {
+    if (tasks.length > 0) {
       const message = 'User story has unfinished tasks.';
       this.logger.warn(message);
       throw new ForbiddenException(message);
     }
 
+    const sprint = await this.prisma.sprint.findFirstOrThrow({
+      where: {
+        id: userStory.sprintId,
+        deletedAt: null,
+      },
+    });
+    const currentDate = dayjs();
+    if (currentDate.isBefore(sprint.start) || currentDate.isAfter(sprint.end)) {
+      const message = `The sprint is not active.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+
     return this.prisma.userStory.update({
       where: { id },
       data: {
-        acceptanceTest: acceptanceTest,
+        acceptanceTest: true,
       },
     });
   }
 
-  async canBeAccepted(id: number) {
-    let canBeAccepted = true;
+  async canBeAccepted(userStory: UserStory) {
+    const returnFalse = { canBeAccepted: false };
 
     const tasks = await this.prisma.task.findMany({
-      where: { userStoryId: id, done: false },
+      where: { userStoryId: userStory.id, done: false },
     });
 
     if (tasks.length > 0) {
-      canBeAccepted = false;
+      return returnFalse;
     }
-    return { canBeAccepted };
+    if (userStory.sprintId) {
+      const sprint = await this.prisma.sprint.findFirstOrThrow({
+        where: {
+          id: userStory.sprintId,
+          deletedAt: null,
+        },
+      });
+      const currentDate = dayjs();
+      if (
+        currentDate.isBefore(sprint.start) ||
+        currentDate.isAfter(sprint.end)
+      ) {
+        return returnFalse;
+      }
+    } else {
+      return returnFalse;
+    }
+
+    return { canBeAccepted: true };
   }
 
   async remove(id: number, userId: number) {
@@ -474,32 +504,38 @@ export class UserStoriesService {
     });
   }
 
-  async removeStoryFromSprint(id: number, user: User) {
+  async reject(id: number, user: User, data: RejectUserStoryDto) {
     const story = await this.prisma.userStory.findFirstOrThrow({
       where: {
         id,
         deletedAt: null,
       },
     });
-    if (story.acceptanceTest) {
-      const message = `User story can not be removed from the sprint.`;
-      this.logger.warn(message);
-      throw new BadRequestException(message);
-    }
     const project = await this.prisma.project.findFirstOrThrow({
       where: {
         id: story.projectId,
       },
     });
-    if (user.id !== project.scrumMasterId && user.role !== Role.ADMIN) {
+    if (user.id !== project.projectOwnerId && user.role !== Role.ADMIN) {
       const message = `Missing access rights.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
     }
-    return this.prisma.userStory.updateMany({
+    if (story.acceptanceTest) {
+      const message = `User story can not be removed from the sprint.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
+
+    if (data.message) {
+      await this.prisma.storyComment.create({
+        data: { message: data.message, userId: user.id, userStoryId: id },
+      });
+    }
+
+    return this.prisma.userStory.update({
       where: {
         id,
-        deletedAt: null,
       },
       data: {
         sprintId: null,

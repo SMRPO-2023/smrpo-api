@@ -1,17 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { BaseModel } from 'src/common/models/base.model';
 import { UserStory } from 'src/user-stories/models/user-story.model';
 import { User } from 'src/users/models/user.model';
 
-export class StoryComment {
-  @ApiProperty({ type: Number })
-  id: number;
-
-  @ApiProperty({ type: Date })
-  createdAt: Date;
-
-  @ApiProperty({ type: Date })
-  updatedAt: Date;
-
+export class StoryComment extends BaseModel {
   @ApiProperty({ type: Number })
   userStoryId: number;
 
