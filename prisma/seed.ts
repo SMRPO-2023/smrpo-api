@@ -391,7 +391,7 @@ async function main() {
             description: faker.random.words(20),
             points: faker.datatype.float({
               min: 0.1,
-              max: Math.min(sprint.velocity - total_points),
+              max: Math.min(sprint.velocity - total_points, 2),
               precision: 0.5,
             }),
             businessValue: +faker.datatype.number({ min: 1, max: 10 }),
@@ -416,7 +416,7 @@ async function main() {
             description: faker.random.words(20),
             points: faker.datatype.float({
               min: 0.1,
-              max: Math.min(sprint.velocity - total_points),
+              max: Math.min(sprint.velocity - total_points, 20),
               precision: 0.5,
             }),
             businessValue: +faker.datatype.number({ min: 1, max: 10 }),
