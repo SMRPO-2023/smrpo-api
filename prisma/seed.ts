@@ -25,11 +25,11 @@ function getPriority(i: number): StoryPriority {
 async function main() {
   console.log('Clearing the database...');
 
+  await prisma.storyComment.deleteMany();
   await prisma.userStory.deleteMany();
   await prisma.sprint.deleteMany();
   await prisma.projectDeveloper.deleteMany();
   await prisma.post.deleteMany();
-  await prisma.storyComment.deleteMany();
   await prisma.timeLog.deleteMany();
   await prisma.task.deleteMany();
   await prisma.project.deleteMany();
