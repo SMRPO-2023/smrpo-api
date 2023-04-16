@@ -382,7 +382,7 @@ async function main() {
     for (const sprint of sprints) {
       // Create user stories with sprint assigned
       let total_points = 0;
-      for (let z = 0; z < 10; z++) {
+      for (let z = 0; z < 20; z++) {
         if (total_points >= sprint.velocity - 8) {
           break;
         }
