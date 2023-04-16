@@ -305,7 +305,7 @@ async function main() {
         data: {
           start: new Date('2023-02-01T21:43:28.434Z'),
           end: new Date('2023-02-10T21:43:28.434Z'),
-          velocity: 5,
+          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
           projectId: project.id,
           name: 'Sprint 1',
         },
@@ -316,7 +316,7 @@ async function main() {
         data: {
           start: new Date('2023-02-10T21:43:28.434Z'),
           end: new Date('2023-02-20T21:43:28.434Z'),
-          velocity: 10,
+          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
           projectId: project.id,
           name: 'sprint 2',
         },
@@ -327,7 +327,7 @@ async function main() {
         data: {
           start: new Date('2023-02-20T21:43:28.434Z'),
           end: new Date('2023-03-01T21:43:28.434Z'),
-          velocity: 15,
+          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
           projectId: project.id,
           name: 'sprint 3',
         },
@@ -338,7 +338,7 @@ async function main() {
         data: {
           start: new Date('2023-03-10T21:43:28.434Z'),
           end: new Date('2023-03-20T21:43:28.434Z'),
-          velocity: 9,
+          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
           projectId: project.id,
           name: 'sprint 4',
         },
@@ -349,7 +349,7 @@ async function main() {
         data: {
           start: new Date('2023-04-01T21:43:28.434Z'),
           end: new Date('2023-04-10T21:43:28.434Z'),
-          velocity: 23,
+          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
           projectId: project.id,
           name: 'sprint 5',
         },
@@ -360,7 +360,7 @@ async function main() {
         data: {
           start: new Date('2023-04-10T21:43:28.434Z'),
           end: new Date('2023-04-19T21:43:28.434Z'),
-          velocity: 30,
+          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
           projectId: project.id,
           name: 'sprint 6',
         },
@@ -371,7 +371,7 @@ async function main() {
         data: {
           start: new Date('2023-04-20T21:43:28.434Z'),
           end: new Date('2023-05-01T21:43:28.434Z'),
-          velocity: 20,
+          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
           projectId: project.id,
           name: 'sprint 7',
         },
@@ -391,11 +391,12 @@ async function main() {
             priority: getPriority(+faker.datatype.number({ min: 0, max: 2 })),
             title: 'Story ' + ++counter,
             description: faker.random.words(20),
-            points: +faker.datatype.number({
-              min: 4,
+            points: faker.datatype.float({
+              min: 0.1,
               max: Math.min(sprint.velocity - total_points),
+              precision: 0.5,
             }),
-            businessValue: +faker.datatype.number({ min: 1, max: 7 }),
+            businessValue: +faker.datatype.number({ min: 1, max: 10 }),
             projectId: sprint.projectId,
             sprintId: sprint.id,
             acceptanceCriteria: faker.random.words(10),
