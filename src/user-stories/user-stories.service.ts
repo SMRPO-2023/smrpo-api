@@ -554,18 +554,6 @@ export class UserStoriesService {
       this.logger.warn(message);
       throw new BadRequestException(message);
     }
-    const sprint = await this.prisma.sprint.findFirstOrThrow({
-      where: {
-        id: story.sprintId,
-        deletedAt: null,
-      },
-    });
-    const currentDate = dayjs();
-    if (currentDate.isBefore(sprint.start) || currentDate.isAfter(sprint.end)) {
-      const message = `The sprint is not active.`;
-      this.logger.warn(message);
-      throw new BadRequestException(message);
-    }
 
     if (data.message) {
       await this.prisma.storyComment.create({
