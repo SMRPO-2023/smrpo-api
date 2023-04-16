@@ -50,6 +50,25 @@ export class PostsService {
         projectId,
         deletedAt: null,
       },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            firstname: true,
+            lastname: true,
+            role: true,
+          },
+        },
+        Project: {
+          select: {
+            title: true,
+            projectOwnerId: true,
+            scrumMasterId: true,
+            developers: true,
+          },
+        }
+      }
     });
   }
 
