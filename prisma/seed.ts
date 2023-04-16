@@ -405,30 +405,21 @@ async function main() {
         total_points += userStory.points;
         await createTask(userStory, sprint);
       }
-
-      // Create user stories with no sprint assigned and WON'T HAVE TIME priority
-      for (let z = 0; z < 2; z++) {
-        if (total_points >= sprint.velocity - 2) {
-          break;
-        }
-        const userStory = await prisma.userStory.create({
-          data: {
-            priority: getPriority(3),
-            title: 'Story ' + ++counter,
-            description: faker.random.words(20),
-            points: +faker.datatype.number({
-              min: 2,
-              max: Math.min(4, sprint.velocity - total_points),
-            }),
-            businessValue: +faker.datatype.number({ min: 1, max: 7 }),
-            projectId: sprint.projectId,
-            acceptanceCriteria: faker.random.words(10),
-            acceptanceTest: false,
-          },
-        });
-        total_points += userStory.points;
-        await createTask(userStory, sprint);
-      }
+    }
+    // Create user stories with no sprint assigned
+    for (let z = 0; z < 10; z++) {
+      await prisma.userStory.create({
+        data: {
+          priority: getPriority(+faker.datatype.number({ min: 0, max: 3 })),
+          title: 'Story ' + ++counter,
+          description: faker.random.words(20),
+          points: faker.datatype.float({ min: 0.5, max: 20, precision: 0.5 }),
+          businessValue: +faker.datatype.number({ min: 1, max: 10 }),
+          projectId: project.id,
+          acceptanceCriteria: faker.random.words(10),
+          acceptanceTest: false,
+        },
+      });
     }
   }
 
