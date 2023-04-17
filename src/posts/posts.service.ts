@@ -67,8 +67,8 @@ export class PostsService {
             scrumMasterId: true,
             developers: true,
           },
-        }
-      }
+        },
+      },
     });
   }
 
