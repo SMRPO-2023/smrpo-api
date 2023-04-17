@@ -153,6 +153,7 @@ export class TasksService {
       },
     });
 
+    // TODO: fix hours and done calculations
     return tasks
       .filter((t) => {
         if (status === 'FINISHED') {
@@ -224,6 +225,7 @@ export class TasksService {
       },
     });
 
+    // TODO: fix hours and done calculations
     task['done'] = !!task?.timeLogs?.filter((tl) => tl.remainingHours === 0)
       .length;
     return task;

@@ -95,7 +95,16 @@ export class UserStoriesService {
 
     const returnStories = [];
     let currentLoad = 0;
+    // TODO: fix hours and done calculations, just like isTaskDone
     for (const tempStory of data) {
+      const isTaskDone = (task) => {
+        if (!task?.timeLogs.length) return false;
+        return task.timeLogs
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .at(0).remainingHours === 0
+      }
+      const numOfStoryTasksDone = tempStory.Task
+        .filter((t) => isTaskDone(t)).length;
       currentLoad += tempStory.points;
       returnStories.push({
         ...{
@@ -113,15 +122,10 @@ export class UserStoriesService {
             0
           ),
           initialEstimate: tempStory.Task.reduce((a, b) => a + b?.estimate, 0),
-          numUnfinishedTasks: tempStory.Task.filter(
-            (t) => !!t.timeLogs.filter((tl) => tl.remainingHours !== 0).length
-          ).length,
-          numFinishedTasks: tempStory.Task.filter(
-            (t) => !!t.timeLogs.filter((tl) => tl.remainingHours === 0).length
-          ).length,
+          numUnfinishedTasks: tempStory.Task.length - numOfStoryTasksDone,
+          numFinishedTasks: numOfStoryTasksDone,
           numTotalTasks: tempStory.Task.length,
-          Task: tempStory.Task.map((t) => ({...t, done: !!t?.timeLogs?.filter((tl) => tl.remainingHours === 0)
-            .length})),
+          Task: tempStory.Task.map((t) => ({...t, done: isTaskDone(t)})),
         },
         ...(await this.canBeAccepted(tempStory)),
       });
