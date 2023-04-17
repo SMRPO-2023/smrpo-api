@@ -57,8 +57,7 @@ Table Task {
   deletedAt DateTime
   title String [not null]
   description String [not null]
-  hours Float [not null]
-  done Boolean [not null, default: false]
+  estimate Float [not null]
   status TaskStatus [not null, default: 'UNASSIGNED']
   assignedTo User
   userId Int

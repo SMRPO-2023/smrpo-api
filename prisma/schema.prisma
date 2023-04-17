@@ -73,8 +73,7 @@ model Task {
   deletedAt   DateTime?
   title       String
   description String
-  hours       Float
-  done        Boolean    @default(false)
+  estimate    Float
   status      TaskStatus @default(UNASSIGNED)
   assignedTo  User?      @relation(fields: [userId], references: [id])
   userId      Int?

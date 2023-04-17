@@ -77,9 +77,21 @@ export class TasksService {
     const where = { deletedAt: null };
     if (status) {
       if (status === 'FINISHED') {
-        where['done'] = true;
+        // Where remaining is equal 0
+        // where['timeLogs'] = {
+        //   some: { remainingHours: 0 },
+        //   every: { deletedAt: null },
+        // };
+        where['NOT'] = { status: 'UNASSIGNED' };
       } else if (status === 'ACTIVE') {
-        where['done'] = true;
+        // Where remaining is greater than 0
+        // where['timeLogs'] = {
+        //   every: {
+        //     remainingHours: { gt: 0 },
+        //     deletedAt: null,
+        //   },
+        // };
+        where['NOT'] = { status: 'UNASSIGNED' };
       } else if (status === 'ALL') {
       } else {
         where['status'] = TaskStatus[status];
@@ -91,7 +103,7 @@ export class TasksService {
     if (userId) {
       where['userId'] = userId;
     }
-    return this.prisma.task.findMany({
+    const tasks = await this.prisma.task.findMany({
       where,
       include: {
         UserStory: {
@@ -120,6 +132,7 @@ export class TasksService {
             hours: true,
             userId: true,
             taskId: true,
+            remainingHours: true,
           },
           where: { deletedAt: null },
         },
@@ -139,10 +152,26 @@ export class TasksService {
         },
       },
     });
+
+    return tasks
+      .filter((t) => {
+        if (status === 'FINISHED') {
+          return !!t.timeLogs.filter((tl) => tl.remainingHours === 0).length;
+        } else if (status === 'ACTIVE') {
+          return !t.timeLogs.filter((tl) => tl.remainingHours === 0).length;
+        }
+        return true;
+      })
+      .map((t) => {
+        return {
+          ...t,
+          done: !!t?.timeLogs?.filter((tl) => tl.remainingHours === 0).length,
+        };
+      });
   }
 
   async findOne(id: number): Promise<Task> {
-    return this.prisma.task.findFirstOrThrow({
+    const task = await this.prisma.task.findFirstOrThrow({
       where: {
         id,
         deletedAt: null,
@@ -174,6 +203,7 @@ export class TasksService {
             hours: true,
             userId: true,
             taskId: true,
+            remainingHours: true,
           },
           where: { deletedAt: null },
         },
@@ -193,6 +223,10 @@ export class TasksService {
         },
       },
     });
+
+    task['done'] = !!task?.timeLogs?.filter((tl) => tl.remainingHours === 0)
+      .length;
+    return task;
   }
 
   async update(id: number, data: UpdateTaskDto, userId: number) {

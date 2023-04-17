@@ -1,4 +1,11 @@
-import { IsInt, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { TaskStatus } from '@prisma/client';
 
 export class CreateTaskDto {
@@ -13,12 +20,14 @@ export class CreateTaskDto {
   @IsNotEmpty()
   @IsNumber({ maxDecimalPlaces: 4 })
   @Min(0.1)
-  hours: number;
+  estimate: number;
 
   @IsNotEmpty()
   @IsInt()
   userStoryId: number;
 
+  @IsOptional()
+  @IsInt()
   userId?: number;
 
   status?: TaskStatus;

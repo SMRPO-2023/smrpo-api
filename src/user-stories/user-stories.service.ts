@@ -117,9 +117,13 @@ export class UserStoriesService {
                 )[0]?.remainingHours || +0,
             0
           ),
-          initialEstimate: tempStory.Task.reduce((a, b) => a + b?.hours, 0),
-          numUnfinishedTasks: tempStory.Task.filter((t) => !t.done).length,
-          numFinishedTasks: tempStory.Task.filter((t) => t.done).length,
+          initialEstimate: tempStory.Task.reduce((a, b) => a + b?.estimate, 0),
+          numUnfinishedTasks: tempStory.Task.filter(
+            (t) => !!t.timeLogs.filter((tl) => tl.remainingHours !== 0).length
+          ).length,
+          numFinishedTasks: tempStory.Task.filter(
+            (t) => !!t.timeLogs.filter((tl) => tl.remainingHours === 0).length
+          ).length,
           numTotalTasks: tempStory.Task.length,
         },
         ...(await this.canBeAccepted(tempStory)),
@@ -323,7 +327,7 @@ export class UserStoriesService {
     }
 
     const tasks = await this.prisma.task.findMany({
-      where: { userStoryId: id, done: false, deletedAt: null },
+      where: { userStoryId: id, timeLogs: { none: { remainingHours: 0 } }, deletedAt: null },
     });
 
     if (tasks.length > 0) {
@@ -357,7 +361,11 @@ export class UserStoriesService {
     const returnFalse = { canBeAccepted: false };
 
     const tasks = await this.prisma.task.findMany({
-      where: { userStoryId: userStory.id, done: false, deletedAt: null },
+      where: {
+        userStoryId: userStory.id,
+        timeLogs: { none: { remainingHours: 0 } },
+        deletedAt: null,
+      },
     });
 
     if (tasks.length > 0) {

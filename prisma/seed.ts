@@ -417,8 +417,7 @@ async function createTask(userStory: any, sprint: any, done: boolean) {
       title: faker.random.words(5),
       description: faker.random.words(25),
       sprintId: sprint.id,
-      done,
-      hours: faker.datatype.float({ min: 4, max: 15, precision: 0.1 }),
+      estimate: faker.datatype.float({ min: 4, max: 15, precision: 0.1 }),
       status:
         !userId || !userStory.sprintId
           ? TaskStatus.UNASSIGNED
@@ -428,11 +427,16 @@ async function createTask(userStory: any, sprint: any, done: boolean) {
     },
   });
   if (task.status === TaskStatus.ASSIGNED) {
-    await createTimeLog(sprint, userId, task);
+    await createTimeLog(sprint, userId, task, done);
   }
 }
 
-async function createTimeLog(sprint: Sprint, userId: number, task: Task) {
+async function createTimeLog(
+  sprint: Sprint,
+  userId: number,
+  task: Task,
+  done: boolean
+) {
   for (let i = 0; i < faker.datatype.number({ min: 2, max: 5 }); i++) {
     await prisma.timeLog.create({
       data: {
@@ -448,7 +452,8 @@ async function createTimeLog(sprint: Sprint, userId: number, task: Task) {
       },
     });
   }
-  if (task.done) {
+
+  if (done) {
     await prisma.timeLog.create({
       data: {
         day: sprint.end,
