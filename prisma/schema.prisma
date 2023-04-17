@@ -79,10 +79,10 @@ model Task {
   assignedTo  User?      @relation(fields: [userId], references: [id])
   userId      Int?
   timeLogs    TimeLog[]
-  Sprint      Sprint?    @relation(fields: [sprintId], references: [id])
-  sprintId    Int?
   UserStory   UserStory? @relation(fields: [userStoryId], references: [id])
   userStoryId Int?
+  Sprint      Sprint?    @relation(fields: [sprintId], references: [id])
+  sprintId    Int?
 }
 
 enum TaskStatus {

@@ -63,10 +63,10 @@ Table Task {
   assignedTo User
   userId Int
   timeLogs TimeLog [not null]
-  Sprint Sprint
-  sprintId Int
   UserStory UserStory
   userStoryId Int
+  Sprint Sprint
+  sprintId Int
 }
 
 Table UserStory {
@@ -177,9 +177,9 @@ Ref: StoryComment.userStoryId > UserStory.id
 
 Ref: Task.userId > User.id
 
-Ref: Task.sprintId > Sprint.id
-
 Ref: Task.userStoryId > UserStory.id
+
+Ref: Task.sprintId > Sprint.id
 
 Ref: UserStory.projectId > Project.id
 
