@@ -298,20 +298,23 @@ async function main() {
     },
   });
 
-  for (let i = 0; i < projects.length; i++) {
-    const project = projects[i];
+  for (const project of projects) {
     const sprints = [];
 
     for (let s = -3; s <= 3; s++) {
+      let startDate = dayjs().add(s * 10 - 5, 'd');
+      let endDate = dayjs().add(s * 10 + 4, 'd');
+      while ([0, 6].includes(startDate.day())) {
+        startDate = startDate.add(1, 'd');
+      }
+      while ([0, 6].includes(endDate.day())) {
+        endDate = endDate.subtract(1, 'd');
+      }
       sprints.push(
         await prisma.sprint.create({
           data: {
-            start: dayjs()
-              .add(s * 10 - 5, 'd')
-              .toDate(),
-            end: dayjs()
-              .add(s * 10 + 4, 'd')
-              .toDate(),
+            start: startDate.toDate(),
+            end: endDate.toDate(),
             velocity: faker.datatype.float({
               min: 10,
               max: 90,
@@ -376,6 +379,7 @@ async function main() {
         await createTask(userStory, sprint, boolRand(0.2));
       }
     }
+
     // Create user stories with no sprint assigned
     for (let z = 0; z < 10; z++) {
       await prisma.userStory.create({
@@ -388,6 +392,26 @@ async function main() {
           projectId: project.id,
           acceptanceCriteria: faker.random.words(10),
           acceptanceTest: false,
+        },
+      });
+    }
+
+    const prjct = await prisma.project.findUnique({
+      where: { id: project.id },
+      include: { developers: true },
+    });
+    const users = [
+      ...prjct?.developers.map((d) => d.userId),
+      prjct?.projectOwnerId,
+      prjct?.scrumMasterId,
+    ];
+    for (let stry = 0; stry < 20; stry++) {
+      await prisma.post.create({
+        data: {
+          userId:
+            users[faker.datatype.number({ min: 0, max: users.length - 1 })],
+          message: faker.lorem.paragraphs(4),
+          projectId: project.id,
         },
       });
     }
