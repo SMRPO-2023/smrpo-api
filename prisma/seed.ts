@@ -6,6 +6,7 @@ import {
   TaskStatus,
 } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+import * as dayjs from 'dayjs';
 
 const prisma = new PrismaClient();
 
@@ -300,83 +301,28 @@ async function main() {
   for (let i = 0; i < projects.length; i++) {
     const project = projects[i];
     const sprints = [];
-    sprints.push(
-      await prisma.sprint.create({
-        data: {
-          start: new Date('2023-02-01T21:43:28.434Z'),
-          end: new Date('2023-02-10T21:43:28.434Z'),
-          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
-          projectId: project.id,
-          name: 'Sprint 1',
-        },
-      })
-    );
-    sprints.push(
-      await prisma.sprint.create({
-        data: {
-          start: new Date('2023-02-10T21:43:28.434Z'),
-          end: new Date('2023-02-20T21:43:28.434Z'),
-          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
-          projectId: project.id,
-          name: 'sprint 2',
-        },
-      })
-    );
-    sprints.push(
-      await prisma.sprint.create({
-        data: {
-          start: new Date('2023-02-20T21:43:28.434Z'),
-          end: new Date('2023-03-01T21:43:28.434Z'),
-          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
-          projectId: project.id,
-          name: 'sprint 3',
-        },
-      })
-    );
-    sprints.push(
-      await prisma.sprint.create({
-        data: {
-          start: new Date('2023-03-10T21:43:28.434Z'),
-          end: new Date('2023-03-20T21:43:28.434Z'),
-          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
-          projectId: project.id,
-          name: 'sprint 4',
-        },
-      })
-    );
-    sprints.push(
-      await prisma.sprint.create({
-        data: {
-          start: new Date('2023-04-01T21:43:28.434Z'),
-          end: new Date('2023-04-10T21:43:28.434Z'),
-          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
-          projectId: project.id,
-          name: 'sprint 5',
-        },
-      })
-    );
-    sprints.push(
-      await prisma.sprint.create({
-        data: {
-          start: new Date('2023-04-10T21:43:28.434Z'),
-          end: new Date('2023-04-19T21:43:28.434Z'),
-          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
-          projectId: project.id,
-          name: 'sprint 6',
-        },
-      })
-    );
-    sprints.push(
-      await prisma.sprint.create({
-        data: {
-          start: new Date('2023-04-20T21:43:28.434Z'),
-          end: new Date('2023-05-01T21:43:28.434Z'),
-          velocity: faker.datatype.float({ min: 10, max: 90, precision: 0.5 }),
-          projectId: project.id,
-          name: 'sprint 7',
-        },
-      })
-    );
+
+    for (let s = -3; s <= 3; s++) {
+      sprints.push(
+        await prisma.sprint.create({
+          data: {
+            start: dayjs()
+              .add(s * 10 - 5, 'd')
+              .toDate(),
+            end: dayjs()
+              .add(s * 10 + 4, 'd')
+              .toDate(),
+            velocity: faker.datatype.float({
+              min: 10,
+              max: 90,
+              precision: 0.5,
+            }),
+            projectId: project.id,
+            name: `Sprint ${s + 4}`,
+          },
+        })
+      );
+    }
 
     let counter = 0;
     for (const sprint of sprints) {

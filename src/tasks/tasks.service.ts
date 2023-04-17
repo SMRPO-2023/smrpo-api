@@ -75,19 +75,21 @@ export class TasksService {
 
   async findAll(userStoryId?: number, userId?: number, status?: string) {
     const where = { deletedAt: null };
-    if (userStoryId) {
-      where['userStoryId'] = userStoryId;
-    }
-    if (userId) {
-      where['userId'] = userId;
-    }
     if (status) {
       if (status === 'FINISHED') {
+        where['done'] = true;
+      } else if (status === 'ACTIVE') {
         where['done'] = true;
       } else if (status === 'ALL') {
       } else {
         where['status'] = TaskStatus[status];
       }
+    }
+    if (userStoryId) {
+      where['userStoryId'] = userStoryId;
+    }
+    if (userId) {
+      where['userId'] = userId;
     }
     return this.prisma.task.findMany({
       where,
@@ -249,6 +251,16 @@ export class TasksService {
 
     if (!(await this.checkPermissions(userId, task.userStoryId))) {
       const message = `User does not have sufficient permissions.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
+
+    if (
+      task.status === TaskStatus.ACCEPTED ||
+      task.status === TaskStatus.ASSIGNED ||
+      !!task.userId
+    ) {
+      const message = `Task cannot be deleted until assignee rejects the task.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
     }
