@@ -245,6 +245,14 @@ export class UserStoriesService {
             },
           },
         },
+        Sprint: {
+          select: {
+            id: true,
+            name: true,
+            start: true,
+            end: true,
+          },
+        },
       },
     });
     return { ...data, ...(await this.canBeAccepted(data)) };
