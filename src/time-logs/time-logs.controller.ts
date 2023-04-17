@@ -40,6 +40,12 @@ export class TimeLogsController {
     return this.timeLogsService.findAll(user, taskId, userId);
   }
 
+  @Get('get-my-hours')
+  @ApiQuery({ name: 'task-id', required: false, type: Number })
+  getUserHours(@UserEntity() user: User, @Query('task-id') taskId?: number) {
+    return this.timeLogsService.findAll(user, taskId, user.id);
+  }
+
   @Put(':id')
   update(
     @UserEntity() user: User,
