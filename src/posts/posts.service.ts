@@ -151,7 +151,7 @@ export class PostsService {
       user.role === 'ADMIN' ||
       project.scrumMasterId === userId ||
       project.projectOwnerId === userId ||
-      project.developers.includes(userId)
+      project.developers.find((u) => u.userId === userId)
     );
   }
 }

@@ -296,7 +296,7 @@ export class TasksService {
       user.role === 'ADMIN' ||
       userId === project.scrumMasterId ||
       (developers &&
-        project.developers.map((d: ProjectDeveloper) => d.id).includes(userId))
+        project.developers.map((d: ProjectDeveloper) => d.userId).includes(userId))
     );
   }
 }
