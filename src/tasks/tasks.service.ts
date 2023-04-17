@@ -255,6 +255,16 @@ export class TasksService {
       throw new UnauthorizedException(message);
     }
 
+    if (
+      task.status === TaskStatus.ACCEPTED ||
+      task.status === TaskStatus.ASSIGNED ||
+      !!task.userId
+    ) {
+      const message = `Task cannot be deleted until assignee rejects the task.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
+
     task.deletedAt = new Date();
     return this.prisma.task.update({
       data: task,
