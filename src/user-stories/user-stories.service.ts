@@ -86,8 +86,8 @@ export class UserStoriesService {
                 firstname: true,
                 lastname: true,
                 role: true,
-              }
-            }
+              },
+            },
           },
         },
       },
@@ -288,7 +288,11 @@ export class UserStoriesService {
     const user = await this.prisma.user.findFirstOrThrow({
       where: { id: userId },
     });
-    if (userId !== project.scrumMasterId && user.role !== Role.ADMIN) {
+    if (
+      userId !== project.projectOwnerId &&
+      userId !== project.scrumMasterId &&
+      user.role !== Role.ADMIN
+    ) {
       const message = `Missing access rights.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
