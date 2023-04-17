@@ -172,24 +172,6 @@ export class SprintsService {
           where: {
             deletedAt: null,
           },
-          include: {
-            Task: {
-              where: {
-                deletedAt: null,
-              },
-              include: {
-                assignedTo: {
-                  select: {
-                    id: true,
-                    username: true,
-                    firstname: true,
-                    lastname: true,
-                    role: true,
-                  },
-                },
-              },
-            },
-          },
         },
       },
     });

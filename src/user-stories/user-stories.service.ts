@@ -104,11 +104,6 @@ export class UserStoriesService {
             (a, b) => a + b?.timeLogs.reduce((c, d) => c + d?.hours, 0),
             0
           ),
-          // hoursRemaining: tempStory.Task.reduce(
-          //   (a, b) =>
-          //     a + b?.timeLogs.reduce((c, d) => c + d?.remainingHours, 0),
-          //   0
-          // ),
           hoursRemaining: tempStory.Task.reduce(
             (a, b) =>
               a +
@@ -125,6 +120,8 @@ export class UserStoriesService {
             (t) => !!t.timeLogs.filter((tl) => tl.remainingHours === 0).length
           ).length,
           numTotalTasks: tempStory.Task.length,
+          Task: tempStory.Task.map((t) => ({...t, done: !!t?.timeLogs?.filter((tl) => tl.remainingHours === 0)
+            .length})),
         },
         ...(await this.canBeAccepted(tempStory)),
       });
