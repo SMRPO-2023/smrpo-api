@@ -75,19 +75,21 @@ export class TasksService {
 
   async findAll(userStoryId?: number, userId?: number, status?: string) {
     const where = { deletedAt: null };
-    if (userStoryId) {
-      where['userStoryId'] = userStoryId;
-    }
-    if (userId) {
-      where['userId'] = userId;
-    }
     if (status) {
       if (status === 'FINISHED') {
+        where['done'] = true;
+      } else if (status === 'ACTIVE') {
         where['done'] = true;
       } else if (status === 'ALL') {
       } else {
         where['status'] = TaskStatus[status];
       }
+    }
+    if (userStoryId) {
+      where['userStoryId'] = userStoryId;
+    }
+    if (userId) {
+      where['userId'] = userId;
     }
     return this.prisma.task.findMany({
       where,
