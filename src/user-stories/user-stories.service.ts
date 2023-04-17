@@ -323,7 +323,7 @@ export class UserStoriesService {
     }
 
     const tasks = await this.prisma.task.findMany({
-      where: { userStoryId: id, done: false },
+      where: { userStoryId: id, done: false, deletedAt: null },
     });
 
     if (tasks.length > 0) {
@@ -357,7 +357,7 @@ export class UserStoriesService {
     const returnFalse = { canBeAccepted: false };
 
     const tasks = await this.prisma.task.findMany({
-      where: { userStoryId: userStory.id, done: false },
+      where: { userStoryId: userStory.id, done: false, deletedAt: null },
     });
 
     if (tasks.length > 0) {
