@@ -156,6 +156,25 @@ export class UserStoriesService {
     });
   }
 
+  async findNotEstimated(projectId: number, sprintId: number) {
+    const where = {
+      deletedAt: null,
+      points: null,
+    };
+    if (projectId) {
+      where['projectId'] = projectId;
+    }
+    if (sprintId) {
+      where['sprintId'] = sprintId;
+    }
+    return this.prisma.userStory.findMany({
+      where,
+      include: {
+        comments: true,
+      },
+    });
+  }
+
   async findFutureReleases(projectId: number) {
     const currentDate = dayjs();
     return this.prisma.userStory.findMany({

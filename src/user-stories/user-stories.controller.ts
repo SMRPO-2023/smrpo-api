@@ -54,6 +54,16 @@ export class UserStoriesController {
     return this.userStoriesService.findRealized(projectId, sprintId);
   }
 
+  @Get('not-estimated')
+  @ApiQuery({ name: 'project-id', required: false, type: Number })
+  @ApiQuery({ name: 'sprint-id', required: false, type: Number })
+  findNotEstimated(
+    @Query('project-id') projectId: number,
+    @Query('sprint-id') sprintId: number
+  ) {
+    return this.userStoriesService.findNotEstimated(projectId, sprintId);
+  }
+
   @Get('unrealized-without-sprint')
   @ApiQuery({ name: 'project-id', required: true, type: Number })
   findUnrealized(@Query('project-id') projectId: number) {
