@@ -339,7 +339,7 @@ async function main() {
             title: 'Story ' + ++counter,
             description: faker.random.words(20),
             points: faker.datatype.float({
-              min: 0.1,
+              min: 1,
               max: Math.min(sprint.velocity - total_points, 2),
               precision: 0.5,
             }),
@@ -364,7 +364,7 @@ async function main() {
             title: 'Story ' + ++counter,
             description: faker.random.words(20),
             points: faker.datatype.float({
-              min: 0.1,
+              min: 1,
               max: Math.min(sprint.velocity - total_points, 20),
               precision: 0.5,
             }),
@@ -387,7 +387,7 @@ async function main() {
           priority: getPriority(+faker.datatype.number({ min: 0, max: 3 })),
           title: 'Story ' + ++counter,
           description: faker.random.words(20),
-          points: faker.datatype.float({ min: 0.5, max: 20, precision: 0.5 }),
+          points: faker.datatype.float({ min: 1, max: 20, precision: 0.5 }),
           businessValue: +faker.datatype.number({ min: 1, max: 10 }),
           projectId: project.id,
           acceptanceCriteria: faker.random.words(10),
@@ -396,16 +396,16 @@ async function main() {
       });
     }
 
-    const prjct = await prisma.project.findUnique({
+    const project2 = await prisma.project.findUnique({
       where: { id: project.id },
       include: { developers: true },
     });
     const users = [
-      ...prjct?.developers.map((d) => d.userId),
-      prjct?.projectOwnerId,
-      prjct?.scrumMasterId,
+      ...project2?.developers.map((d) => d.userId),
+      project2?.projectOwnerId,
+      project2?.scrumMasterId,
     ];
-    for (let stry = 0; stry < 20; stry++) {
+    for (let story = 0; story < 20; story++) {
       await prisma.post.create({
         data: {
           userId:
