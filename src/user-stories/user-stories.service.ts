@@ -10,7 +10,13 @@ import {
 import { PrismaService } from 'nestjs-prisma';
 import { UserStoryDto } from './dto/user-story.dto';
 import { StoryListDto } from './dto/story-list.dto';
-import { Role, StoryPriority, User, UserStory } from '@prisma/client';
+import {
+  Role,
+  StoryPriority,
+  TaskStatus,
+  User,
+  UserStory,
+} from '@prisma/client';
 import * as dayjs from 'dayjs';
 import { RejectUserStoryDto } from './dto/reject-user-story.dto';
 
@@ -95,18 +101,9 @@ export class UserStoriesService {
 
     const returnStories = [];
     let currentLoad = 0;
-    // TODO: fix hours and done calculations, just like isTaskDone
     for (const tempStory of data) {
-      const isTaskDone = (task) => {
-        if (!task?.timeLogs.length) return false;
-        return (
-          task.timeLogs
-            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-            .at(0).remainingHours === 0
-        );
-      };
-      const numOfStoryTasksDone = tempStory.Task.filter((t) =>
-        isTaskDone(t)
+      const numOfStoryTasksDone = tempStory.Task.filter(
+        (t) => t.status === TaskStatus.FINISHED
       ).length;
       currentLoad += tempStory.points;
       returnStories.push({
@@ -128,7 +125,7 @@ export class UserStoriesService {
           numUnfinishedTasks: tempStory.Task.length - numOfStoryTasksDone,
           numFinishedTasks: numOfStoryTasksDone,
           numTotalTasks: tempStory.Task.length,
-          Task: tempStory.Task.map((t) => ({ ...t, done: isTaskDone(t) })),
+          Task: tempStory.Task,
         },
         ...(await this.canBeAccepted(tempStory)),
       });
