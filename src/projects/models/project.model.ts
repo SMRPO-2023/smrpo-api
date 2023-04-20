@@ -13,6 +13,9 @@ export class Project extends BaseModel {
   @ApiPropertyOptional({ type: String })
   documentation?: string;
 
+  @ApiProperty({ type: String })
+  description: string;
+
   @ApiProperty({ isArray: true, type: () => Sprint })
   sprints: Sprint[];
 

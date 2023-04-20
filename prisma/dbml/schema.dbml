@@ -135,7 +135,8 @@ Table Project {
   updatedAt DateTime [not null]
   deletedAt DateTime
   title String [not null]
-  documentation String [not null]
+  documentation String
+  description String [not null]
   projectOwner User [not null]
   scrumMaster User [not null]
   developers ProjectDeveloper [not null]
