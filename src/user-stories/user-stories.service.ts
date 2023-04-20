@@ -99,12 +99,15 @@ export class UserStoriesService {
     for (const tempStory of data) {
       const isTaskDone = (task) => {
         if (!task?.timeLogs.length) return false;
-        return task.timeLogs
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-        .at(0).remainingHours === 0
-      }
-      const numOfStoryTasksDone = tempStory.Task
-        .filter((t) => isTaskDone(t)).length;
+        return (
+          task.timeLogs
+            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+            .at(0).remainingHours === 0
+        );
+      };
+      const numOfStoryTasksDone = tempStory.Task.filter((t) =>
+        isTaskDone(t)
+      ).length;
       currentLoad += tempStory.points;
       returnStories.push({
         ...{
@@ -125,7 +128,7 @@ export class UserStoriesService {
           numUnfinishedTasks: tempStory.Task.length - numOfStoryTasksDone,
           numFinishedTasks: numOfStoryTasksDone,
           numTotalTasks: tempStory.Task.length,
-          Task: tempStory.Task.map((t) => ({...t, done: isTaskDone(t)})),
+          Task: tempStory.Task.map((t) => ({ ...t, done: isTaskDone(t) })),
         },
         ...(await this.canBeAccepted(tempStory)),
       });
@@ -336,7 +339,11 @@ export class UserStoriesService {
     }
 
     const tasks = await this.prisma.task.findMany({
-      where: { userStoryId: id, timeLogs: { none: { remainingHours: 0 } }, deletedAt: null },
+      where: {
+        userStoryId: id,
+        timeLogs: { none: { remainingHours: 0 } },
+        deletedAt: null,
+      },
     });
 
     if (tasks.length > 0) {
@@ -560,11 +567,9 @@ export class UserStoriesService {
       throw new BadRequestException(message);
     }
 
-    if (data.message) {
-      await this.prisma.storyComment.create({
-        data: { message: data.message, userId: user.id, userStoryId: id },
-      });
-    }
+    await this.prisma.storyComment.create({
+      data: { message: data.message, userId: user.id, userStoryId: id },
+    });
 
     return this.prisma.userStory.update({
       where: {
