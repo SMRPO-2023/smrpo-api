@@ -48,6 +48,14 @@ export class ProjectController {
     return this.projectService.update(data, projectId, user);
   }
 
+  @Delete('delete-documentation/:id')
+  deleteProjectDocumentation(
+    @UserEntity() user: User,
+    @Param('id', ParseIntPipe) projectId: number
+  ) {
+    return this.projectService.removeDocumentation(projectId, user);
+  }
+
   @Roles('ADMIN')
   @Delete(':id')
   markDeleted(@Param('id', ParseIntPipe) project_id: number) {

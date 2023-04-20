@@ -8,6 +8,7 @@ import {
 import { PrismaService } from 'nestjs-prisma';
 import { Prisma, Role, User } from '@prisma/client';
 import { ProjectDto } from './dto/project.dto';
+import { ProjectDocumentationDto } from './dto/project-documentation.dto';
 
 @Injectable()
 export class ProjectService {
@@ -113,7 +114,7 @@ export class ProjectService {
   }
 
   async update(data: ProjectDto, projectId: number, user: User) {
-    const where = { id: projectId };
+    const where = { id: projectId, deletedAt: null };
     const project = await this.findOne(where);
     if (!project) {
       throw new BadRequestException('Object is deleted');
@@ -167,6 +168,60 @@ export class ProjectService {
 
     return this.prisma.project.update({
       data,
+      where,
+    });
+  }
+
+  async updateDocumentation(
+    data: ProjectDocumentationDto,
+    projectId: number,
+    user: User
+  ) {
+    const where = { id: projectId, deletedAt: null };
+    const project = await this.findOne(where);
+    if (!project) {
+      throw new BadRequestException('Object is deleted');
+    }
+    if (
+      user.id !== project.scrumMasterId &&
+      user.id !== project.projectOwnerId &&
+      !(await this.prisma.projectDeveloper.findFirst({
+        where: { projectId: projectId, userId: user.id, deletedAt: null },
+      })) &&
+      user.role !== Role.ADMIN
+    ) {
+      const message = `Missing access rights.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
+
+    return this.prisma.project.update({
+      data,
+      where,
+    });
+  }
+
+  async removeDocumentation(projectId: number, user: User) {
+    const where = { id: projectId, deletedAt: null };
+    const project = await this.findOne(where);
+    if (!project) {
+      throw new BadRequestException('Object is deleted');
+    }
+    if (
+      user.id !== project.scrumMasterId &&
+      user.id !== project.projectOwnerId &&
+      !(await this.prisma.projectDeveloper.findFirst({
+        where: { projectId: projectId, userId: user.id, deletedAt: null },
+      })) &&
+      user.role !== Role.ADMIN
+    ) {
+      const message = `Missing access rights.`;
+      this.logger.warn(message);
+      throw new UnauthorizedException(message);
+    }
+
+    return this.prisma.project.update({
+      data: { documentation: null },
       where,
     });
   }
