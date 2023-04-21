@@ -178,6 +178,13 @@ export class TasksService {
             remainingHours: true,
           },
           where: { deletedAt: null },
+          include: {
+            User: {
+              select: {
+                username: true,
+              },
+            },
+          },
         },
         assignedTo: {
           select: {
