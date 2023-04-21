@@ -166,17 +166,6 @@ export class TasksService {
           },
         },
         timeLogs: {
-          select: {
-            id: true,
-            createdAt: true,
-            updatedAt: true,
-            deletedAt: true,
-            day: true,
-            hours: true,
-            userId: true,
-            taskId: true,
-            remainingHours: true,
-          },
           where: { deletedAt: null },
           include: {
             User: {
