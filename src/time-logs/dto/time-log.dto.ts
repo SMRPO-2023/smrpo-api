@@ -7,6 +7,8 @@ import {
   IsInt,
   IsNumber,
   IsString,
+  MinLength,
+  MaxLength,
 } from 'class-validator';
 
 export class TimeLogDto {
@@ -35,6 +37,7 @@ export class TimeLogDto {
 
   @IsString()
   @IsNotEmpty()
-  @Max(30)
+  @MinLength(1)
+  @MaxLength(30)
   title: string;
 }
