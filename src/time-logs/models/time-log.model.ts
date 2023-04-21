@@ -24,4 +24,7 @@ export class TimeLog extends BaseModel {
 
   @ApiProperty({ type: Number })
   taskId: number;
+
+  @ApiProperty({ type: String })
+  title: string;
 }
