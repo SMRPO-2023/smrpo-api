@@ -464,6 +464,7 @@ async function createTimeLog(
   for (let i = 0; i < faker.datatype.number({ min: 2, max: 5 }); i++) {
     await prisma.timeLog.create({
       data: {
+        title: faker.random.words(faker.datatype.number({ min: 1, max: 5 })),
         day: sprint.start,
         hours: faker.datatype.float({ min: 1, max: 4, precision: 0.1 }),
         userId,
@@ -480,6 +481,7 @@ async function createTimeLog(
   if (done) {
     await prisma.timeLog.create({
       data: {
+        title: faker.random.words(faker.datatype.number({ min: 1, max: 5 })),
         day: sprint.end,
         hours: faker.datatype.float({ min: 1, max: 4, precision: 0.1 }),
         userId,
