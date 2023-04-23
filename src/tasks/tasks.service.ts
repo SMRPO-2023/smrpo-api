@@ -243,7 +243,6 @@ export class TasksService {
     } else if (action === 'finish') {
       if (await this.checkIfNoneRemain(id)) {
         task.status = TaskStatus.FINISHED;
-        task.userId = null;
       } else {
         const message = `Task has some hours remaining on last time log.`;
         this.logger.warn(message);
@@ -283,11 +282,7 @@ export class TasksService {
       throw new UnauthorizedException(message);
     }
 
-    if (
-      task.status === TaskStatus.ACCEPTED ||
-      task.status === TaskStatus.ASSIGNED ||
-      !!task.userId
-    ) {
+    if (task.status !== TaskStatus.UNASSIGNED && task.status !== TaskStatus.ASSIGNED) {
       const message = `Task cannot be deleted until assignee rejects the task.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);

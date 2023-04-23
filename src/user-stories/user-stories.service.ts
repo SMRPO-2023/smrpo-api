@@ -109,18 +109,24 @@ export class UserStoriesService {
       returnStories.push({
         ...{
           ...tempStory,
+          // of all tasks
           hoursTotal: tempStory.Task.reduce(
             (a, b) => a + b?.timeLogs.reduce((c, d) => c + d?.hours, 0),
             0
           ),
-          hoursRemaining: tempStory.Task.reduce(
-            (a, b) =>
-              a +
-                b?.timeLogs?.sort(
-                  (d, c) => d.createdAt.getTime() - c.createdAt.getTime()
-                )[0]?.remainingHours || +0,
-            0
-          ),
+          // of not finished tasks and not accepted story
+          hoursRemaining: !tempStory.acceptanceTest
+            ? tempStory.Task.reduce((prev, task) => {
+                const timelog = task?.timeLogs?.sort(
+                  (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+                )[0];
+                if (task.status !== TaskStatus.FINISHED) {
+                  return prev + timelog?.remainingHours || +0;
+                } else {
+                  return prev;
+                }
+              }, 0)
+            : 0,
           initialEstimate: tempStory.Task.reduce((a, b) => a + b?.estimate, 0),
           numUnfinishedTasks: tempStory.Task.length - numOfStoryTasksDone,
           numFinishedTasks: numOfStoryTasksDone,
@@ -131,7 +137,13 @@ export class UserStoriesService {
       });
     }
 
-    return { stories: returnStories, currentLoad: currentLoad };
+    let totalRemainingHours = 0;
+    let totalSpentHours = 0;
+    for (const story of returnStories) {
+      totalRemainingHours += story.hoursRemaining;
+      totalSpentHours += story.hoursTotal;
+    }
+    return { stories: returnStories, currentLoad, totalRemainingHours, totalSpentHours };
   }
 
   async findRealized(projectId: number, sprintId: number) {
