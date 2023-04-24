@@ -454,7 +454,7 @@ async function createTask(userStory: UserStory, sprint: Sprint, done: boolean) {
       sprintId: sprint.id,
       estimate: faker.datatype.float({ min: 4, max: 15, precision: 0.1 }),
       status: done
-        ? TaskStatus.ASSIGNED
+        ? TaskStatus.FINISHED
         : !userId || !userStory.sprintId
         ? TaskStatus.UNASSIGNED
         : boolRand(0.33)

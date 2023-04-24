@@ -143,7 +143,12 @@ export class UserStoriesService {
       totalRemainingHours += story.hoursRemaining;
       totalSpentHours += story.hoursTotal;
     }
-    return { stories: returnStories, currentLoad, totalRemainingHours, totalSpentHours };
+    return {
+      stories: returnStories,
+      currentLoad,
+      totalRemainingHours,
+      totalSpentHours,
+    };
   }
 
   async findRealized(projectId: number, sprintId: number) {
@@ -369,12 +374,14 @@ export class UserStoriesService {
     const tasks = await this.prisma.task.findMany({
       where: {
         userStoryId: id,
-        timeLogs: { none: { remainingHours: 0 } },
         deletedAt: null,
       },
     });
 
-    if (tasks.length > 0) {
+    if (
+      tasks.length !==
+      tasks.filter((t) => t.status === TaskStatus.FINISHED).length
+    ) {
       const message = 'User story has unfinished tasks.';
       this.logger.warn(message);
       throw new ForbiddenException(message);
@@ -407,12 +414,12 @@ export class UserStoriesService {
     const tasks = await this.prisma.task.findMany({
       where: {
         userStoryId: userStory.id,
-        timeLogs: { every: { remainingHours: { gt: 0 } } },
+        status: TaskStatus.FINISHED,
         deletedAt: null,
       },
     });
 
-    if (tasks.length > 0) {
+    if (tasks.length === 0) {
       return returnFalse;
     }
     if (userStory.sprintId) {
@@ -490,6 +497,9 @@ export class UserStoriesService {
         NOT: {
           OR: [{ points: null }, { priority: StoryPriority.WONT_HAVE }],
         },
+      },
+      include: {
+        comments: {},
       },
     });
   }
