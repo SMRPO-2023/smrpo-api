@@ -407,7 +407,7 @@ export class UserStoriesService {
     const tasks = await this.prisma.task.findMany({
       where: {
         userStoryId: userStory.id,
-        timeLogs: { none: { remainingHours: 0 } },
+        timeLogs: { every: { remainingHours: { gt: 0 } } },
         deletedAt: null,
       },
     });
