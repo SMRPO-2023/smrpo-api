@@ -121,7 +121,7 @@ export class UserStoriesService {
                   (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
                 )[0];
                 if (task.status !== TaskStatus.FINISHED) {
-                  return prev + timelog?.remainingHours || +0;
+                  return prev + (timelog?.remainingHours || 0);
                 } else {
                   return prev;
                 }
