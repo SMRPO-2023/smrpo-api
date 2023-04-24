@@ -168,7 +168,7 @@ export class ProjectService {
 
     return this.prisma.project.update({
       data,
-      where,
+      where: { id: projectId },
     });
   }
 
