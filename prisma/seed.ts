@@ -395,6 +395,17 @@ async function main() {
           acceptanceTest: false,
         },
       });
+      await prisma.userStory.create({
+        data: {
+          priority: getPriority(+faker.datatype.number({ min: 0, max: 3 })),
+          title: 'Story ' + ++counter,
+          description: faker.random.words(20),
+          businessValue: +faker.datatype.number({ min: 1, max: 10 }),
+          projectId: project.id,
+          acceptanceCriteria: faker.random.words(10),
+          acceptanceTest: false,
+        },
+      });
     }
 
     const project2 = await prisma.project.findUnique({
