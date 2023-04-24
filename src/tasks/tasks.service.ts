@@ -282,7 +282,10 @@ export class TasksService {
       throw new UnauthorizedException(message);
     }
 
-    if (task.status !== TaskStatus.UNASSIGNED && task.status !== TaskStatus.ASSIGNED) {
+    if (
+      task.status !== TaskStatus.UNASSIGNED &&
+      task.status !== TaskStatus.ASSIGNED
+    ) {
       const message = `Task cannot be deleted until assignee rejects the task.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
