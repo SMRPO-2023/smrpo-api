@@ -116,7 +116,10 @@ export class TimeLogsService {
         id: data.taskId,
       },
     });
-    if (task.status !== TaskStatus.ACCEPTED) {
+    if (
+      task.status !== TaskStatus.ACCEPTED &&
+      task.status !== TaskStatus.FINISHED
+    ) {
       const message = `The task is not accepted.`;
       this.logger.warn(message);
       throw new BadRequestException(message);
