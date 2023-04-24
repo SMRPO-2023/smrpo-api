@@ -471,7 +471,10 @@ async function createTask(userStory: UserStory, sprint: Sprint, done: boolean) {
         : TaskStatus.ASSIGNED,
     },
   });
-  if (task.status === TaskStatus.ASSIGNED) {
+  if (
+    task.status === TaskStatus.ACCEPTED ||
+    task.status === TaskStatus.FINISHED
+  ) {
     await createTimeLogs(sprint, userId, task, done);
   }
 }
