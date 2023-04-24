@@ -33,7 +33,7 @@ export class TimeLogsService {
         throw new BadRequestException(message);
       }
       return this.prisma.timeLog.update({
-        data: { hours: hoursSum },
+        data: { hours: hoursSum, title: data.title },
         where: { id: existingLog.id },
       });
     }
