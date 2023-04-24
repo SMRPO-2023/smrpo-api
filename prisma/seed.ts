@@ -326,7 +326,7 @@ async function main() {
             start: startDate.toDate(),
             end: endDate.toDate(),
             velocity: faker.datatype.float({
-              min: 10,
+              min: 30,
               max: 90,
               precision: 0.5,
             }),
