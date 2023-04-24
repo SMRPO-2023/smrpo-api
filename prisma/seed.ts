@@ -441,7 +441,11 @@ async function main() {
   console.log('Seeding finished.');
 }
 
-async function createTask(userStory: UserStory, sprint: Sprint, done: boolean) {
+async function createRandomTask(
+  userStory: UserStory,
+  sprint: Sprint,
+  done: boolean
+) {
   const project = await prisma.project.findFirst({
     where: { id: sprint.projectId },
     include: {
@@ -476,6 +480,38 @@ async function createTask(userStory: UserStory, sprint: Sprint, done: boolean) {
     task.status === TaskStatus.FINISHED
   ) {
     await createTimeLogs(sprint, userId, task, done);
+  }
+}
+
+async function createAssignedTask(userStory: UserStory, sprint: Sprint) {
+  const project = await prisma.project.findFirst({
+    where: { id: sprint.projectId },
+    include: {
+      developers: {
+        include: { user: { select: { id: true } } },
+      },
+    },
+  });
+  const userId =
+    project.developers[
+      faker.datatype.number({ min: 0, max: project.developers.length - 1 })
+    ]?.user?.id;
+  const task = await prisma.task.create({
+    data: {
+      userId,
+      userStoryId: userStory.id,
+      title: faker.random.words(5),
+      description: faker.random.words(25),
+      sprintId: sprint.id,
+      estimate: faker.datatype.float({ min: 4, max: 15, precision: 0.1 }),
+      status: TaskStatus.FINISHED,
+    },
+  });
+  if (
+    task.status === TaskStatus.ACCEPTED ||
+    task.status === TaskStatus.FINISHED
+  ) {
+    await createTimeLogs(sprint, userId, task, true);
   }
 }
 
@@ -535,9 +571,13 @@ async function createTasks(
   done: boolean
 ) {
   for (let i = 0; i < faker.datatype.number({ min: 3, max: 6 }); i++) {
-    await createTask(userStory, sprint, done ?? boolRand(0.2));
+    if (userStory.acceptanceTest) {
+      await createAssignedTask(userStory, sprint);
+    } else {
+      await createRandomTask(userStory, sprint, done ?? boolRand(0.2));
+    }
   }
-  if (!done) {
+  if (!userStory.acceptanceTest && !done) {
     await createUnassignedTask(userStory, sprint);
   }
 }

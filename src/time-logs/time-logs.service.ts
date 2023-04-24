@@ -101,6 +101,23 @@ export class TimeLogsService {
       this.logger.warn(message);
       throw new UnauthorizedException(message);
     }
+    const task = await this.prisma.task.findFirstOrThrow({
+      where: {
+        deletedAt: null,
+        id: timeLog.taskId,
+      },
+    });
+    const userStory = await this.prisma.userStory.findFirstOrThrow({
+      where: {
+        deletedAt: null,
+        id: task.userStoryId,
+      },
+    });
+    if (userStory.acceptanceTest) {
+      const message = `User story is already marked as accepted.`;
+      this.logger.warn(message);
+      throw new BadRequestException(message);
+    }
     return this.prisma.timeLog.delete({ where: { id } });
   }
 
