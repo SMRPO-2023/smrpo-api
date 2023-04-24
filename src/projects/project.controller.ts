@@ -16,6 +16,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { UserEntity } from 'src/common/decorators/user.decorator';
+import { ProjectDocumentationDto } from './dto/project-documentation.dto';
 @Controller('project')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
@@ -46,6 +47,15 @@ export class ProjectController {
     @Param('id', ParseIntPipe) projectId: number
   ) {
     return this.projectService.update(data, projectId, user);
+  }
+
+  @Put('update-documentation/:id')
+  updateDocumentation(
+    @Body() data: ProjectDocumentationDto,
+    @UserEntity() user: User,
+    @Param('id', ParseIntPipe) projectId: number
+  ) {
+    return this.projectService.updateDocumentation(data, projectId, user);
   }
 
   @Delete('delete-documentation/:id')
