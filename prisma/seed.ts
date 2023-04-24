@@ -189,7 +189,7 @@ async function main() {
   const project1 = await prisma.project.create({
     data: {
       title: 'Project 1',
-      documentation: faker.random.words(20),
+      description: faker.random.words(20),
       projectOwnerId: simpsonl.id,
       scrumMasterId: ferrella.id,
     },
@@ -198,7 +198,7 @@ async function main() {
   const project2 = await prisma.project.create({
     data: {
       title: 'project 2',
-      documentation: 'project 2 documentation.',
+      description: 'project 2 description.',
       projectOwnerId: ferrella.id,
       scrumMasterId: simpsonl.id,
     },
@@ -207,7 +207,7 @@ async function main() {
   const project3 = await prisma.project.create({
     data: {
       title: 'Inside job',
-      documentation: 'Jet fuel cant melt steel beams.',
+      description: 'Jet fuel cant melt steel beams.',
       projectOwnerId: bushg.id,
       scrumMasterId: jacksonm.id,
     },

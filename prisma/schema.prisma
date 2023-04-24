@@ -164,7 +164,8 @@ model Project {
   updatedAt      DateTime           @updatedAt
   deletedAt      DateTime?
   title          String
-  documentation  String
+  documentation  String?
+  description    String
   projectOwner   User               @relation(fields: [projectOwnerId], references: [id], name: "UserProjectOwner")
   scrumMaster    User               @relation(fields: [scrumMasterId], references: [id], name: "UserScrumMaster")
   developers     ProjectDeveloper[]
