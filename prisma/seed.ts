@@ -192,6 +192,9 @@ async function main() {
       description: faker.random.words(20),
       projectOwnerId: simpsonl.id,
       scrumMasterId: ferrella.id,
+      documentation: `# Project 1
+
+      This is project 1 documentation.`,
     },
   });
 
@@ -201,6 +204,9 @@ async function main() {
       description: 'project 2 description.',
       projectOwnerId: ferrella.id,
       scrumMasterId: simpsonl.id,
+      documentation: `# Project 2
+
+      This is project 2 documentation.`,
     },
   });
 
@@ -210,6 +216,9 @@ async function main() {
       description: 'Jet fuel cant melt steel beams.',
       projectOwnerId: bushg.id,
       scrumMasterId: jacksonm.id,
+      documentation: `# Project 3
+
+      This is project 3 documentation.`,
     },
   });
 
