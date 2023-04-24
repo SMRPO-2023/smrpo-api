@@ -10,7 +10,13 @@ import {
 import { PrismaService } from 'nestjs-prisma';
 import { UserStoryDto } from './dto/user-story.dto';
 import { StoryListDto } from './dto/story-list.dto';
-import { Role, StoryPriority, User, UserStory } from '@prisma/client';
+import {
+  Role,
+  StoryPriority,
+  TaskStatus,
+  User,
+  UserStory,
+} from '@prisma/client';
 import * as dayjs from 'dayjs';
 import { RejectUserStoryDto } from './dto/reject-user-story.dto';
 
@@ -95,46 +101,49 @@ export class UserStoriesService {
 
     const returnStories = [];
     let currentLoad = 0;
-    // TODO: fix hours and done calculations, just like isTaskDone
     for (const tempStory of data) {
-      const isTaskDone = (task) => {
-        if (!task?.timeLogs.length) return false;
-        return (
-          task.timeLogs
-            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-            .at(0).remainingHours === 0
-        );
-      };
-      const numOfStoryTasksDone = tempStory.Task.filter((t) =>
-        isTaskDone(t)
+      const numOfStoryTasksDone = tempStory.Task.filter(
+        (t) => t.status === TaskStatus.FINISHED
       ).length;
       currentLoad += tempStory.points;
       returnStories.push({
         ...{
           ...tempStory,
+          // of all tasks
           hoursTotal: tempStory.Task.reduce(
             (a, b) => a + b?.timeLogs.reduce((c, d) => c + d?.hours, 0),
             0
           ),
-          hoursRemaining: tempStory.Task.reduce(
-            (a, b) =>
-              a +
-                b?.timeLogs?.sort(
-                  (d, c) => d.createdAt.getTime() - c.createdAt.getTime()
-                )[0]?.remainingHours || +0,
-            0
-          ),
+          // of not finished tasks and not accepted story
+          hoursRemaining: !tempStory.acceptanceTest
+            ? tempStory.Task.reduce((prev, task) => {
+                const timelog = task?.timeLogs?.sort(
+                  (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+                )[0];
+                if (task.status !== TaskStatus.FINISHED) {
+                  return prev + timelog?.remainingHours || +0;
+                } else {
+                  return prev;
+                }
+              }, 0)
+            : 0,
           initialEstimate: tempStory.Task.reduce((a, b) => a + b?.estimate, 0),
           numUnfinishedTasks: tempStory.Task.length - numOfStoryTasksDone,
           numFinishedTasks: numOfStoryTasksDone,
           numTotalTasks: tempStory.Task.length,
-          Task: tempStory.Task.map((t) => ({ ...t, done: isTaskDone(t) })),
+          Task: tempStory.Task,
         },
         ...(await this.canBeAccepted(tempStory)),
       });
     }
 
-    return { stories: returnStories, currentLoad: currentLoad };
+    let totalRemainingHours = 0;
+    let totalSpentHours = 0;
+    for (const story of returnStories) {
+      totalRemainingHours += story.hoursRemaining;
+      totalSpentHours += story.hoursTotal;
+    }
+    return { stories: returnStories, currentLoad, totalRemainingHours, totalSpentHours };
   }
 
   async findRealized(projectId: number, sprintId: number) {
@@ -398,7 +407,7 @@ export class UserStoriesService {
     const tasks = await this.prisma.task.findMany({
       where: {
         userStoryId: userStory.id,
-        timeLogs: { none: { remainingHours: 0 } },
+        timeLogs: { every: { remainingHours: { gt: 0 } } },
         deletedAt: null,
       },
     });

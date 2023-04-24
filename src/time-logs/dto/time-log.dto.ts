@@ -1,5 +1,15 @@
 import { Type } from 'class-transformer';
-import { IsNotEmpty, Min, Max, IsDate, IsInt, IsNumber } from 'class-validator';
+import {
+  IsNotEmpty,
+  Min,
+  Max,
+  IsDate,
+  IsInt,
+  IsNumber,
+  IsString,
+  MinLength,
+  MaxLength,
+} from 'class-validator';
 
 export class TimeLogDto {
   @IsNotEmpty()
@@ -24,4 +34,10 @@ export class TimeLogDto {
 
   @IsInt()
   taskId: number;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(1)
+  @MaxLength(30)
+  title: string;
 }

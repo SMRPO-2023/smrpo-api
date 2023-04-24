@@ -4,6 +4,7 @@ import {
   StoryPriority,
   Task,
   TaskStatus,
+  UserStory,
 } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import * as dayjs from 'dayjs';
@@ -332,7 +333,7 @@ async function main() {
       // Create user stories with sprint assigned
       let total_points = 0;
       // Only with finished tasks, but not yet accepted
-      for (let z = 0; z < 2; z++) {
+      for (let z = 0; z < 4; z++) {
         const userStory = await prisma.userStory.create({
           data: {
             priority: getPriority(+faker.datatype.number({ min: 0, max: 2 })),
@@ -351,7 +352,7 @@ async function main() {
           },
         });
         total_points += userStory.points;
-        await createTask(userStory, sprint, true);
+        await createTasks(userStory, sprint, true);
       }
       // Random
       for (let z = 0; z < 20; z++) {
@@ -376,7 +377,7 @@ async function main() {
           },
         });
         total_points += userStory.points;
-        await createTask(userStory, sprint, boolRand(0.2));
+        await createTasks(userStory, sprint, false);
       }
     }
 
@@ -388,6 +389,17 @@ async function main() {
           title: 'Story ' + ++counter,
           description: faker.random.words(20),
           points: faker.datatype.float({ min: 1, max: 20, precision: 0.5 }),
+          businessValue: +faker.datatype.number({ min: 1, max: 10 }),
+          projectId: project.id,
+          acceptanceCriteria: faker.random.words(10),
+          acceptanceTest: false,
+        },
+      });
+      await prisma.userStory.create({
+        data: {
+          priority: getPriority(+faker.datatype.number({ min: 0, max: 3 })),
+          title: 'Story ' + ++counter,
+          description: faker.random.words(20),
           businessValue: +faker.datatype.number({ min: 1, max: 10 }),
           projectId: project.id,
           acceptanceCriteria: faker.random.words(10),
@@ -420,7 +432,7 @@ async function main() {
   console.log('Seeding finished.');
 }
 
-async function createTask(userStory: any, sprint: any, done: boolean) {
+async function createTask(userStory: UserStory, sprint: Sprint, done: boolean) {
   const project = await prisma.project.findFirst({
     where: { id: sprint.projectId },
     include: {
@@ -429,11 +441,10 @@ async function createTask(userStory: any, sprint: any, done: boolean) {
       },
     },
   });
-  const userId = (
-    await project.developers[
-      faker.datatype.number({ min: 0, max: (await project.developers).length })
-    ]
-  )?.user?.id;
+  const userId =
+    project.developers[
+      faker.datatype.number({ min: 0, max: project.developers.length - 1 })
+    ]?.user?.id;
   const task = await prisma.task.create({
     data: {
       userId,
@@ -442,20 +453,21 @@ async function createTask(userStory: any, sprint: any, done: boolean) {
       description: faker.random.words(25),
       sprintId: sprint.id,
       estimate: faker.datatype.float({ min: 4, max: 15, precision: 0.1 }),
-      status:
-        !userId || !userStory.sprintId
-          ? TaskStatus.UNASSIGNED
-          : boolRand(0.33)
-          ? TaskStatus.ACCEPTED
-          : TaskStatus.ASSIGNED,
+      status: done
+        ? TaskStatus.ASSIGNED
+        : !userId || !userStory.sprintId
+        ? TaskStatus.UNASSIGNED
+        : boolRand(0.33)
+        ? TaskStatus.ACCEPTED
+        : TaskStatus.ASSIGNED,
     },
   });
   if (task.status === TaskStatus.ASSIGNED) {
-    await createTimeLog(sprint, userId, task, done);
+    await createTimeLogs(sprint, userId, task, done);
   }
 }
 
-async function createTimeLog(
+async function createTimeLogs(
   sprint: Sprint,
   userId: number,
   task: Task,
@@ -464,6 +476,7 @@ async function createTimeLog(
   for (let i = 0; i < faker.datatype.number({ min: 2, max: 5 }); i++) {
     await prisma.timeLog.create({
       data: {
+        title: faker.random.words(faker.datatype.number({ min: 1, max: 5 })),
         day: sprint.start,
         hours: faker.datatype.float({ min: 1, max: 4, precision: 0.1 }),
         userId,
@@ -480,6 +493,7 @@ async function createTimeLog(
   if (done) {
     await prisma.timeLog.create({
       data: {
+        title: faker.random.words(faker.datatype.number({ min: 1, max: 5 })),
         day: sprint.end,
         hours: faker.datatype.float({ min: 1, max: 4, precision: 0.1 }),
         userId,
@@ -487,6 +501,16 @@ async function createTimeLog(
         taskId: task.id,
       },
     });
+  }
+}
+
+async function createTasks(
+  userStory: UserStory,
+  sprint: Sprint,
+  done: boolean
+) {
+  for (let i = 0; i < faker.datatype.number({ min: 3, max: 6 }); i++) {
+    await createTask(userStory, sprint, done ?? boolRand(0.2));
   }
 }
 

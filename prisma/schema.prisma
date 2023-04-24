@@ -130,6 +130,7 @@ model TimeLog {
   Task           Task      @relation(fields: [taskId], references: [id])
   taskId         Int
   remainingHours Float
+  title          String
 }
 
 model Post {

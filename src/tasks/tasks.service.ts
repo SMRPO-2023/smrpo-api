@@ -76,23 +76,14 @@ export class TasksService {
   async findAll(userStoryId?: number, userId?: number, status?: string) {
     const where = { deletedAt: null };
     if (status) {
-      if (status === 'FINISHED') {
-        // Where remaining is equal 0
-        // where['timeLogs'] = {
-        //   some: { remainingHours: 0 },
-        //   every: { deletedAt: null },
-        // };
-        where['NOT'] = { status: 'UNASSIGNED' };
-      } else if (status === 'ACTIVE') {
-        // Where remaining is greater than 0
-        // where['timeLogs'] = {
-        //   every: {
-        //     remainingHours: { gt: 0 },
-        //     deletedAt: null,
-        //   },
-        // };
-        where['NOT'] = { status: 'UNASSIGNED' };
-      } else if (status === 'ALL') {
+      if (status === 'ACTIVE') {
+        where['NOT'] = {
+          OR: [
+            { status: TaskStatus.FINISHED },
+            { status: TaskStatus.ASSIGNED },
+            { status: TaskStatus.UNASSIGNED },
+          ],
+        };
       } else {
         where['status'] = TaskStatus[status];
       }
@@ -103,7 +94,7 @@ export class TasksService {
     if (userId) {
       where['userId'] = userId;
     }
-    const tasks = await this.prisma.task.findMany({
+    return this.prisma.task.findMany({
       where,
       include: {
         UserStory: {
@@ -152,31 +143,11 @@ export class TasksService {
         },
       },
     });
-
-    // TODO: fix hours and done calculations
-    return tasks
-      .filter((t) => {
-        if (status === 'FINISHED') {
-          return !!t.timeLogs.filter((tl) => tl.remainingHours === 0).length;
-        } else if (status === 'ACTIVE') {
-          return !t.timeLogs.filter((tl) => tl.remainingHours === 0).length;
-        }
-        return true;
-      })
-      .map((t) => {
-        return {
-          ...t,
-          done: !!t?.timeLogs?.filter((tl) => tl.remainingHours === 0).length,
-        };
-      });
   }
 
   async findOne(id: number): Promise<Task> {
-    const task = await this.prisma.task.findFirstOrThrow({
-      where: {
-        id,
-        deletedAt: null,
-      },
+    return this.prisma.task.findFirstOrThrow({
+      where: { id, deletedAt: null },
       include: {
         UserStory: {
           select: {
@@ -195,18 +166,14 @@ export class TasksService {
           },
         },
         timeLogs: {
-          select: {
-            id: true,
-            createdAt: true,
-            updatedAt: true,
-            deletedAt: true,
-            day: true,
-            hours: true,
-            userId: true,
-            taskId: true,
-            remainingHours: true,
-          },
           where: { deletedAt: null },
+          include: {
+            User: {
+              select: {
+                username: true,
+              },
+            },
+          },
         },
         assignedTo: {
           select: {
@@ -224,11 +191,6 @@ export class TasksService {
         },
       },
     });
-
-    // TODO: fix hours and done calculations
-    task['done'] = !!task?.timeLogs?.filter((tl) => tl.remainingHours === 0)
-      .length;
-    return task;
   }
 
   async update(id: number, data: UpdateTaskDto, userId: number) {
@@ -236,6 +198,14 @@ export class TasksService {
       const message = `User does not have sufficient permissions.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
+    }
+
+    if (data.status === TaskStatus.FINISHED) {
+      if (!(await this.checkIfNoneRemain(id))) {
+        const message = `Task has some hours remaining on last time log.`;
+        this.logger.warn(message);
+        throw new BadRequestException(message);
+      }
     }
 
     return this.prisma.task.update({
@@ -270,11 +240,32 @@ export class TasksService {
     } else if (action === 'reject') {
       task.status = TaskStatus.UNASSIGNED;
       task.userId = null;
+    } else if (action === 'finish') {
+      if (await this.checkIfNoneRemain(id)) {
+        task.status = TaskStatus.FINISHED;
+      } else {
+        const message = `Task has some hours remaining on last time log.`;
+        this.logger.warn(message);
+        throw new BadRequestException(message);
+      }
     }
 
     await this.prisma.task.update({ where: { id }, data: task });
-    // must return task with included data
     return this.findOne(id);
+  }
+
+  async checkIfNoneRemain(taskId: number) {
+    const logs = await this.prisma.timeLog.findMany({
+      where: {
+        taskId,
+        deletedAt: null,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return !!logs.length && logs[0].remainingHours === 0;
   }
 
   async remove(id: number, userId: number) {
@@ -291,11 +282,7 @@ export class TasksService {
       throw new UnauthorizedException(message);
     }
 
-    if (
-      task.status === TaskStatus.ACCEPTED ||
-      task.status === TaskStatus.ASSIGNED ||
-      !!task.userId
-    ) {
+    if (task.status !== TaskStatus.UNASSIGNED && task.status !== TaskStatus.ASSIGNED) {
       const message = `Task cannot be deleted until assignee rejects the task.`;
       this.logger.warn(message);
       throw new UnauthorizedException(message);
@@ -332,7 +319,9 @@ export class TasksService {
       user.role === 'ADMIN' ||
       userId === project.scrumMasterId ||
       (developers &&
-        project.developers.map((d: ProjectDeveloper) => d.userId).includes(userId))
+        project.developers
+          .map((d: ProjectDeveloper) => d.userId)
+          .includes(userId))
     );
   }
 }
