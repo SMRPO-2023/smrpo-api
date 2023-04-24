@@ -479,6 +479,19 @@ async function createTask(userStory: UserStory, sprint: Sprint, done: boolean) {
   }
 }
 
+async function createUnassignedTask(userStory: UserStory, sprint: Sprint) {
+  await prisma.task.create({
+    data: {
+      userStoryId: userStory.id,
+      title: faker.random.words(5),
+      description: faker.random.words(25),
+      sprintId: sprint.id,
+      estimate: faker.datatype.float({ min: 4, max: 15, precision: 0.1 }),
+      status: TaskStatus.UNASSIGNED,
+    },
+  });
+}
+
 async function createTimeLogs(
   sprint: Sprint,
   userId: number,
@@ -523,6 +536,9 @@ async function createTasks(
 ) {
   for (let i = 0; i < faker.datatype.number({ min: 3, max: 6 }); i++) {
     await createTask(userStory, sprint, done ?? boolRand(0.2));
+  }
+  if (!done) {
+    await createUnassignedTask(userStory, sprint);
   }
 }
 
