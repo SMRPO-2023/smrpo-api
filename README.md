@@ -1,6 +1,5 @@
 # SMRPO Project Backend
 
---- Draft ---
 
 > One API to rule them all  
 
